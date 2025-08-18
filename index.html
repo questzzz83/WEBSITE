@@ -4,477 +4,65 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Luis Paiva — Web Designer & Creative Developer</title>
-  <meta name="description" content="Ultra-modern portfolio for a professional web designer & creative developer. Smooth 3D effects, magnetic buttons, glass UI, and blazing performance." />
-  <meta name="theme-color" content="#0a0a0b" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
-  <link rel="preload" href="https://unpkg.com/lenis@1.1.14/dist/lenis.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link rel="stylesheet" href="https://unpkg.com/lenis@1.1.14/dist/lenis.css"></noscript>
+  <meta name="description" content="Portfolio for Luis Paiva: Web Designer & Python Developer." />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #0a0a0b;
-      --bg-soft: #0f1116;
-      --card: rgba(255, 255, 255, 0.06);
       --text: #f8fafc;
-      --muted: #9aa3b2;
       --brand: #00e7f6;
       --brand-2: #4f46e5;
-      --ok: #22c55e;
-      --warn: #f59e0b;
-      --danger: #ef4444;
-      --glass: rgba(255, 255, 255, 0.06);
       --border: rgba(255, 255, 255, 0.12);
-      --shadow: 0 10px 30px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.04);
     }
-    [data-theme="light"]{
-      --bg:#f7f7fb; --bg-soft:#ffffff; --card:rgba(0,0,0,.04); --text:#0b1020; --muted:#4b5563; --glass:rgba(255,255,255,.8); --border:rgba(0,0,0,.08);
-    }
-
-    * { box-sizing: border-box }
-    html, body { height: 100% }
-    html { scroll-behavior: smooth }
     body {
-      margin: 0;
-      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
-      color: var(--text);
-      background: radial-gradient(1200px 800px at 10% -10%, rgba(79,70,229,.25), transparent 60%),
-                  radial-gradient(900px 600px at 110% 10%, rgba(0,231,246,.18), transparent 50%),
-                  var(--bg);
-      overflow-x: hidden;
+      margin:0; font-family: Inter, sans-serif; background: var(--bg); color: var(--text); line-height:1.6;
     }
-
-    /* ===== Global UI ===== */
-    .container { width: min(1200px, 92vw); margin: 0 auto }
-    .glass { background: var(--card); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--border); box-shadow: var(--shadow) }
-    .btn { appearance: none; border: 0; outline: 0; padding: 14px 22px; border-radius: 16px; font-weight: 700; cursor: pointer; position: relative; overflow: hidden; transition: transform .2s ease, box-shadow .2s ease }
-    .btn-primary { background: linear-gradient(120deg, var(--brand), var(--brand-2)); color: #0b1020; box-shadow: 0 10px 24px rgba(0, 231, 246, .25) }
-    .btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--border) }
-    .btn:hover { transform: translateY(-2px) }
-
-    .tag { display:inline-flex; align-items:center; gap:.5rem; padding:.5rem .8rem; border-radius:999px; font-size:.85rem; background:linear-gradient(90deg, rgba(79,70,229,.18), rgba(0,231,246,.18)); border:1px solid var(--border) }
-
-    .section { padding: clamp(72px, 9vw, 120px) 0 }
-    .headline { font-family: "Space Grotesk", Inter, sans-serif; font-weight: 700; letter-spacing: -0.02em }
-
-    /* ===== Header ===== */
-    header { position: sticky; top: 0; z-index: 50; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--border) }
-    nav { display:flex; align-items:center; justify-content:space-between; padding: 18px 0 }
-    .brand { display:flex; gap:.8rem; align-items:center; text-decoration:none; color:var(--text) }
-    .brand-logo { width: 36px; height: 36px; border-radius: 12px; background: conic-gradient(from 180deg at 50% 50%, var(--brand), var(--brand-2), var(--brand)); box-shadow: 0 6px 14px rgba(79,70,229,.35) }
-    .brand h1 { font-size: 1.05rem; margin:0; font-weight:800; letter-spacing:.02em }
-
-    .nav-links { display:flex; gap: 16px; align-items:center }
-    .nav-links a { color: var(--text); text-decoration:none; font-weight:600; opacity:.9 }
-    .nav-links a:hover { opacity: 1 }
-    .theme-toggle { width:40px; height:40px; border-radius:12px; border:1px solid var(--border); background:var(--card); display:grid; place-items:center; cursor:pointer }
-
-    /* ===== Hero ===== */
-    .hero { position: relative; min-height: 86vh; display:grid; place-items:center; isolation: isolate }
-    .hero-inner { position: relative; display:grid; grid-template-columns: 1.2fr .8fr; align-items:center; gap: clamp(24px, 6vw, 48px) }
-    .hero h2 { font-size: clamp(2.2rem, 6.2vw, 5rem); margin:0 0 14px; line-height:1.02 }
-    .hero p { color: var(--muted); font-size: clamp(1rem, 1.6vw, 1.125rem) }
-    .cta-row { display:flex; gap:12px; margin-top: 24px }
-
-    /* Floating blob background */
-    .blob-wrap { position:absolute; inset:-20vh -20vw -20vh -20vw; z-index:-1; filter: blur(40px); opacity:.8; pointer-events:none }
-    .blob { position:absolute; width:34vmax; height:34vmax; background: radial-gradient(closest-side, rgba(0,231,246,.55), transparent 60%); border-radius: 50%; mix-blend-mode: screen; animation: float 12s ease-in-out infinite }
-    .blob.b2 { background: radial-gradient(closest-side, rgba(79,70,229,.55), transparent 60%); animation-duration: 15s }
-    .blob.b3 { background: radial-gradient(closest-side, rgba(255,255,255,.18), transparent 60%); animation-duration: 18s }
-    @keyframes float { 0%,100%{ transform: translate(0,0)} 50%{ transform: translate(8vw, -6vh)} }
-
-    /* Showcase mockup */
-    .mockup { position:relative; aspect-ratio: 16/10; border-radius: 24px; overflow:hidden; border:1px solid var(--border) }
-    .mockup video, .mockup img { width:100%; height:100%; object-fit: cover; display:block }
-    .mockup::after{ content:""; position:absolute; inset:0; box-shadow: inset 0 0 0 1px rgba(255,255,255,.06); pointer-events:none }
-
-    /* ===== Marquee ===== */
-    .marquee { overflow:hidden; border-top:1px dashed var(--border); border-bottom:1px dashed var(--border) }
-    .marquee-track { display:flex; gap:48px; padding:18px 0; will-change: transform; animation: marquee 28s linear infinite }
-    .marquee .tag { white-space:nowrap }
-    @keyframes marquee { from { transform: translateX(0) } to { transform: translateX(-50%) } }
-
-    /* ===== Projects ===== */
-    .grid { display:grid; grid-template-columns: repeat(12, 1fr); gap: 18px }
-    .card { grid-column: span 6; border-radius: 22px; position:relative; overflow:hidden; transition: transform .35s ease, box-shadow .35s ease }
-    .card:hover { transform: translateY(-6px) }
-    .card .media { aspect-ratio: 16/10; background: linear-gradient(120deg, rgba(79,70,229,.35), rgba(0,231,246,.25)); display:grid; place-items:center }
-    .card .media img, .card .media video { width:100%; height:100%; object-fit: cover }
-    .card .body { padding: 20px }
-    .card h3 { margin: 0 0 6px; font-family: "Space Grotesk", Inter, sans-serif }
-    .card p { margin:0; color:var(--muted) }
-
-    .card.badge::before{ content:"Featured"; position:absolute; top:12px; left:12px; background:linear-gradient(90deg, var(--brand), var(--brand-2)); color:#0b1020; font-weight:800; font-size:.8rem; padding:.35rem .6rem; border-radius:999px }
-
-    /* ===== Split section ===== */
-    .split { display:grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items:center }
-    .list { display:grid; gap:12px }
-    .list .row { display:flex; gap:10px; align-items:flex-start; padding:14px 14px; border-radius:16px; border:1px dashed var(--border); background: rgba(255,255,255,.03) }
-
-    /* ===== Testimonials ===== */
-    .testi { display:grid; grid-template-columns: repeat(3,1fr); gap: 18px }
-    .quote { padding:22px; border-radius:18px; position:relative }
-    .quote p { margin:0 0 14px; color:var(--text) }
-    .quote small { color: var(--muted) }
-
-    /* ===== Contact ===== */
-    form { display:grid; gap: 14px }
-    .field { display:grid }
-    .field label { font-size:.9rem; color: var(--muted) }
-    .field input, .field textarea { border: 1px solid var(--border); background: var(--bg-soft); color: var(--text); border-radius:14px; padding:12px 14px; outline: none }
-    .field textarea { min-height: 120px; resize: vertical }
-
-    footer { padding: 30px 0; color: var(--muted); border-top:1px solid var(--border) }
-
-    /* ===== Utilities ===== */
-    .tilt { transform-style: preserve-3d; will-change: transform }
-    .tilt [data-tilt-child] { transform: translateZ(24px) }
-    .hidden { opacity: 0; transform: translateY(14px); transition: opacity .6s ease, transform .6s ease }
-
-    /* ===== Responsive ===== */
-    @media (max-width: 980px){
-      .hero-inner { grid-template-columns: 1fr }
-      .grid .card { grid-column: span 12 }
-      .split { grid-template-columns: 1fr }
-      .testi { grid-template-columns: 1fr }
-      .marquee-track { animation-duration: 18s }
-    }
-
-    /* Accessibility: Focus styles */
-    :focus-visible { outline: 2px solid var(--brand); outline-offset: 3px; border-radius: 10px }
-
-    /* Respect reduced motion */
-    @media (prefers-reduced-motion: reduce){
-      .marquee-track { animation: none }
-      .tilt, .btn { transition: none }
-    }
+    header { padding:18px 0; border-bottom:1px solid var(--border); text-align:center; }
+    header h1 { font-weight:800; font-size:1.5rem; margin:0; }
+    nav { margin-top:8px; }
+    nav a { margin:0 12px; text-decoration:none; color:var(--text); font-weight:600; }
+    nav a:hover { color: var(--brand); }
+    .section { padding:60px 20px; max-width:800px; margin:0 auto; }
+    h2 { font-weight:800; font-size:1.8rem; margin-bottom:20px; }
+    p { color:#9aa3b2 }
+    .btn { display:inline-block; margin-top:16px; padding:12px 20px; border-radius:12px; text-decoration:none; font-weight:600; background:linear-gradient(90deg,var(--brand),var(--brand-2)); color:#0a0a0b; }
+    .btn:hover { opacity:.85; }
+    footer { padding:20px; text-align:center; border-top:1px solid var(--border); font-size:.9rem; color:#9aa3b2 }
   </style>
 </head>
 <body>
-  <!-- Floating blobs (background wow effect) -->
-  <div class="blob-wrap" aria-hidden="true">
-    <div class="blob b1" style="top:10vh; left:-10vw"></div>
-    <div class="blob b2" style="bottom:-10vh; right:-6vw"></div>
-    <div class="blob b3" style="top:40vh; right:20vw"></div>
-  </div>
-
-  <!-- Header / Nav -->
-  <header class="glass">
-    <div class="container">
-      <nav>
-        <a class="brand" href="#top" aria-label="Go to top">
-          <span class="brand-logo" aria-hidden="true"></span>
-          <h1>Luis Paiva</h1>
-        </a>
-        <div class="nav-links" role="navigation" aria-label="Primary">
-          <a href="#work">Work</a>
-          <a href="#services">Services</a>
-          <a href="#about">About</a>
-          <a href="#contact">Contact</a>
-          <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme" title="Toggle theme">🌓</button>
-        </div>
-      </nav>
-    </div>
+  <header>
+    <h1>Luis Paiva</h1>
+    <nav>
+      <a href="#about">About</a>
+      <a href="#projects">Projects</a>
+      <a href="#contact">Contact</a>
+    </nav>
   </header>
 
-  <!-- Hero -->
-  <main id="top" class="hero section">
-    <div class="container hero-inner">
-      <div class="content tilt" aria-labelledby="hero-title">
-        <span class="tag" aria-hidden="true">Web Designer · Creative Developer</span>
-        <h2 id="hero-title" class="headline" data-tilt-child>
-          Design that feels <em style="font-style:normal;background:linear-gradient(90deg,var(--brand),var(--brand-2));-webkit-background-clip:text;background-clip:text;color:transparent">alive</em>.
-        </h2>
-        <p>I craft immersive, fast, and accessible websites—where aesthetics meet measurable business impact. Based in the UK, working worldwide.</p>
-        <div class="cta-row">
-          <a class="btn btn-primary magnet" href="#contact">Start a Project</a>
-          <a class="btn btn-ghost" href="#work">See My Work</a>
-        </div>
-      </div>
-
-      <div class="mockup glass tilt" aria-hidden="true">
-        <video autoplay muted loop playsinline poster="" id="heroVideo">
-          <source src="https://cdn.coverr.co/videos/coverr-web-design-hero-4052/1080p.mp4" type="video/mp4" />
-        </video>
-      </div>
-    </div>
-
-    <!-- Tech marquee -->
-    <div class="marquee" aria-hidden="true">
-      <div class="marquee-track">
-        <span class="tag">Figma</span>
-        <span class="tag">Framer</span>
-        <span class="tag">React</span>
-        <span class="tag">Next.js</span>
-        <span class="tag">GSAP</span>
-        <span class="tag">Three.js</span>
-        <span class="tag">Tailwind</span>
-        <span class="tag">Python</span>
-        <span class="tag">Django</span>
-        <span class="tag">SEO</span>
-        <!-- loop twins for seamless scroll -->
-        <span class="tag">Figma</span>
-        <span class="tag">Framer</span>
-        <span class="tag">React</span>
-        <span class="tag">Next.js</span>
-        <span class="tag">GSAP</span>
-        <span class="tag">Three.js</span>
-        <span class="tag">Tailwind</span>
-        <span class="tag">Python</span>
-        <span class="tag">Django</span>
-        <span class="tag">SEO</span>
-      </div>
-    </div>
-  </main>
-
-  <!-- Work -->
-  <section id="work" class="section">
-    <div class="container">
-      <div style="display:flex;justify-content:space-between;align-items:end;gap:16px;margin-bottom:20px">
-        <h3 class="headline" style="margin:0;font-size:clamp(1.6rem,4vw,2.6rem)">Featured Work</h3>
-        <a class="btn btn-ghost" href="#contact" aria-label="Request portfolio PDF">Request PDF</a>
-      </div>
-
-      <div class="grid">
-        <!-- Card 1 -->
-        <article class="card glass tilt badge" aria-labelledby="p1t">
-          <div class="media">
-            <img loading="lazy" src="https://images.unsplash.com/photo-1522252234503-e356532cafd5?q=80&w=1600&auto=format&fit=crop" alt="Sleek SaaS dashboard UI" />
-          </div>
-          <div class="body">
-            <h3 id="p1t">SaaS Dashboard Redesign</h3>
-            <p>Increased trial-to-paid by 18% with a cleaner IA and real-time UX telemetry.</p>
-            <div class="cta-row" style="margin-top:12px">
-              <a class="btn btn-primary magnet" href="#">Case Study</a>
-              <span class="tag" aria-label="Tech used">React · GSAP · Node</span>
-            </div>
-          </div>
-        </article>
-
-        <!-- Card 2 -->
-        <article class="card glass tilt" aria-labelledby="p2t">
-          <div class="media">
-            <img loading="lazy" src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=1600&auto=format&fit=crop" alt="Portfolio grid website on laptop" />
-          </div>
-          <div class="body">
-            <h3 id="p2t">Creative Studio Website</h3>
-            <p>High-impact landing with fluid typographic scale and buttery scroll. +42% time on page.</p>
-            <div class="cta-row" style="margin-top:12px">
-              <a class="btn btn-ghost" href="#">Live</a>
-              <span class="tag">Next.js · Framer Motion</span>
-            </div>
-          </div>
-        </article>
-
-        <!-- Card 3 -->
-        <article class="card glass tilt" aria-labelledby="p3t">
-          <div class="media">
-            <img loading="lazy" src="https://images.unsplash.com/photo-1515879218367-8466d910aaa4?q=80&w=1600&auto=format&fit=crop" alt="E‑commerce product grid" />
-          </div>
-          <div class="body">
-            <h3 id="p3t">E‑commerce Experience</h3>
-            <p>Streamlined checkout and visual hierarchy improvements lifted conversion by 14%.</p>
-            <div class="cta-row" style="margin-top:12px">
-              <a class="btn btn-ghost" href="#">Live</a>
-              <span class="tag">Remix · Stripe</span>
-            </div>
-          </div>
-        </article>
-
-        <!-- Card 4 -->
-        <article class="card glass tilt" aria-labelledby="p4t">
-          <div class="media">
-            <img loading="lazy" src="https://images.unsplash.com/photo-1556157382-97eda2d62296?q=80&w=1600&auto=format&fit=crop" alt="Data viz screens" />
-          </div>
-          <div class="body">
-            <h3 id="p4t">Interactive Data Visualisation</h3>
-            <p>Beautiful, accessible charts that make complex data sing—without sacrificing performance.</p>
-            <div class="cta-row" style="margin-top:12px">
-              <a class="btn btn-ghost" href="#">Live</a>
-              <span class="tag">D3 · Python · WebGL</span>
-            </div>
-          </div>
-        </article>
-      </div>
-    </div>
-  </section>
-
-  <!-- Services / Value Props -->
-  <section id="services" class="section">
-    <div class="container split">
-      <div>
-        <h3 class="headline" style="margin-top:0;font-size:clamp(1.6rem,4vw,2.6rem)">Design + Code, end‑to‑end</h3>
-        <p style="color:var(--muted)">From concept to production. I combine design craft with engineering rigor to deliver sites that are fast, accessible, and SEO‑ready.</p>
-        <div class="list" role="list">
-          <div class="row glass" role="listitem">
-            <strong>Brand‑first Web Design</strong>
-            <span style="color:var(--muted)">Visual systems, typography, motion, and storytelling.</span>
-          </div>
-          <div class="row glass" role="listitem">
-            <strong>Frontend Engineering</strong>
-            <span style="color:var(--muted)">React/Next, animations, component libraries, performance.</span>
-          </div>
-          <div class="row glass" role="listitem">
-            <strong>Technical SEO</strong>
-            <span style="color:var(--muted)">Lighthouse 95+, schema, sitemaps, Core Web Vitals.</span>
-          </div>
-        </div>
-        <div class="cta-row" style="margin-top:18px">
-          <a class="btn btn-primary magnet" href="#contact">Get a Proposal</a>
-        </div>
-      </div>
-
-      <div class="glass" style="border-radius:22px; padding:20px">
-        <h4 class="headline" style="margin:6px 0 16px; font-size:1.2rem">Recent Wins</h4>
-        <ul style="margin:0; padding-left:18px; color:var(--muted)">
-          <li>+18% trial→paid conversion (SaaS)</li>
-          <li>+42% average time on page (studio site)</li>
-          <li>95–100 Lighthouse across pages</li>
-          <li>Sub‑1s LCP on hero sections</li>
-        </ul>
-      </div>
-    </div>
-  </section>
-
-  <!-- About -->
   <section id="about" class="section">
-    <div class="container split">
-      <div>
-        <h3 class="headline" style="margin-top:0;font-size:clamp(1.6rem,4vw,2.6rem)">Hi, I’m Luis 👋</h3>
-        <p style="color:var(--muted)">A web designer & creative developer crafting expressive interfaces with real‑world impact. I obsess over the details—type scales, easing curves, and micro‑interactions that make users smile.</p>
-        <div class="cta-row">
-          <a class="btn btn-ghost" href="#work">Browse Work</a>
-          <a class="btn btn-primary magnet" href="#contact">Hire Me</a>
-        </div>
-      </div>
-      <div class="glass" style="border-radius:22px; padding:20px">
-        <div class="testi">
-          <blockquote class="quote glass">
-            <p>“Gorgeous work and seamless delivery. Our site finally matches our brand.”</p>
-            <small>— Creative Director, Studio Nox</small>
-          </blockquote>
-          <blockquote class="quote glass">
-            <p>“Performance jumped overnight. We now rank top‑3 for core terms.”</p>
-            <small>— Growth Lead, SaaSCo</small>
-          </blockquote>
-          <blockquote class="quote glass">
-            <p>“Luis is rare: a designer who codes at a high level.”</p>
-            <small>— CTO, PixelCart</small>
-          </blockquote>
-        </div>
-      </div>
-    </div>
+    <h2>About Me</h2>
+    <p>I'm Luis Paiva, a Web Designer and Python Developer crafting simple yet immersive digital experiences. I combine design and development to deliver clean, modern, and effective websites.</p>
   </section>
 
-  <!-- Contact -->
+  <section id="projects" class="section">
+    <h2>Featured Project</h2>
+    <p>Try out my experimental hand-tracking drawing app directly in your browser:</p>
+    <a class="btn" href="airdraw.html">Launch AirDraw</a>
+  </section>
+
   <section id="contact" class="section">
-    <div class="container split">
-      <div>
-        <h3 class="headline" style="margin-top:0;font-size:clamp(1.6rem,4vw,2.6rem)">Let’s build something impactful</h3>
-        <p style="color:var(--muted)">Tell me about your goals. I’ll respond within one business day with next steps.</p>
-        <div class="cta-row" style="gap:10px; flex-wrap:wrap">
-          <a class="btn btn-primary magnet" href="mailto:luispaiva83@gmail.com">Email Me</a>
-          <a class="btn btn-ghost" href="https://www.linkedin.com/" target="_blank" rel="noopener">LinkedIn</a>
-          <a class="btn btn-ghost" href="https://github.com/" target="_blank" rel="noopener">GitHub</a>
-        </div>
-      </div>
-      <form class="glass" action="https://formspree.io/f/your-id" method="POST" style="border-radius:22px; padding:20px">
-        <div class="field">
-          <label for="name">Name</label>
-          <input id="name" name="name" required placeholder="Ada Lovelace"/>
-        </div>
-        <div class="field">
-          <label for="email">Email</label>
-          <input id="email" type="email" name="email" required placeholder="ada@lovelace.dev"/>
-        </div>
-        <div class="field">
-          <label for="msg">Project Details</label>
-          <textarea id="msg" name="message" placeholder="A few lines about your timeline, scope, and goals"></textarea>
-        </div>
-        <button class="btn btn-primary magnet" type="submit">Send</button>
-      </form>
-    </div>
+    <h2>Contact</h2>
+    <p>Interested in working together or have a project idea? Let's connect.</p>
+    <a class="btn" href="mailto:luispaiva83@gmail.com">Email Me</a>
   </section>
 
   <footer>
-    <div class="container" style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap">
-      <small>© <span id="year"></span> Luis Paiva. All rights reserved.</small>
-      <small>Site score: <span id="vitals">95+</span> Lighthouse</small>
-    </div>
+    <p>© <span id="year"></span> Luis Paiva. All rights reserved.</p>
   </footer>
 
-  <!-- Scripts: GSAP (optional), Lenis for smooth scroll -->
-  <script src="https://unpkg.com/gsap@3.12.5/dist/gsap.min.js"></script>
-  <script src="https://unpkg.com/lenis@1.1.14/dist/lenis.min.js"></script>
   <script>
-    // Year
     document.getElementById('year').textContent = new Date().getFullYear();
-
-    // Smooth scroll
-    const lenis = new Lenis({ smoothWheel: true, lerp: 0.1 });
-    function raf(time){ lenis.raf(time); requestAnimationFrame(raf) }
-    requestAnimationFrame(raf);
-
-    // Theme toggle with persistence
-    const root = document.documentElement;
-    const userPref = localStorage.getItem('theme');
-    if (userPref) document.documentElement.setAttribute('data-theme', userPref);
-    document.getElementById('themeToggle').addEventListener('click', () => {
-      const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-      root.setAttribute('data-theme', next);
-      localStorage.setItem('theme', next);
-    });
-
-    // Magnetic buttons (wow effect)
-    const magnets = document.querySelectorAll('.magnet');
-    magnets.forEach(btn => {
-      btn.addEventListener('mousemove', (e) => {
-        const r = btn.getBoundingClientRect();
-        const x = e.clientX - r.left - r.width/2;
-        const y = e.clientY - r.top - r.height/2;
-        btn.style.transform = `translate(${x*0.15}px, ${y*0.15}px)`;
-      });
-      btn.addEventListener('mouseleave', () => {
-        btn.style.transform = '';
-      });
-    });
-
-    // Tilt cards (3D parallax)
-    const tilts = document.querySelectorAll('.tilt');
-    tilts.forEach(card => {
-      card.addEventListener('pointermove', (e) => {
-        const b = card.getBoundingClientRect();
-        const rx = ((e.clientY - b.top) / b.height - 0.5) * -8; // rotateX
-        const ry = ((e.clientX - b.left) / b.width - 0.5) * 10;  // rotateY
-        card.style.transform = `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg)`;
-      });
-      card.addEventListener('pointerleave', () => {
-        card.style.transform = 'perspective(900px) rotateX(0) rotateY(0)';
-      });
-    });
-
-    // Reveal on scroll
-    const revealEls = document.querySelectorAll('section .container, .card, .quote, .split > *');
-    const io = new IntersectionObserver((entries)=>{
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.remove('hidden');
-          io.unobserve(entry.target);
-        }
-      });
-    },{ threshold: 0.12 });
-    revealEls.forEach(el => { el.classList.add('hidden'); io.observe(el) });
-
-    // Pause hero video for users who prefer reduced motion
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      const v = document.getElementById('heroVideo');
-      if (v) { v.pause(); v.removeAttribute('autoplay'); }
-    }
-
-    // Minor GSAP flourish (optional)
-    if (window.gsap){
-      gsap.from('.brand', { y:-16, opacity:0, duration:.6, ease:'power2.out' });
-      gsap.from('.blob', { scale:.85, opacity:0.3, duration:1.2, stagger:.15, ease:'sine.out' });
-    }
   </script>
 </body>
 </html>
