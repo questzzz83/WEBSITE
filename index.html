@@ -795,7 +795,35 @@
             });
         }
         
-        // Create dynamic background elements
-        function createBgElements() {
+        function createBgElements(count = 8) {
             const bgElements = document.querySelector('.bg-elements');
-            const colors = ['
+            if (!bgElements) return;
+        
+            for (let i = 0; i < count; i++) {
+                const el = document.createElement('div');
+                el.classList.add('bg-element');
+        
+                // Random size
+                const size = Math.floor(Math.random() * 300) + 150; // 150–450px
+                el.style.width = `${size}px`;
+                el.style.height = `${size}px`;
+        
+                // Random color (accent or accent-dark)
+                el.style.background = Math.random() > 0.5 ? 'var(--accent)' : 'var(--accent-dark)';
+        
+                // Random position
+                el.style.top = `${Math.random() * 100}%`;
+                el.style.left = `${Math.random() * 100}%`;
+        
+                // Random animation duration/delay
+                el.style.animationDuration = `${15 + Math.random() * 15}s`; // 15–30s
+                el.style.animationDelay = `${-Math.random() * 20}s`;
+        
+                bgElements.appendChild(el);
+            }
+        }
+        
+        // Run after DOM loads
+        document.addEventListener('DOMContentLoaded', () => {
+            createBgElements(10); // generate 10 floating lights
+        });
