@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Magic Air Draw</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: sans-serif;
+      background: white;
+    }
+    video { display: none; }
+    canvas { position: absolute; top: 0; left: 0; }
+    #controls {
+      position: fixed;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 10px;
+      z-index: 10;
+    }
+    button, select {
+      padding: 8px 12px;
+      font-size: 14px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+    }
+    #clearBtn { background: #ff6b6b; color: white; }
+    #eraserBtn { background: #ffd93d; }
+    #bgBtn { background: #6bcB77; color: white; }
+  </style>
+</head>
+<body>
+  <div id="controls">
+    <button id="clearBtn">Clear</button>
+    <button id="eraserBtn">Eraser Off</button>
+    <select id="brushSize">
+      <option value="3">Small Brush</option>
+      <option value="6" selected>Medium Brush</option>
+      <option value="10">Large Brush</option>
+    </select>
+    <button id="bgBtn">Background: White</button>
+  </div>
+
+  <video id="video" playsinline></video>
+  <canvas id="output"></canvas>
+
+  <!-- MediaPipe Hands -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+
+  <script>
+    const videoElement = document.getElementById('video');
+    const canvasElement = document.getElementById('output');
+    const ctx = canvasElement.getContext('2d');
+
+    let points = [];
+    let isEraser = false;
+    let brushSize = 6;
+    let bgMode = 'white';
+    let hue = 0;
+
+    function resizeCanvas() {
+      canvasElement.width = window.innerWidth;
+      canvasElement.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    const hands = new Hands({
+      locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+    });
+    hands.setOptions({
+      maxNumHands: 1,
+      modelComplexity: 1,
+      minDetectionConfidence: 0.7,
+      minTrackingConfidence: 0.5
+    });
+    hands.onResults(onResults);
+
+    const camera = new Camera(videoElement, {
+      onFrame: async () => { await hands.send({ image: videoElement }); },
+      width: 640, height: 480
+    });
+    camera.start();
+
+    function distance(a, b) {
+      return Math.sqrt((a.x - b.x)**2 + (a.y - b.y)**2);
+    }
+
+    function drawBackground() {
+      if (bgMode === 'white') {
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, canvasElement.width, canvasElement.height);
+      } else {
+        ctx.fillStyle = 'black';
+        ctx.fillRect(0, 0, canvasElement.width, canvasElement.height);
+        // stars
+        for (let i = 0; i < 100; i++) {
+          ctx.fillStyle = 'white';
+          ctx.fillRect(Math.random()*canvasElement.width, Math.random()*canvasElement.height, 2, 2);
+        }
+      }
+    }
+
+    function onResults(results) {
+  hue = (hue + 1) % 360;
+
+  // Mirror effect
+  ctx.save();
+  ctx.scale(-1, 1);
+  ctx.translate(-canvasElement.width, 0);
+
+  drawBackground();
+
+  // Draw stored lines (mirrored)
+  for (let stroke of points) {
+    ctx.strokeStyle = stroke.color;
+    ctx.lineWidth = stroke.size;
+    ctx.beginPath();
+    for (let i = 1; i < stroke.path.length; i++) {
+      ctx.moveTo(canvasElement.width - stroke.path[i-1].x, stroke.path[i-1].y);
+      ctx.lineTo(canvasElement.width - stroke.path[i].x, stroke.path[i].y);
+    }
+    ctx.stroke();
+  }
+
+  ctx.restore();
+
+  if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+    const landmarks = results.multiHandLandmarks[0];
+    const indexTip = landmarks[8];
+    const thumbTip = landmarks[4];
+    const pinchDist = distance(indexTip, thumbTip);
+
+    // Flip the X coordinate so movement matches
+    const x = (1 - indexTip.x) * canvasElement.width;
+    const y = indexTip.y * canvasElement.height;
+
+    const pinch = pinchDist < 0.05;
+    if (pinch) {
+      if (isEraser) {
+        points = points.map(stroke => ({
+          ...stroke,
+          path: stroke.path.filter(p => Math.hypot(p.x - x, p.y - y) > brushSize*2)
+        }));
+      } else {
+        if (points.length === 0 || points[points.length-1].done) {
+          points.push({ 
+            color: `hsl(${hue},100%,50%)`, 
+            size: brushSize, 
+            path: [], 
+            done: false 
+          });
+        }
+        points[points.length-1].path.push({x, y});
+      }
+    } else {
+      if (points.length > 0 && !points[points.length-1].done) {
+        points[points.length-1].done = true;
+      }
+    }
+  }
+}
+
+    document.getElementById('clearBtn').onclick = () => points = [];
+    document.getElementById('eraserBtn').onclick = (e) => {
+      isEraser = !isEraser;
+      e.target.textContent = isEraser ? 'Eraser On' : 'Eraser Off';
+    };
+    document.getElementById('brushSize').onchange = (e) => {
+      brushSize = parseInt(e.target.value);
+    };
+    document.getElementById('bgBtn').onclick = (e) => {
+      bgMode = bgMode === 'white' ? 'space' : 'white';
+      e.target.textContent = bgMode === 'white' ? 'Background: White' : 'Background: Space';
+    };
+  </script>
+</body>
+</html>
