@@ -3,15 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Luis Paiva | Web Designer & Python Developer</title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&family=Space+Grotesk:wght@700&display=swap">
+    <title>Luis Paiva | Creative Web Designer & Python Developer</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700;900&family=Space+Grotesk:wght@700&display=swap">
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css">
     <style>
         :root {
-            --bg-dark: #0a0a0a;
-            --text-light: #f5f5f5;
+            --bg-dark: #050505;
+            --text-light: #ffffff;
             --accent: #00f0ff;
             --accent-dark: #008cff;
-            --card-bg: #1a1a1a;
+            --card-bg: rgba(30, 30, 30, 0.6);
+            --glass: rgba(255, 255, 255, 0.05);
         }
         
         * {
@@ -26,6 +28,34 @@
             color: var(--text-light);
             line-height: 1.6;
             overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(0, 240, 255, 0.15) 0%, transparent 30%),
+                radial-gradient(circle at 75% 75%, rgba(0, 140, 255, 0.15) 0%, transparent 30%);
+        }
+        
+        /* Animated Background Elements */
+        .bg-elements {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+        
+        .bg-element {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.15;
+            animation: float 15s infinite linear;
+        }
+        
+        @keyframes float {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            50% { transform: translate(50px, 50px) rotate(180deg); }
+            100% { transform: translate(0, 0) rotate(360deg); }
         }
         
         /* Navigation */
@@ -34,10 +64,11 @@
             top: 0;
             left: 0;
             width: 100%;
-            padding: 20px 0;
+            padding: 25px 0;
             z-index: 1000;
-            background: rgba(10, 10, 10, 0.8);
+            background: rgba(5, 5, 5, 0.8);
             backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
         
         nav {
@@ -46,12 +77,17 @@
             align-items: center;
             max-width: 1200px;
             margin: 0 auto;
-            padding: 0 20px;
+            padding: 0 30px;
         }
         
         .logo {
-            height: 80px;
+            height: 40px;
             width: auto;
+            transition: transform 0.3s ease;
+        }
+        
+        .logo:hover {
+            transform: scale(1.1);
         }
         
         .nav-links {
@@ -63,33 +99,39 @@
             color: var(--text-light);
             text-decoration: none;
             font-weight: 500;
-            transition: color 0.3s ease;
+            transition: all 0.3s ease;
             position: relative;
+            padding: 8px 0;
+        }
+        
+        .nav-links a::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-dark));
+            transition: width 0.3s ease;
         }
         
         .nav-links a:hover {
             color: var(--accent);
         }
         
-        .nav-links a::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: var(--accent);
-            transition: width 0.3s ease;
+        .nav-links a:hover::before {
+            width: 100%;
         }
         
-        .nav-links a:hover::after {
-            width: 100%;
+        .hamburger {
+            display: none;
+            cursor: pointer;
         }
         
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 0 20px;
+            padding: 0 30px;
         }
         
         /* Hero Section */
@@ -101,62 +143,72 @@
             align-items: flex-start;
             position: relative;
             overflow: hidden;
-            padding-top: 80px;
+            padding-top: 100px;
         }
         
-        .hero::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(0,240,255,0.1) 0%, rgba(0,0,0,0) 70%);
-            animation: pulse 15s infinite alternate;
-            z-index: -1;
-        }
-        
-        @keyframes pulse {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(10%, 10%); }
+        .hero-content {
+            position: relative;
+            z-index: 2;
         }
         
         .hero h1 {
             font-family: 'Space Grotesk', sans-serif;
-            font-size: clamp(2.5rem, 8vw, 5rem);
-            margin-bottom: 1rem;
+            font-size: clamp(3rem, 8vw, 6rem);
+            margin-bottom: 1.5rem;
             background: linear-gradient(90deg, var(--accent), var(--accent-dark));
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
+            line-height: 1.1;
         }
         
         .hero p {
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             max-width: 600px;
-            margin-bottom: 2rem;
+            margin-bottom: 3rem;
             opacity: 0.9;
         }
         
-        .hero .subtitle {
+        .hero-btns {
             display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 3rem;
+            gap: 20px;
         }
         
-        .hero .subtitle span {
-            background: var(--accent);
-            color: var(--bg-dark);
-            padding: 5px 10px;
-            border-radius: 4px;
+        .btn {
+            display: inline-block;
+            padding: 15px 35px;
+            border-radius: 50px;
             font-weight: 700;
-            font-size: 0.9rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(90deg, var(--accent), var(--accent-dark));
+            color: var(--bg-dark);
+            box-shadow: 0 10px 30px rgba(0, 240, 255, 0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0, 240, 255, 0.4);
+        }
+        
+        .btn-secondary {
+            border: 2px solid var(--accent);
+            color: var(--accent);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(0, 240, 255, 0.1);
+            transform: translateY(-3px);
         }
         
         .scroll-down {
             position: absolute;
-            bottom: 30px;
+            bottom: 40px;
             left: 50%;
             transform: translateX(-50%);
             animation: bounce 2s infinite;
@@ -170,13 +222,14 @@
         
         /* About Section */
         .section {
-            padding: 100px 0;
+            padding: 150px 0;
+            position: relative;
         }
         
         .section-title {
             font-family: 'Space Grotesk', sans-serif;
-            font-size: 2.5rem;
-            margin-bottom: 3rem;
+            font-size: 3.5rem;
+            margin-bottom: 5rem;
             position: relative;
             display: inline-block;
         }
@@ -184,16 +237,16 @@
         .section-title::after {
             content: '';
             position: absolute;
-            bottom: -10px;
+            bottom: -15px;
             left: 0;
             width: 50%;
-            height: 3px;
+            height: 4px;
             background: linear-gradient(90deg, var(--accent), var(--accent-dark));
         }
         
         .about-content {
             display: flex;
-            gap: 50px;
+            gap: 80px;
             align-items: center;
         }
         
@@ -202,155 +255,209 @@
         }
         
         .about-text p {
-            margin-bottom: 1.5rem;
-            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            font-size: 1.2rem;
+            line-height: 1.8;
         }
         
         .skills {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 2rem;
+            gap: 15px;
+            margin-top: 3rem;
         }
         
         .skill {
             background: var(--card-bg);
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 0.9rem;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-size: 1rem;
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 8px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .skill:hover {
+            transform: translateY(-3px);
+            background: rgba(0, 240, 255, 0.1);
+            border-color: var(--accent);
         }
         
         /* Projects Section */
         .projects-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 30px;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 40px;
             margin-top: 50px;
         }
         
         .project-card {
             background: var(--card-bg);
-            border-radius: 10px;
+            border-radius: 20px;
             overflow: hidden;
-            transition: transform 0.3s ease;
+            transition: all 0.5s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+        }
+        
+        .project-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(0, 240, 255, 0.05), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
         }
         
         .project-card:hover {
             transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border-color: rgba(0, 240, 255, 0.3);
+        }
+        
+        .project-card:hover::before {
+            transform: translateX(100%);
         }
         
         .project-image {
-            height: 200px;
-            background: linear-gradient(45deg, #2a2a2a, #1a1a1a);
+            height: 250px;
+            background: linear-gradient(45deg, #1a1a1a, #2a2a2a);
             display: flex;
             align-items: center;
             justify-content: center;
             color: var(--accent);
-            font-size: 3rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .project-image::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
         }
         
         .project-info {
-            padding: 20px;
+            padding: 30px;
         }
         
         .project-info h3 {
             font-family: 'Space Grotesk', sans-serif;
-            margin-bottom: 10px;
-            font-size: 1.3rem;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
         }
         
         .project-info p {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             opacity: 0.8;
-            font-size: 0.95rem;
+            font-size: 1rem;
+            line-height: 1.7;
         }
         
         .project-tech {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 15px;
+            gap: 10px;
+            margin-top: 20px;
         }
         
         .tech-tag {
             background: rgba(0, 240, 255, 0.1);
             color: var(--accent);
-            padding: 4px 10px;
-            border-radius: 4px;
-            font-size: 0.8rem;
+            padding: 6px 15px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            border: 1px solid rgba(0, 240, 255, 0.2);
         }
         
         /* Contact Section */
         .contact {
             text-align: center;
-            padding-bottom: 150px;
+            padding-bottom: 200px;
         }
         
         .contact p {
-            max-width: 600px;
-            margin: 0 auto 3rem;
-            font-size: 1.1rem;
+            max-width: 700px;
+            margin: 0 auto 4rem;
+            font-size: 1.3rem;
+            line-height: 1.8;
         }
         
         .email-btn {
             display: inline-block;
             background: linear-gradient(90deg, var(--accent), var(--accent-dark));
             color: var(--bg-dark);
-            padding: 15px 30px;
+            padding: 20px 40px;
             border-radius: 50px;
             font-weight: 700;
             text-decoration: none;
-            margin-bottom: 3rem;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-bottom: 4rem;
+            transition: all 0.3s ease;
+            font-size: 1.1rem;
+            box-shadow: 0 10px 30px rgba(0, 240, 255, 0.3);
+            position: relative;
+            overflow: hidden;
         }
         
         .email-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(0, 240, 255, 0.3);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 240, 255, 0.4);
         }
         
         .social-links {
             display: flex;
             justify-content: center;
-            gap: 20px;
+            gap: 25px;
         }
         
         .social-link {
-            width: 50px;
-            height: 50px;
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
             background: var(--card-bg);
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: transform 0.3s ease;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
         
         .social-link:hover {
-            transform: translateY(-5px);
+            transform: translateY(-5px) scale(1.1);
             background: var(--accent);
             color: var(--bg-dark);
+            box-shadow: 0 10px 20px rgba(0, 240, 255, 0.3);
         }
         
         /* Footer */
         footer {
             text-align: center;
-            padding: 30px 0;
+            padding: 50px 0;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(5, 5, 5, 0.5);
+            backdrop-filter: blur(10px);
         }
         
         .gamer-tag {
             display: inline-block;
-            margin-top: 10px;
+            margin-top: 20px;
             opacity: 0.7;
-            font-size: 0.9rem;
+            font-size: 1rem;
         }
         
         /* Responsive */
-        @media (max-width: 768px) {
+        @media (max-width: 992px) {
             .about-content {
                 flex-direction: column;
             }
@@ -359,39 +466,77 @@
                 grid-template-columns: 1fr;
             }
             
+            .section-title {
+                font-size: 2.5rem;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .hamburger {
+                display: block;
+            }
+        }
+        
+        @media (max-width: 768px) {
             .hero h1 {
                 font-size: 3rem;
             }
             
-            .nav-links {
+            .hero-btns {
+                flex-direction: column;
                 gap: 15px;
+            }
+            
+            .btn {
+                width: 100%;
+                text-align: center;
+            }
+            
+            .section {
+                padding: 100px 0;
             }
         }
     </style>
 </head>
 <body>
+    <!-- Animated Background Elements -->
+    <div class="bg-elements">
+        <div class="bg-element" style="width: 300px; height: 300px; background: var(--accent); top: 10%; left: 10%; animation-duration: 20s;"></div>
+        <div class="bg-element" style="width: 400px; height: 400px; background: var(--accent-dark); top: 60%; left: 70%; animation-duration: 25s; animation-delay: -5s;"></div>
+        <div class="bg-element" style="width: 200px; height: 200px; background: var(--accent); top: 30%; left: 80%; animation-duration: 15s; animation-delay: -10s;"></div>
+    </div>
+    
     <!-- Navigation -->
     <header>
         <nav>
-            <img src="logo.PNG" alt="Luis Paiva Logo" class="logo">
+            <img src="logo.png" alt="Luis Paiva Logo" class="logo">
             <div class="nav-links">
                 <a href="#about">About</a>
                 <a href="#projects">Projects</a>
                 <a href="airdraw.html">AirDraw</a>
                 <a href="#contact">Contact</a>
             </div>
+            <div class="hamburger">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+            </div>
         </nav>
     </header>
     
     <!-- Hero Section -->
     <section class="hero">
-        <div class="container">
-            <div class="subtitle">
-                <span>WEB DESIGNER & PYTHON DEVELOPER</span>
+        <div class="hero-content" data-aos="fade-up" data-aos-duration="1000">
+            <h1>Design. Code. Create.</h1>
+            <p>I'm Luis Paiva, a web designer and Python developer crafting immersive digital experiences that blend stunning visuals with flawless functionality.</p>
+            <div class="hero-btns">
+                <a href="#projects" class="btn btn-primary">View My Work</a>
+                <a href="#contact" class="btn btn-secondary">Let's Collaborate</a>
             </div>
-            <h1>Luis Paiva</h1>
-            <p>I create beautiful, functional digital experiences that blend design aesthetics with clean code.</p>
-            <a href="#projects" class="btn">View My Work</a>
         </div>
         <div class="scroll-down">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -403,22 +548,77 @@
     <!-- About Section -->
     <section class="section" id="about">
         <div class="container">
-            <h2 class="section-title">About Me</h2>
+            <h2 class="section-title" data-aos="fade-up">About Me</h2>
             <div class="about-content">
-                <div class="about-text">
-                    <p>Hello! I'm Luis, a passionate web designer and Python developer with a keen eye for detail and a love for creating elegant solutions to complex problems.</p>
-                    <p>My approach combines thoughtful design with robust development practices to deliver products that are both visually stunning and technically sound.</p>
-                    <p>When I'm not coding or designing, you can find me gaming online as <strong>questzzz83</strong>.</p>
+                <div class="about-text" data-aos="fade-up" data-aos-delay="200">
+                    <p>With a unique blend of design sensibility and technical expertise, I create digital experiences that not only look beautiful but perform exceptionally.</p>
+                    <p>My approach combines cutting-edge design trends with robust development practices, ensuring your project stands out in today's competitive digital landscape.</p>
+                    <p>When I'm not pushing pixels or writing code, you'll find me dominating online games as <strong>questzzz83</strong>.</p>
                     
                     <div class="skills">
-                        <div class="skill">Web Design</div>
-                        <div class="skill">UI/UX</div>
-                        <div class="skill">Python</div>
-                        <div class="skill">Flask</div>
-                        <div class="skill">Django</div>
-                        <div class="skill">JavaScript</div>
-                        <div class="skill">HTML/CSS</div>
-                        <div class="skill">Responsive Design</div>
+                        <div class="skill">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                                <line x1="8" y1="21" x2="16" y2="21"></line>
+                                <line x1="12" y1="17" x2="12" y2="21"></line>
+                            </svg>
+                            Web Design
+                        </div>
+                        <div class="skill">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                            </svg>
+                            UI/UX
+                        </div>
+                        <div class="skill">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+                                <polyline points="13 2 13 9 20 9"></polyline>
+                            </svg>
+                            Python
+                        </div>
+                        <div class="skill">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                            Flask
+                        </div>
+                        <div class="skill">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+                            </svg>
+                            Django
+                        </div>
+                        <div class="skill">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"></path>
+                                <path d="M8.5 8.5v.01"></path>
+                                <path d="M16 15.5v.01"></path>
+                                <path d="M12 12v.01"></path>
+                                <path d="M11 17v.01"></path>
+                                <path d="M7 14v.01"></path>
+                            </svg>
+                            JavaScript
+                        </div>
+                        <div class="skill">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                            </svg>
+                            HTML/CSS
+                        </div>
+                        <div class="skill">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                                <line x1="8" y1="21" x2="16" y2="21"></line>
+                                <line x1="12" y1="17" x2="12" y2="21"></line>
+                            </svg>
+                            Responsive Design
+                        </div>
                     </div>
                 </div>
             </div>
@@ -428,11 +628,11 @@
     <!-- Projects Section -->
     <section class="section" id="projects">
         <div class="container">
-            <h2 class="section-title">Featured Projects</h2>
+            <h2 class="section-title" data-aos="fade-up">Featured Projects</h2>
             <div class="projects-grid">
-                <div class="project-card">
+                <div class="project-card" data-aos="fade-up" data-aos-delay="200">
                     <div class="project-image">
-                        <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
                             <line x1="8" y1="21" x2="16" y2="21"></line>
                             <line x1="12" y1="17" x2="12" y2="21"></line>
@@ -440,18 +640,19 @@
                     </div>
                     <div class="project-info">
                         <h3>Portfolio Dashboard</h3>
-                        <p>A sleek dashboard for creative professionals to showcase their work with analytics.</p>
+                        <p>A sleek, interactive dashboard for creative professionals to showcase their work with real-time analytics and customizable themes.</p>
                         <div class="project-tech">
                             <span class="tech-tag">Python</span>
                             <span class="tech-tag">Flask</span>
                             <span class="tech-tag">JavaScript</span>
+                            <span class="tech-tag">D3.js</span>
                         </div>
                     </div>
                 </div>
                 
-                <div class="project-card">
+                <div class="project-card" data-aos="fade-up" data-aos-delay="400">
                     <div class="project-image">
-                        <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"></path>
                             <path d="M8.5 8.5v.01"></path>
                             <path d="M16 15.5v.01"></path>
@@ -462,19 +663,20 @@
                     </div>
                     <div class="project-info">
                         <h3>Interactive Data Viz</h3>
-                        <p>Custom data visualization tool that makes complex data accessible and engaging.</p>
+                        <p>Custom data visualization platform that transforms complex datasets into engaging, interactive visual stories for better insights.</p>
                         <div class="project-tech">
                             <span class="tech-tag">Python</span>
                             <span class="tech-tag">D3.js</span>
                             <span class="tech-tag">Pandas</span>
+                            <span class="tech-tag">WebGL</span>
                         </div>
                     </div>
                 </div>
                 
-                <div class="project-card">
+                <div class="project-card" data-aos="fade-up" data-aos-delay="600">
                     <a href="airdraw.html" style="text-decoration: none; color: inherit;">
                         <div class="project-image">
-                            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M12 19l7-7 3 3-7 7-3-3z"></path>
                                 <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path>
                                 <path d="M2 2l7.586 7.586"></path>
@@ -483,11 +685,12 @@
                         </div>
                         <div class="project-info">
                             <h3>AirDraw</h3>
-                            <p>A web-based drawing application with unique airbrush effects and tools.</p>
+                            <p>An innovative web-based drawing application featuring unique airbrush effects, pressure sensitivity, and real-time collaboration tools.</p>
                             <div class="project-tech">
                                 <span class="tech-tag">JavaScript</span>
                                 <span class="tech-tag">HTML5 Canvas</span>
                                 <span class="tech-tag">CSS</span>
+                                <span class="tech-tag">WebSockets</span>
                             </div>
                         </div>
                     </a>
@@ -499,11 +702,11 @@
     <!-- Contact Section -->
     <section class="section contact" id="contact">
         <div class="container">
-            <h2 class="section-title">Get In Touch</h2>
-            <p>Have a project in mind or want to collaborate? I'd love to hear from you!</p>
-            <a href="mailto:luispaiva83@gmail.com" class="email-btn" id="email-btn">luispaiva83@gmail.com</a>
+            <h2 class="section-title" data-aos="fade-up">Let's Create Something Amazing</h2>
+            <p data-aos="fade-up" data-aos-delay="200">Have a project in mind or want to discuss potential collaboration? I'm always excited to hear about new opportunities and challenges.</p>
+            <a href="mailto:luispaiva83@gmail.com" class="email-btn" id="email-btn" data-aos="fade-up" data-aos-delay="400">luispaiva83@gmail.com</a>
             
-            <div class="social-links">
+            <div class="social-links" data-aos="fade-up" data-aos-delay="600">
                 <a href="#" class="social-link">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
@@ -543,7 +746,16 @@
         </div>
     </footer>
     
+    <!-- Scripts -->
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
     <script>
+        // Initialize AOS (Animate On Scroll)
+        AOS.init({
+            duration: 800,
+            once: true,
+            easing: 'ease-out-quart'
+        });
+        
         // Set current year in footer
         document.getElementById('year').textContent = new Date().getFullYear();
         
@@ -573,32 +785,17 @@
             });
         });
         
-        // Simple animation on scroll
-        const animateOnScroll = () => {
-            const elements = document.querySelectorAll('.project-card, .section-title');
-            
-            elements.forEach(element => {
-                const elementPosition = element.getBoundingClientRect().top;
-                const screenPosition = window.innerHeight / 1.3;
-                
-                if (elementPosition < screenPosition) {
-                    element.style.opacity = '1';
-                    element.style.transform = 'translateY(0)';
-                }
+        // Mobile menu toggle
+        const hamburger = document.querySelector('.hamburger');
+        const navLinks = document.querySelector('.nav-links');
+        
+        if (hamburger) {
+            hamburger.addEventListener('click', () => {
+                navLinks.style.display = navLinks.style.display === 'flex' ? 'none' : 'flex';
             });
-        };
+        }
         
-        // Set initial state for animated elements
-        document.querySelectorAll('.project-card, .section-title').forEach(el => {
-            el.style.opacity = '0';
-            el.style.transform = 'translateY(20px)';
-            el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-        });
-        
-        window.addEventListener('scroll', animateOnScroll);
-        window.addEventListener('load', animateOnScroll);
-    </script>
-</body>
-
-</html>
-
+        // Create dynamic background elements
+        function createBgElements() {
+            const bgElements = document.querySelector('.bg-elements');
+            const colors = ['
