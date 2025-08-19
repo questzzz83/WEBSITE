@@ -6,6 +6,7 @@
   <title>Luis Paiva — Web Designer & Python Developer</title>
   <meta name="description" content="Portfolio for Luis Paiva: Web Designer & Python Developer specializing in clean, functional websites." />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     :root {
       --bg: #0a0a0b;
@@ -31,7 +32,7 @@
       color: var(--text);
       line-height: 1.6;
       -webkit-font-smoothing: antialiased;
-      padding-bottom: 1px; /* Prevent margin collapse */
+      padding-bottom: 1px;
     }
     
     header {
@@ -236,68 +237,87 @@
       color: var(--text-secondary);
     }
     
-    /* Project Section */
-    .project-showcase {
+    /* Projects Section */
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 2rem;
+      margin-top: 3rem;
+    }
+    
+    .project-card {
       background: var(--card-bg);
       border-radius: 1rem;
       overflow: hidden;
       border: 1px solid var(--border);
-      margin: 3rem 0;
+      transition: var(--transition);
     }
     
-    .project-content {
-      padding: 2rem;
+    .project-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
     }
     
     .project-image {
-      height: 300px;
-      background: linear-gradient(120deg, #2d2d39, #1a1a22);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      height: 200px;
       position: relative;
       overflow: hidden;
     }
     
-    .project-image::before {
-      content: '';
-      position: absolute;
-      width: 200%;
-      height: 200%;
-      background: conic-gradient(transparent, transparent, transparent, var(--brand));
-      animation: border-animate 4s linear infinite;
-    }
-    
-    @keyframes border-animate {
-      0% {
-        transform: rotate(0deg);
-      }
-      100% {
-        transform: rotate(360deg);
-      }
-    }
-    
     .project-image-inner {
-      position: absolute;
-      inset: 5px;
-      background: linear-gradient(120deg, #2d2d39, #1a1a22);
-      z-index: 1;
+      width: 100%;
+      height: 100%;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
       color: var(--brand);
       font-size: 4rem;
+      background: linear-gradient(120deg, #2d2d39, #1a1a22);
     }
     
-    .project-image-inner span {
-      font-size: 1rem;
-      margin-top: 1rem;
-      color: var(--text-secondary);
+    .project-image-inner.airdraw {
+      background: linear-gradient(120deg, #2d2d39, #1a1a22);
+    }
+    
+    .project-image-inner.clean-boss {
+      background: linear-gradient(120deg, #1a2a3a, #0d1b2a);
+    }
+    
+    .project-content {
+      padding: 1.5rem;
+    }
+    
+    .project-title {
+      font-weight: 700;
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
     }
     
     .project-description {
-      margin: 1.5rem 0;
+      color: var(--text-secondary);
+      margin-bottom: 1.5rem;
+      font-size: 1rem;
+    }
+    
+    .project-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .project-tag {
+      background: rgba(79, 70, 229, 0.2);
+      color: var(--brand-2);
+      padding: 0.25rem 0.75rem;
+      border-radius: 100px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    
+    .project-links {
+      display: flex;
+      gap: 1rem;
     }
     
     /* Contact Section */
@@ -353,6 +373,14 @@
         width: 100%;
         text-align: center;
         justify-content: center;
+      }
+      
+      .projects-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .project-links {
+        flex-direction: column;
       }
     }
   </style>
@@ -416,20 +444,66 @@
 
     <section id="projects" class="section">
       <div class="container">
-        <h2>Featured Project</h2>
-        <p>Here's my hand-tracking drawing application that I've developed:</p>
+        <h2>My Projects</h2>
+        <p>Here are some of the projects I've developed to showcase my skills and creativity.</p>
         
-        <div class="project-showcase">
-          <div class="project-image">
-            <div class="project-image-inner">
-              ✨
-              <span>AirDraw Project Preview</span>
+        <div class="projects-grid">
+          <div class="project-card">
+            <div class="project-image">
+              <div class="project-image-inner airdraw">
+                ✨
+              </div>
+            </div>
+            <div class="project-content">
+              <h3 class="project-title">AirDraw</h3>
+              <p class="project-description">An experimental web application that uses computer vision to track hand movements, allowing users to draw in the air and see their gestures translated onto a digital canvas in real-time.</p>
+              
+              <div class="project-tags">
+                <span class="project-tag">JavaScript</span>
+                <span class="project-tag">Computer Vision</span>
+                <span class="project-tag">Interactive</span>
+              </div>
+              
+              <div class="project-links">
+                <a href="airdraw.html" class="btn">
+                  <i class="fas fa-external-link-alt"></i>
+                  Launch App
+                </a>
+                <a href="#" class="btn btn-outline">
+                  <i class="fab fa-github"></i>
+                  Code
+                </a>
+              </div>
             </div>
           </div>
-          <div class="project-content">
-            <h3>AirDraw - Hand Tracking Drawing App</h3>
-            <p class="project-description">An experimental web application that uses computer vision to track hand movements, allowing users to draw in the air and see their gestures translated onto a digital canvas in real-time.</p>
-            <a href="airdraw.html" class="btn">Launch AirDraw App</a>
+          
+          <div class="project-card">
+            <div class="project-image">
+              <div class="project-image-inner clean-boss">
+                💼
+              </div>
+            </div>
+            <div class="project-content">
+              <h3 class="project-title">Clean Boss Website</h3>
+              <p class="project-description">A modern, responsive website for a cleaning service business. Features a clean design with service information, pricing, and contact details in an elegant layout.</p>
+              
+              <div class="project-tags">
+                <span class="project-tag">HTML/CSS</span>
+                <span class="project-tag">Responsive</span>
+                <span class="project-tag">Business</span>
+              </div>
+              
+              <div class="project-links">
+                <a href="https://v0-clean-boss-website.vercel.app/" target="_blank" class="btn">
+                  <i class="fas fa-external-link-alt"></i>
+                  Visit Website
+                </a>
+                <a href="#" class="btn btn-outline">
+                  <i class="fab fa-github"></i>
+                  Code
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -442,11 +516,16 @@
         
         <div class="contact-links">
           <a class="btn" href="mailto:luispaiva83@gmail.com">
+            <i class="fas fa-envelope"></i>
             Email Me
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-left: 8px;">
-              <path d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M22 6L12 13L2 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+          </a>
+          <a class="btn btn-outline" href="#">
+            <i class="fab fa-linkedin"></i>
+            LinkedIn
+          </a>
+          <a class="btn btn-outline" href="#">
+            <i class="fab fa-github"></i>
+            GitHub
           </a>
         </div>
       </div>
