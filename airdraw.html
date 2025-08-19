@@ -147,37 +147,16 @@
       z-index: 10;
     }
     
-    #calibrationView {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.9);
-      z-index: 1000;
+    .calibration-mode #drawingCanvas {
       display: none;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      color: white;
     }
     
-    #calibrationCanvas {
-      width: 80%;
-      max-width: 640px;
-      border: 3px solid white;
-      border-radius: 10px;
+    .calibration-mode #cursor {
+      display: none;
     }
     
-    #closeCalibration {
-      margin-top: 20px;
-      padding: 10px 20px;
-      background: #4b9fff;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      cursor: pointer;
+    .calibration-mode #status {
+      background: rgba(255, 165, 0, 0.7);
     }
   </style>
 </head>
@@ -230,13 +209,6 @@
     <button id="closeTutorial">Got it!</button>
   </div>
 
-  <div id="calibrationView">
-    <h2>Hand Calibration</h2>
-    <p>Move your hand around to make sure all landmarks are detected correctly</p>
-    <canvas id="calibrationCanvas"></canvas>
-    <button id="closeCalibration">Close Calibration</button>
-  </div>
-
   <div id="cursor"></div>
   <div id="status">Looking for hands...</div>
 
@@ -253,9 +225,7 @@
     const videoElement = document.getElementById('video');
     const canvasElement = document.getElementById('output');
     const drawingCanvas = document.getElementById('drawingCanvas');
-    const calibrationCanvas = document.getElementById('calibrationCanvas');
     const ctx = drawingCanvas.getContext('2d');
-    const calibrationCtx = calibrationCanvas.getContext('2d');
     const cursor = document.getElementById('cursor');
     const statusDiv = document.getElementById('status');
 
@@ -459,20 +429,22 @@
       const outputCtx = canvasElement.getContext('2d');
       outputCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
       
-      // Draw the drawing area border
-      outputCtx.strokeStyle = '#4b9fff';
-      outputCtx.lineWidth = 4;
-      outputCtx.strokeRect(drawingX, drawingY, drawingWidth, drawingHeight);
-      
-      // Draw "Draw Here!" text
-      outputCtx.font = '24px Comic Sans MS';
-      outputCtx.fillStyle = '#4b9fff';
-      outputCtx.textAlign = 'center';
-      outputCtx.fillText('Draw Here!', canvasElement.width / 2, drawingY - 15);
+      if (!isCalibrating) {
+        // Draw the drawing area border
+        outputCtx.strokeStyle = '#4b9fff';
+        outputCtx.lineWidth = 4;
+        outputCtx.strokeRect(drawingX, drawingY, drawingWidth, drawingHeight);
+        
+        // Draw "Draw Here!" text
+        outputCtx.font = '24px Comic Sans MS';
+        outputCtx.fillStyle = '#4b9fff';
+        outputCtx.textAlign = 'center';
+        outputCtx.fillText('Draw Here!', canvasElement.width / 2, drawingY - 15);
+      }
       
       if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
-        statusDiv.textContent = "Hand detected! Pinch to draw";
-        statusDiv.style.background = "rgba(76, 175, 80, 0.7)";
+        statusDiv.textContent = isCalibrating ? "Calibrating - Move your hand around" : "Hand detected! Pinch to draw";
+        statusDiv.style.background = isCalibrating ? "rgba(255, 165, 0, 0.7)" : "rgba(76, 175, 80, 0.7)";
         
         const landmarks = results.multiHandLandmarks[0];
         const indexTip = landmarks[8];
@@ -484,8 +456,8 @@
         const x = (1 - indexTip.x) * canvasElement.width;
         const y = indexTip.y * canvasElement.height;
         
-        // Show cursor only if inside drawing area
-        if (x > drawingX && x < drawingX + drawingWidth && 
+        // Show cursor only if inside drawing area and not in calibration mode
+        if (!isCalibrating && x > drawingX && x < drawingX + drawingWidth && 
             y > drawingY && y < drawingY + drawingHeight) {
           cursor.style.display = 'block';
           cursor.style.left = `${x - 10}px`;
@@ -499,7 +471,7 @@
         
         const pinch = pinchDist < 0.05;
         
-        if (pinch) {
+        if (pinch && !isCalibrating) {
           // Convert to drawing canvas coordinates
           const drawX = x - drawingX;
           const drawY = y - drawingY;
@@ -534,11 +506,11 @@
             }
           }
         } else {
-          if (points.length > 0 && !points[points.length-1].done && !currentShape) {
+          if (points.length > 0 && !points[points.length-1].done && !currentShape && !isCalibrating) {
             points[points.length-1].done = true;
           }
           
-          if (shapeStartPoint && currentShape) {
+          if (shapeStartPoint && currentShape && !isCalibrating) {
             // Add the shape to points for persistence
             points.push({ 
               color: `hsl(${hue},100%,50%)`, 
@@ -558,37 +530,30 @@
         }
         
         // Draw hand landmarks (mirrored)
-        if (!isCalibrating) {
-          outputCtx.save();
-          outputCtx.scale(-1, 1);
-          outputCtx.translate(-canvasElement.width, 0);
-          
-          drawConnectors(outputCtx, landmarks, HAND_CONNECTIONS, 
-                        {color: '#FF0000', lineWidth: 1});
-          drawLandmarks(outputCtx, landmarks, {color: '#00FF00', lineWidth: 1, radius: 3});
-          
-          outputCtx.restore();
-        } else {
-          // Draw calibration view
-          calibrationCtx.clearRect(0, 0, calibrationCanvas.width, calibrationCanvas.height);
-          
-          // Scale to fit calibration canvas
-          calibrationCtx.save();
-          const scaleX = calibrationCanvas.width;
-          const scaleY = calibrationCanvas.height;
-          
-          calibrationCtx.scale(scaleX, scaleY);
-          
-          drawConnectors(calibrationCtx, landmarks, HAND_CONNECTIONS, 
-                        {color: '#FF0000', lineWidth: 0.005});
-          drawLandmarks(calibrationCtx, landmarks, {color: '#00FF00', lineWidth: 0.005, radius: 0.01});
-          
-          calibrationCtx.restore();
-        }
+        outputCtx.save();
+        outputCtx.scale(-1, 1);
+        outputCtx.translate(-canvasElement.width, 0);
+        
+        drawConnectors(outputCtx, landmarks, HAND_CONNECTIONS, 
+                      {color: '#FF0000', lineWidth: 1});
+        drawLandmarks(outputCtx, landmarks, {color: '#00FF00', lineWidth: 1, radius: 3});
+        
+        outputCtx.restore();
       } else {
-        statusDiv.textContent = "Looking for hands...";
+        statusDiv.textContent = isCalibrating ? "Calibrating - Show your hand to the camera" : "Looking for hands...";
         statusDiv.style.background = "rgba(0, 0, 0, 0.7)";
         cursor.style.display = 'none';
+      }
+    }
+
+    function toggleCalibration() {
+      isCalibrating = !isCalibrating;
+      document.body.classList.toggle('calibration-mode', isCalibrating);
+      document.getElementById('calibrateBtn').textContent = isCalibrating ? 'Exit Calibration' : 'Calibrate Hand';
+      
+      if (!isCalibrating) {
+        // Redraw everything when exiting calibration
+        redrawStrokes();
       }
     }
 
@@ -631,19 +596,7 @@
     };
     
     // Calibration button
-    document.getElementById('calibrateBtn').onclick = () => {
-      isCalibrating = true;
-      document.getElementById('calibrationView').style.display = 'flex';
-      
-      // Set calibration canvas size
-      calibrationCanvas.width = Math.min(640, window.innerWidth * 0.8);
-      calibrationCanvas.height = calibrationCanvas.width * 0.75;
-    };
-    
-    document.getElementById('closeCalibration').onclick = () => {
-      isCalibrating = false;
-      document.getElementById('calibrationView').style.display = 'none';
-    };
+    document.getElementById('calibrateBtn').onclick = toggleCalibration;
     
     // Shape buttons
     document.querySelectorAll('.shape-btn').forEach(btn => {
