@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zombie Escape | Portfolio Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        body {
+            background-color: #121212;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 800px;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            color: #ff3e3e;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            margin-bottom: 10px;
+        }
+        
+        .game-stats {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            background-color: #222;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        
+        .stat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #ffcc00;
+        }
+        
+        #game-canvas {
+            background-color: #1e1e1e;
+            border: 3px solid #333;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.2);
+        }
+        
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .control-btn {
+            padding: 12px;
+            background-color: #333;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: background-color 0.2s;
+        }
+        
+        .control-btn:hover {
+            background-color: #555;
+        }
+        
+        #up {
+            grid-column: 2;
+            grid-row: 1;
+        }
+        
+        #left {
+            grid-column: 1;
+            grid-row: 2;
+        }
+        
+        #right {
+            grid-column: 3;
+            grid-row: 2;
+        }
+        
+        #down {
+            grid-column: 2;
+            grid-row: 3;
+        }
+        
+        #action {
+            grid-column: 2;
+            grid-row: 2;
+            background-color: #ff3e3e;
+        }
+        
+        #action:hover {
+            background-color: #ff6b6b;
+        }
+        
+        .instructions {
+            background-color: #222;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+        
+        .instructions h2 {
+            color: #ffcc00;
+            margin-bottom: 10px;
+        }
+        
+        .instructions ul {
+            list-style-type: none;
+            padding-left: 10px;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+            display: flex;
+            align-items: flex-start;
+        }
+        
+        .instructions li::before {
+            content: "•";
+            color: #ff3e3e;
+            font-weight: bold;
+            display: inline-block;
+            width: 20px;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: #222;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+        }
+        
+        .modal h2 {
+            color: #ffcc00;
+            margin-bottom: 20px;
+            font-size: 2rem;
+        }
+        
+        .modal p {
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            line-height: 1.5;
+        }
+        
+        #start-btn, #restart-btn {
+            padding: 12px 30px;
+            background-color: #ff3e3e;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        #start-btn:hover, #restart-btn:hover {
+            background-color: #ff6b6b;
+        }
+        
+        @media (min-width: 768px) {
+            .controls {
+                display: none;
+            }
+            
+            .instructions {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>ZOMBIE ESCAPE</h1>
+            <div class="game-stats">
+                <div class="stat">
+                    <div>GAS CANS</div>
+                    <div id="gas-count" class="stat-value">0/3</div>
+                </div>
+                <div class="stat">
+                    <div>HEALTH</div>
+                    <div id="health" class="stat-value">100%</div>
+                </div>
+                <div class="stat">
+                    <div>ZOMBIES</div>
+                    <div id="zombie-count" class="stat-value">12</div>
+                </div>
+            </div>
+        </header>
+        
+        <canvas id="game-canvas" width="800" height="500"></canvas>
+        
+        <div class="controls">
+            <button id="up" class="control-btn">↑</button>
+            <button id="left" class="control-btn">←</button>
+            <button id="action" class="control-btn">A</button>
+            <button id="right" class="control-btn">→</button>
+            <button id="down" class="control-btn">↓</button>
+        </div>
+        
+        <div class="instructions">
+            <h2>HOW TO PLAY</h2>
+            <ul>
+                <li>Find 3 gas cans to fuel the escape car</li>
+                <li>Avoid zombies - they will damage you on contact</li>
+                <li>Find the escape car (red sports car) once you have gas</li>
+                <li>Use arrow keys or WASD to move</li>
+                <li>Press SPACE to interact with objects</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div id="start-modal" class="modal" style="display: flex;">
+        <div class="modal-content">
+            <h2>ZOMBIE ESCAPE</h2>
+            <p>The city is overrun with zombies! Find 3 gas cans, locate the escape car, and get out alive!</p>
+            <p>Use arrow keys or WASD to move. Avoid zombies at all costs!</p>
+            <button id="start-btn">START GAME</button>
+        </div>
+    </div>
+    
+    <div id="game-over-modal" class="modal">
+        <div class="modal-content">
+            <h2>GAME OVER</h2>
+            <p id="game-over-message">The zombies got you!</p>
+            <button id="restart-btn">PLAY AGAIN</button>
+        </div>
+    </div>
+    
+    <div id="win-modal" class="modal">
+        <div class="modal-content">
+            <h2>ESCAPE SUCCESSFUL!</h2>
+            <p>You made it out of the zombie-infested city!</p>
+            <button id="win-restart-btn">PLAY AGAIN</button>
+        </div>
+    </div>
+
+    <script>
+        // Game variables
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+        const startModal = document.getElementById('start-modal');
+        const gameOverModal = document.getElementById('game-over-modal');
+        const winModal = document.getElementById('win-modal');
+        const startBtn = document.getElementById('start-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const winRestartBtn = document.getElementById('win-restart-btn');
+        const gasCountElement = document.getElementById('gas-count');
+        const healthElement = document.getElementById('health');
+        const zombieCountElement = document.getElementById('zombie-count');
+        const gameOverMessage = document.getElementById('game-over-message');
+        
+        // Game state
+        let gameRunning = false;
+        let player = {
+            x: 400,
+            y: 250,
+            size: 20,
+            speed: 5,
+            health: 100,
+            direction: 0,
+            gasCans: 0
+        };
+        
+        let car = {
+            x: 700,
+            y: 400,
+            width: 40,
+            height: 30,
+            found: false
+        };
+        
+        let zombies = [];
+        let gasCans = [];
+        let buildings = [];
+        let keys = {};
+        let lastTimestamp = 0;
+        
+        // Initialize game objects
+        function initGame() {
+            player = {
+                x: 400,
+                y: 250,
+                size: 20,
+                speed: 5,
+                health: 100,
+                direction: 0,
+                gasCans: 0
+            };
+            
+            car = {
+                x: 700,
+                y: 400,
+                width: 40,
+                height: 30,
+                found: false
+            };
+            
+            zombies = [];
+            for (let i = 0; i < 12; i++) {
+                zombies.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: 24,
+                    speed: 1 + Math.random() * 1.5,
+                    direction: Math.random() * Math.PI * 2
+                });
+            }
+            
+            gasCans = [];
+            for (let i = 0; i < 3; i++) {
+                gasCans.push({
+                    x: 100 + Math.random() * 600,
+                    y: 100 + Math.random() * 300,
+                    size: 15,
+                    collected: false
+                });
+            }
+            
+            buildings = [];
+            for (let i = 0; i < 8; i++) {
+                buildings.push({
+                    x: Math.random() * (canvas.width - 100),
+                    y: Math.random() * (canvas.height - 80),
+                    width: 80 + Math.random() * 70,
+                    height: 60 + Math.random() * 50
+                });
+            }
+            
+            updateStats();
+        }
+        
+        // Update game stats display
+        function updateStats() {
+            gasCountElement.textContent = `${player.gasCans}/3`;
+            healthElement.textContent = `${Math.max(0, Math.floor(player.health))}%`;
+            zombieCountElement.textContent = zombies.length;
+        }
+        
+        // Draw game objects
+        function draw() {
+            // Clear canvas
+            ctx.fillStyle = '#1e1e1e';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw roads
+            ctx.fillStyle = '#444';
+            ctx.fillRect(0, 200, canvas.width, 100);
+            ctx.fillRect(350, 0, 100, canvas.height);
+            
+            // Draw road markings
+            ctx.fillStyle = '#ffcc00';
+            for (let i = 0; i < canvas.width; i += 40) {
+                ctx.fillRect(i, 245, 20, 5);
+            }
+            for (let i = 0; i < canvas.height; i += 40) {
+                ctx.fillRect(395, i, 5, 20);
+            }
+            
+            // Draw buildings
+            ctx.fillStyle = '#555';
+            buildings.forEach(building => {
+                ctx.fillRect(building.x, building.y, building.width, building.height);
+                ctx.fillStyle = '#333';
+                for (let i = 0; i < building.width; i += 15) {
+                    for (let j = 0; j < building.height; j += 20) {
+                        ctx.fillRect(building.x + i + 2, building.y + j + 2, 8, 12);
+                    }
+                }
+                ctx.fillStyle = '#555';
+            });
+            
+            // Draw gas cans
+            gasCans.forEach(can => {
+                if (!can.collected) {
+                    ctx.fillStyle = '#ffcc00';
+                    ctx.beginPath();
+                    ctx.rect(can.x - can.size/2, can.y - can.size/2, can.size, can.size);
+                    ctx.fill();
+                    
+                    ctx.fillStyle = '#ff5500';
+                    ctx.beginPath();
+                    ctx.rect(can.x - can.size/2 + 2, can.y - can.size/2 + 2, can.size - 4, can.size - 4);
+                    ctx.fill();
+                }
+            });
+            
+            // Draw car
+            ctx.fillStyle = '#ff3e3e';
+            ctx.fillRect(car.x - car.width/2, car.y - car.height/2, car.width, car.height);
+            ctx.fillStyle = '#222';
+            ctx.fillRect(car.x - car.width/2 + 5, car.y - car.height/2 + 5, car.width - 10, car.height - 10);
+            ctx.fillStyle = '#1e1e1e';
+            ctx.fillRect(car.x - car.width/2 + 8, car.y - car.height/2 + 8, car.width - 16, car.height - 16);
+            
+            // Draw player
+            ctx.fillStyle = '#3e93ff';
+            ctx.beginPath();
+            ctx.arc(player.x, player.y, player.size, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Draw direction indicator
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(player.x, player.y);
+            ctx.lineTo(
+                player.x + Math.cos(player.direction) * player.size,
+                player.y + Math.sin(player.direction) * player.size
+            );
+            ctx.stroke();
+            
+            // Draw zombies
+            zombies.forEach(zombie => {
+                ctx.fillStyle = '#3eff3e';
+                ctx.beginPath();
+                ctx.arc(zombie.x, zombie.y, zombie.size, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Draw zombie eyes
+                ctx.fillStyle = '#000';
+                ctx.beginPath();
+                ctx.arc(zombie.x - 5, zombie.y - 5, 4, 0, Math.PI * 2);
+                ctx.arc(zombie.x + 5, zombie.y - 5, 4, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            
+            // Draw HUD
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            ctx.fillRect(10, 10, 150, 40);
+            ctx.fillStyle = '#fff';
+            ctx.font = '16px Arial';
+            ctx.fillText(`Gas: ${player.gasCans}/3`, 20, 30);
+            ctx.fillText(`Health: ${Math.max(0, Math.floor(player.health))}%`, 20, 50);
+        }
+        
+        // Update game state
+        function update(timestamp) {
+            if (!gameRunning) return;
+            
+            const deltaTime = timestamp - lastTimestamp;
+            lastTimestamp = timestamp;
+            
+            // Move player
+            if (keys['ArrowUp'] || keys['w'] || keys['W']) {
+                player.y -= player.speed;
+                player.direction = -Math.PI/2;
+            }
+            if (keys['ArrowDown'] || keys['s'] || keys['S']) {
+                player.y += player.speed;
+                player.direction = Math.PI/2;
+            }
+            if (keys['ArrowLeft'] || keys['a'] || keys['A']) {
+                player.x -= player.speed;
+                player.direction = Math.PI;
+            }
+            if (keys['ArrowRight'] || keys['d'] || keys['D']) {
+                player.x += player.speed;
+                player.direction = 0;
+            }
+            
+            // Keep player in bounds
+            player.x = Math.max(player.size, Math.min(canvas.width - player.size, player.x));
+            player.y = Math.max(player.size, Math.min(canvas.height - player.size, player.y));
+            
+            // Move zombies
+            zombies.forEach(zombie => {
+                // Move toward player
+                const dx = player.x - zombie.x;
+                const dy = player.y - zombie.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                
+                if (dist < 300) {
+                    zombie.x += (dx / dist) * zombie.speed;
+                    zombie.y += (dy / dist) * zombie.speed;
+                } else {
+                    // Random movement
+                    zombie.x += Math.cos(zombie.direction) * zombie.speed;
+                    zombie.y += Math.sin(zombie.direction) * zombie.speed;
+                    
+                    // Change direction occasionally
+                    if (Math.random() < 0.01) {
+                        zombie.direction = Math.random() * Math.PI * 2;
+                    }
+                }
+                
+                // Keep zombies in bounds
+                zombie.x = Math.max(zombie.size, Math.min(canvas.width - zombie.size, zombie.x));
+                zombie.y = Math.max(zombie.size, Math.min(canvas.height - zombie.size, zombie.y));
+                
+                // Check for collision with player
+                const collisionDist = player.size + zombie.size;
+                if (dist < collisionDist) {
+                    player.health -= 0.5;
+                }
+            });
+            
+            // Check for gas can collection
+            gasCans.forEach(can => {
+                if (!can.collected) {
+                    const dx = player.x - can.x;
+                    const dy = player.y - can.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (dist < player.size + can.size) {
+                        if (keys[' ']) {
+                            can.collected = true;
+                            player.gasCans++;
+                            updateStats();
+                        }
+                    }
+                }
+            });
+            
+            // Check for car interaction
+            const carDx = player.x - car.x;
+            const carDy = player.y - car.y;
+            const carDist = Math.sqrt(carDx * carDx + carDy * carDy);
+            
+            if (carDist < player.size + 30) {
+                if (keys[' ']) {
+                    if (player.gasCans >= 3) {
+                        // Win condition
+                        gameRunning = false;
+                        winModal.style.display = 'flex';
+                    }
+                }
+            }
+            
+            // Check for game over
+            if (player.health <= 0) {
+                gameRunning = false;
+                gameOverMessage.textContent = "The zombies got you!";
+                gameOverModal.style.display = 'flex';
+            }
+            
+            // Update stats
+            updateStats();
+            
+            // Draw everything
+            draw();
+            
+            // Continue game loop
+            if (gameRunning) {
+                requestAnimationFrame(update);
+            }
+        }
+        
+        // Event listeners
+        document.addEventListener('keydown', (e) => {
+            keys[e.key] = true;
+        });
+        
+        document.addEventListener('keyup', (e) => {
+            keys[e.key] = false;
+        });
+        
+        // Touch controls for mobile
+        document.getElementById('up').addEventListener('touchstart', () => {
+            keys['ArrowUp'] = true;
+        });
+        
+        document.getElementById('up').addEventListener('touchend', () => {
+            keys['ArrowUp'] = false;
+        });
+        
+        document.getElementById('down').addEventListener('touchstart', () => {
+            keys['ArrowDown'] = true;
+        });
+        
+        document.getElementById('down').addEventListener('touchend', () => {
+            keys['ArrowDown'] = false;
+        });
+        
+        document.getElementById('left').addEventListener('touchstart', () => {
+            keys['ArrowLeft'] = true;
+        });
+        
+        document.getElementById('left').addEventListener('touchend', () => {
+            keys['ArrowLeft'] = false;
+        });
+        
+        document.getElementById('right').addEventListener('touchstart', () => {
+            keys['ArrowRight'] = true;
+        });
+        
+        document.getElementById('right').addEventListener('touchend', () => {
+            keys['ArrowRight'] = false;
+        });
+        
+        document.getElementById('action').addEventListener('touchstart', () => {
+            keys[' '] = true;
+        });
+        
+        document.getElementById('action').addEventListener('touchend', () => {
+            keys[' '] = false;
+        });
+        
+        // Start game button
+        startBtn.addEventListener('click', () => {
+            startModal.style.display = 'none';
+            gameRunning = true;
+            lastTimestamp = performance.now();
+            requestAnimationFrame(update);
+        });
+        
+        // Restart game buttons
+        restartBtn.addEventListener('click', () => {
+            gameOverModal.style.display = 'none';
+            initGame();
+            gameRunning = true;
+            lastTimestamp = performance.now();
+            requestAnimationFrame(update);
+        });
+        
+        winRestartBtn.addEventListener('click', () => {
+            winModal.style.display = 'none';
+            initGame();
+            gameRunning = true;
+            lastTimestamp = performance.now();
+            requestAnimationFrame(update);
+        });
+        
+        // Initialize the game
+        initGame();
+        draw();
+    </script>
+</body>
+</html>
