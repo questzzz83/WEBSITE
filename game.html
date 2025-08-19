@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zombie Escape | Portfolio Game</title>
+    <title>Zombie Escape | Enhanced</title>
     <style>
         * {
             margin: 0;
@@ -28,7 +28,7 @@
             flex-direction: column;
             align-items: center;
             width: 100%;
-            max-width: 800px;
+            max-width: 900px;
             padding: 20px;
         }
         
@@ -67,12 +67,25 @@
             color: #ffcc00;
         }
         
+        .game-area {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
         #game-canvas {
             background-color: #1e1e1e;
             border: 3px solid #333;
             border-radius: 5px;
-            margin-bottom: 20px;
             box-shadow: 0 0 20px rgba(255, 0, 0, 0.2);
+        }
+        
+        #mini-map {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            border: 2px solid #555;
+            border-radius: 5px;
         }
         
         .controls {
@@ -209,12 +222,30 @@
             background-color: #ff6b6b;
         }
         
+        .weapon-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 10px;
+            padding: 8px;
+            background-color: #333;
+            border-radius: 5px;
+        }
+        
+        .weapon-key {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            background-color: #555;
+            border-radius: 4px;
+            text-align: center;
+            line-height: 30px;
+            margin: 0 10px;
+            font-weight: bold;
+        }
+        
         @media (min-width: 768px) {
             .controls {
-                display: none;
-            }
-            
-            .instructions {
                 display: none;
             }
         }
@@ -223,7 +254,7 @@
 <body>
     <div class="container">
         <header>
-            <h1>ZOMBIE ESCAPE</h1>
+            <h1>ZOMBIE ESCAPE: AFTERMATH</h1>
             <div class="game-stats">
                 <div class="stat">
                     <div>GAS CANS</div>
@@ -234,13 +265,20 @@
                     <div id="health" class="stat-value">100%</div>
                 </div>
                 <div class="stat">
+                    <div>AMMO</div>
+                    <div id="ammo-count" class="stat-value">6</div>
+                </div>
+                <div class="stat">
                     <div>ZOMBIES</div>
-                    <div id="zombie-count" class="stat-value">12</div>
+                    <div id="zombie-count" class="stat-value">8</div>
                 </div>
             </div>
         </header>
         
-        <canvas id="game-canvas" width="800" height="500"></canvas>
+        <div class="game-area">
+            <canvas id="game-canvas" width="800" height="600"></canvas>
+            <canvas id="mini-map" width="150" height="150"></canvas>
+        </div>
         
         <div class="controls">
             <button id="up" class="control-btn">↑</button>
@@ -250,12 +288,21 @@
             <button id="down" class="control-btn">↓</button>
         </div>
         
+        <div class="weapon-info">
+            <span>Press</span>
+            <div class="weapon-key">Q</div>
+            <span>to use weapon (temporarily stuns zombies)</span>
+        </div>
+        
         <div class="instructions">
             <h2>HOW TO PLAY</h2>
             <ul>
                 <li>Find 3 gas cans to fuel the escape car</li>
+                <li>Stay on roads when possible - movement is faster</li>
                 <li>Avoid zombies - they will damage you on contact</li>
+                <li>Buildings are obstacles - navigate around them</li>
                 <li>Find the escape car (red sports car) once you have gas</li>
+                <li>Use Q to shoot zombies and stun them temporarily</li>
                 <li>Use arrow keys or WASD to move</li>
                 <li>Press SPACE to interact with objects</li>
             </ul>
@@ -264,9 +311,9 @@
     
     <div id="start-modal" class="modal" style="display: flex;">
         <div class="modal-content">
-            <h2>ZOMBIE ESCAPE</h2>
+            <h2>ZOMBIE ESCAPE: AFTERMATH</h2>
             <p>The city is overrun with zombies! Find 3 gas cans, locate the escape car, and get out alive!</p>
-            <p>Use arrow keys or WASD to move. Avoid zombies at all costs!</p>
+            <p>Stay on roads for faster movement. Use Q to temporarily stun zombies. Avoid buildings!</p>
             <button id="start-btn">START GAME</button>
         </div>
     </div>
@@ -291,6 +338,8 @@
         // Game variables
         const canvas = document.getElementById('game-canvas');
         const ctx = canvas.getContext('2d');
+        const miniMap = document.getElementById('mini-map');
+        const miniCtx = miniMap.getContext('2d');
         const startModal = document.getElementById('start-modal');
         const gameOverModal = document.getElementById('game-over-modal');
         const winModal = document.getElementById('win-modal');
@@ -299,6 +348,7 @@
         const winRestartBtn = document.getElementById('win-restart-btn');
         const gasCountElement = document.getElementById('gas-count');
         const healthElement = document.getElementById('health');
+        const ammoCountElement = document.getElementById('ammo-count');
         const zombieCountElement = document.getElementById('zombie-count');
         const gameOverMessage = document.getElementById('game-over-message');
         
@@ -306,17 +356,21 @@
         let gameRunning = false;
         let player = {
             x: 400,
-            y: 250,
+            y: 300,
             size: 20,
             speed: 5,
+            roadSpeed: 7,
+            offRoadSpeed: 3,
             health: 100,
             direction: 0,
-            gasCans: 0
+            gasCans: 0,
+            ammo: 6,
+            isOnRoad: false
         };
         
         let car = {
             x: 700,
-            y: 400,
+            y: 500,
             width: 40,
             height: 30,
             found: false
@@ -325,59 +379,98 @@
         let zombies = [];
         let gasCans = [];
         let buildings = [];
+        let roads = [];
+        let bullets = [];
         let keys = {};
         let lastTimestamp = 0;
+        let viewport = { x: 0, y: 0, width: canvas.width, height: canvas.height };
+        let mapWidth = 1600;
+        let mapHeight = 1600;
         
         // Initialize game objects
         function initGame() {
             player = {
                 x: 400,
-                y: 250,
+                y: 300,
                 size: 20,
                 speed: 5,
+                roadSpeed: 7,
+                offRoadSpeed: 3,
                 health: 100,
                 direction: 0,
-                gasCans: 0
+                gasCans: 0,
+                ammo: 6,
+                isOnRoad: false
             };
             
             car = {
-                x: 700,
-                y: 400,
+                x: 1200,
+                y: 1400,
                 width: 40,
                 height: 30,
                 found: false
             };
             
+            // Create zombies (fewer and slower)
             zombies = [];
-            for (let i = 0; i < 12; i++) {
+            for (let i = 0; i < 8; i++) {
                 zombies.push({
-                    x: Math.random() * canvas.width,
-                    y: Math.random() * canvas.height,
+                    x: Math.random() * mapWidth,
+                    y: Math.random() * mapHeight,
                     size: 24,
-                    speed: 1 + Math.random() * 1.5,
-                    direction: Math.random() * Math.PI * 2
+                    speed: 0.5 + Math.random() * 1.0,
+                    direction: Math.random() * Math.PI * 2,
+                    stunned: 0,
+                    color: '#3eff3e'
                 });
             }
             
+            // Create gas cans
             gasCans = [];
+            const gasPositions = [
+                {x: 200, y: 300},
+                {x: 1400, y: 400},
+                {x: 600, y: 1200}
+            ];
+            
             for (let i = 0; i < 3; i++) {
                 gasCans.push({
-                    x: 100 + Math.random() * 600,
-                    y: 100 + Math.random() * 300,
+                    x: gasPositions[i].x,
+                    y: gasPositions[i].y,
                     size: 15,
                     collected: false
                 });
             }
             
+            // Create buildings (obstacles)
             buildings = [];
-            for (let i = 0; i < 8; i++) {
+            for (let i = 0; i < 15; i++) {
+                const width = 80 + Math.random() * 100;
+                const height = 80 + Math.random() * 100;
+                
                 buildings.push({
-                    x: Math.random() * (canvas.width - 100),
-                    y: Math.random() * (canvas.height - 80),
-                    width: 80 + Math.random() * 70,
-                    height: 60 + Math.random() * 50
+                    x: Math.random() * (mapWidth - width),
+                    y: Math.random() * (mapHeight - height),
+                    width: width,
+                    height: height
                 });
             }
+            
+            // Create roads
+            roads = [
+                // Horizontal roads
+                {x: 0, y: 200, width: mapWidth, height: 100},
+                {x: 0, y: 800, width: mapWidth, height: 100},
+                {x: 0, y: 1400, width: mapWidth, height: 100},
+                
+                // Vertical roads
+                {x: 300, y: 0, width: 100, height: mapHeight},
+                {x: 900, y: 0, width: 100, height: mapHeight},
+                {x: 1300, y: 0, width: 100, height: mapHeight}
+            ];
+            
+            bullets = [];
+            viewport = { x: 0, y: 0, width: canvas.width, height: canvas.height };
             
             updateStats();
         }
@@ -386,7 +479,38 @@
         function updateStats() {
             gasCountElement.textContent = `${player.gasCans}/3`;
             healthElement.textContent = `${Math.max(0, Math.floor(player.health))}%`;
+            ammoCountElement.textContent = player.ammo;
             zombieCountElement.textContent = zombies.length;
+        }
+        
+        // Check if point is on road
+        function isOnRoad(x, y) {
+            for (const road of roads) {
+                if (x >= road.x && x <= road.x + road.width &&
+                    y >= road.y && y <= road.y + road.height) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        // Check if point is inside a building
+        function isInBuilding(x, y) {
+            for (const building of buildings) {
+                if (x >= building.x && x <= building.x + building.width &&
+                    y >= building.y && y <= building.y + building.height) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        // Check collision between two objects
+        function checkCollision(obj1, obj2) {
+            const dx = obj1.x - obj2.x;
+            const dy = obj1.y - obj2.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            return distance < (obj1.size + obj2.size);
         }
         
         // Draw game objects
@@ -395,95 +519,316 @@
             ctx.fillStyle = '#1e1e1e';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
+            // Draw visible portion of map
+            const startX = Math.max(0, viewport.x);
+            const startY = Math.max(0, viewport.y);
+            const endX = Math.min(mapWidth, viewport.x + viewport.width);
+            const endY = Math.min(mapHeight, viewport.y + viewport.height);
+            
             // Draw roads
             ctx.fillStyle = '#444';
-            ctx.fillRect(0, 200, canvas.width, 100);
-            ctx.fillRect(350, 0, 100, canvas.height);
+            for (const road of roads) {
+                if (road.x + road.width > viewport.x && road.x < viewport.x + viewport.width &&
+                    road.y + road.height > viewport.y && road.y < viewport.y + viewport.height) {
+                    ctx.fillRect(
+                        road.x - viewport.x, 
+                        road.y - viewport.y, 
+                        road.width, 
+                        road.height
+                    );
+                }
+            }
             
             // Draw road markings
             ctx.fillStyle = '#ffcc00';
-            for (let i = 0; i < canvas.width; i += 40) {
-                ctx.fillRect(i, 245, 20, 5);
-            }
-            for (let i = 0; i < canvas.height; i += 40) {
-                ctx.fillRect(395, i, 5, 20);
+            for (const road of roads) {
+                if (road.width > road.height) {
+                    // Horizontal road
+                    for (let x = road.x; x < road.x + road.width; x += 40) {
+                        if (x > viewport.x && x < viewport.x + viewport.width &&
+                            road.y + 45 > viewport.y && road.y + 45 < viewport.y + viewport.height) {
+                            ctx.fillRect(
+                                x - viewport.x, 
+                                road.y + 45 - viewport.y, 
+                                20, 
+                                5
+                            );
+                        }
+                    }
+                } else {
+                    // Vertical road
+                    for (let y = road.y; y < road.y + road.height; y += 40) {
+                        if (y > viewport.y && y < viewport.y + viewport.height &&
+                            road.x + 45 > viewport.x && road.x + 45 < viewport.x + viewport.width) {
+                            ctx.fillRect(
+                                road.x + 45 - viewport.x, 
+                                y - viewport.y, 
+                                5, 
+                                20
+                            );
+                        }
+                    }
+                }
             }
             
             // Draw buildings
             ctx.fillStyle = '#555';
-            buildings.forEach(building => {
-                ctx.fillRect(building.x, building.y, building.width, building.height);
-                ctx.fillStyle = '#333';
-                for (let i = 0; i < building.width; i += 15) {
-                    for (let j = 0; j < building.height; j += 20) {
-                        ctx.fillRect(building.x + i + 2, building.y + j + 2, 8, 12);
+            for (const building of buildings) {
+                if (building.x + building.width > viewport.x && building.x < viewport.x + viewport.width &&
+                    building.y + building.height > viewport.y && building.y < viewport.y + viewport.height) {
+                    ctx.fillRect(
+                        building.x - viewport.x, 
+                        building.y - viewport.y, 
+                        building.width, 
+                        building.height
+                    );
+                    
+                    // Draw windows
+                    ctx.fillStyle = '#333';
+                    for (let i = 0; i < building.width; i += 15) {
+                        for (let j = 0; j < building.height; j += 20) {
+                            if (building.x + i + 2 > viewport.x && building.x + i + 2 < viewport.x + viewport.width &&
+                                building.y + j + 2 > viewport.y && building.y + j + 2 < viewport.y + viewport.height) {
+                                ctx.fillRect(
+                                    building.x + i + 2 - viewport.x, 
+                                    building.y + j + 2 - viewport.y, 
+                                    8, 
+                                    12
+                                );
+                            }
+                        }
                     }
+                    ctx.fillStyle = '#555';
                 }
-                ctx.fillStyle = '#555';
-            });
+            }
             
             // Draw gas cans
-            gasCans.forEach(can => {
-                if (!can.collected) {
+            for (const can of gasCans) {
+                if (!can.collected && 
+                    can.x > viewport.x && can.x < viewport.x + viewport.width &&
+                    can.y > viewport.y && can.y < viewport.y + viewport.height) {
                     ctx.fillStyle = '#ffcc00';
                     ctx.beginPath();
-                    ctx.rect(can.x - can.size/2, can.y - can.size/2, can.size, can.size);
+                    ctx.rect(
+                        can.x - can.size/2 - viewport.x, 
+                        can.y - can.size/2 - viewport.y, 
+                        can.size, 
+                        can.size
+                    );
                     ctx.fill();
                     
                     ctx.fillStyle = '#ff5500';
                     ctx.beginPath();
-                    ctx.rect(can.x - can.size/2 + 2, can.y - can.size/2 + 2, can.size - 4, can.size - 4);
+                    ctx.rect(
+                        can.x - can.size/2 + 2 - viewport.x, 
+                        can.y - can.size/2 + 2 - viewport.y, 
+                        can.size - 4, 
+                        can.size - 4
+                    );
                     ctx.fill();
                 }
-            });
+            }
             
-            // Draw car
-            ctx.fillStyle = '#ff3e3e';
-            ctx.fillRect(car.x - car.width/2, car.y - car.height/2, car.width, car.height);
-            ctx.fillStyle = '#222';
-            ctx.fillRect(car.x - car.width/2 + 5, car.y - car.height/2 + 5, car.width - 10, car.height - 10);
-            ctx.fillStyle = '#1e1e1e';
-            ctx.fillRect(car.x - car.width/2 + 8, car.y - car.height/2 + 8, car.width - 16, car.height - 16);
+            // Draw car if in view
+            if (car.x > viewport.x && car.x < viewport.x + viewport.width &&
+                car.y > viewport.y && car.y < viewport.y + viewport.height) {
+                ctx.fillStyle = '#ff3e3e';
+                ctx.fillRect(
+                    car.x - car.width/2 - viewport.x, 
+                    car.y - car.height/2 - viewport.y, 
+                    car.width, 
+                    car.height
+                );
+                ctx.fillStyle = '#222';
+                ctx.fillRect(
+                    car.x - car.width/2 + 5 - viewport.x, 
+                    car.y - car.height/2 + 5 - viewport.y, 
+                    car.width - 10, 
+                    car.height - 10
+                );
+                ctx.fillStyle = '#1e1e1e';
+                ctx.fillRect(
+                    car.x - car.width/2 + 8 - viewport.x, 
+                    car.y - car.height/2 + 8 - viewport.y, 
+                    car.width - 16, 
+                    car.height - 16
+                );
+            }
+            
+            // Draw bullets
+            ctx.fillStyle = '#ffff00';
+            for (const bullet of bullets) {
+                if (bullet.x > viewport.x && bullet.x < viewport.x + viewport.width &&
+                    bullet.y > viewport.y && bullet.y < viewport.y + viewport.height) {
+                    ctx.beginPath();
+                    ctx.arc(
+                        bullet.x - viewport.x, 
+                        bullet.y - viewport.y, 
+                        3, 
+                        0, 
+                        Math.PI * 2
+                    );
+                    ctx.fill();
+                }
+            }
             
             // Draw player
             ctx.fillStyle = '#3e93ff';
             ctx.beginPath();
-            ctx.arc(player.x, player.y, player.size, 0, Math.PI * 2);
+            ctx.arc(
+                player.x - viewport.x, 
+                player.y - viewport.y, 
+                player.size, 
+                0, 
+                Math.PI * 2
+            );
             ctx.fill();
             
             // Draw direction indicator
             ctx.strokeStyle = 'white';
             ctx.lineWidth = 3;
             ctx.beginPath();
-            ctx.moveTo(player.x, player.y);
+            ctx.moveTo(player.x - viewport.x, player.y - viewport.y);
             ctx.lineTo(
-                player.x + Math.cos(player.direction) * player.size,
-                player.y + Math.sin(player.direction) * player.size
+                player.x + Math.cos(player.direction) * player.size - viewport.x,
+                player.y + Math.sin(player.direction) * player.size - viewport.y
             );
             ctx.stroke();
             
             // Draw zombies
-            zombies.forEach(zombie => {
-                ctx.fillStyle = '#3eff3e';
-                ctx.beginPath();
-                ctx.arc(zombie.x, zombie.y, zombie.size, 0, Math.PI * 2);
-                ctx.fill();
-                
-                // Draw zombie eyes
-                ctx.fillStyle = '#000';
-                ctx.beginPath();
-                ctx.arc(zombie.x - 5, zombie.y - 5, 4, 0, Math.PI * 2);
-                ctx.arc(zombie.x + 5, zombie.y - 5, 4, 0, Math.PI * 2);
-                ctx.fill();
-            });
+            for (const zombie of zombies) {
+                if (zombie.x > viewport.x && zombie.x < viewport.x + viewport.width &&
+                    zombie.y > viewport.y && zombie.y < viewport.y + viewport.height) {
+                    ctx.fillStyle = zombie.stunned > 0 ? '#555' : '#3eff3e';
+                    ctx.beginPath();
+                    ctx.arc(
+                        zombie.x - viewport.x, 
+                        zombie.y - viewport.y, 
+                        zombie.size, 
+                        0, 
+                        Math.PI * 2
+                    );
+                    ctx.fill();
+                    
+                    // Draw zombie eyes
+                    ctx.fillStyle = '#000';
+                    ctx.beginPath();
+                    ctx.arc(
+                        zombie.x - 5 - viewport.x, 
+                        zombie.y - 5 - viewport.y, 
+                        4, 
+                        0, 
+                        Math.PI * 2
+                    );
+                    ctx.arc(
+                        zombie.x + 5 - viewport.x, 
+                        zombie.y - 5 - viewport.y, 
+                        4, 
+                        0, 
+                        Math.PI * 2
+                    );
+                    ctx.fill();
+                }
+            }
             
             // Draw HUD
             ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-            ctx.fillRect(10, 10, 150, 40);
+            ctx.fillRect(10, 10, 200, 60);
             ctx.fillStyle = '#fff';
             ctx.font = '16px Arial';
             ctx.fillText(`Gas: ${player.gasCans}/3`, 20, 30);
             ctx.fillText(`Health: ${Math.max(0, Math.floor(player.health))}%`, 20, 50);
+            ctx.fillText(`Ammo: ${player.ammo}`, 20, 70);
+            
+            // Draw minimap
+            drawMiniMap();
+        }
+        
+        // Draw minimap
+        function drawMiniMap() {
+            const scale = 0.1;
+            miniCtx.fillStyle = '#1e1e1e';
+            miniCtx.fillRect(0, 0, miniMap.width, miniMap.height);
+            
+            // Draw roads on minimap
+            miniCtx.fillStyle = '#444';
+            for (const road of roads) {
+                miniCtx.fillRect(
+                    road.x * scale, 
+                    road.y * scale, 
+                    road.width * scale, 
+                    road.height * scale
+                );
+            }
+            
+            // Draw buildings on minimap
+            miniCtx.fillStyle = '#555';
+            for (const building of buildings) {
+                miniCtx.fillRect(
+                    building.x * scale, 
+                    building.y * scale, 
+                    building.width * scale, 
+                    building.height * scale
+                );
+            }
+            
+            // Draw gas cans on minimap
+            miniCtx.fillStyle = '#ffcc00';
+            for (const can of gasCans) {
+                if (!can.collected) {
+                    miniCtx.fillRect(
+                        can.x * scale - 2, 
+                        can.y * scale - 2, 
+                        4, 
+                        4
+                    );
+                }
+            }
+            
+            // Draw car on minimap
+            miniCtx.fillStyle = '#ff3e3e';
+            miniCtx.fillRect(
+                car.x * scale - 2, 
+                car.y * scale - 2, 
+                4, 
+                4
+            );
+            
+            // Draw player on minimap
+            miniCtx.fillStyle = '#3e93ff';
+            miniCtx.beginPath();
+            miniCtx.arc(
+                player.x * scale, 
+                player.y * scale, 
+                3, 
+                0, 
+                Math.PI * 2
+            );
+            miniCtx.fill();
+            
+            // Draw zombies on minimap
+            miniCtx.fillStyle = '#3eff3e';
+            for (const zombie of zombies) {
+                miniCtx.beginPath();
+                miniCtx.arc(
+                    zombie.x * scale, 
+                    zombie.y * scale, 
+                    2, 
+                    0, 
+                    Math.PI * 2
+                );
+                miniCtx.fill();
+            }
+            
+            // Draw viewport rectangle on minimap
+            miniCtx.strokeStyle = 'white';
+            miniCtx.lineWidth = 1;
+            miniCtx.strokeRect(
+                viewport.x * scale, 
+                viewport.y * scale, 
+                viewport.width * scale, 
+                viewport.height * scale
+            );
         }
         
         // Update game state
@@ -493,36 +838,112 @@
             const deltaTime = timestamp - lastTimestamp;
             lastTimestamp = timestamp;
             
+            // Update viewport to center on player
+            viewport.x = player.x - canvas.width / 2;
+            viewport.y = player.y - canvas.height / 2;
+            
+            // Keep viewport within map bounds
+            viewport.x = Math.max(0, Math.min(mapWidth - viewport.width, viewport.x));
+            viewport.y = Math.max(0, Math.min(mapHeight - viewport.height, viewport.y));
+            
+            // Check if player is on road
+            player.isOnRoad = isOnRoad(player.x, player.y);
+            player.speed = player.isOnRoad ? player.roadSpeed : player.offRoadSpeed;
+            
             // Move player
+            let newX = player.x;
+            let newY = player.y;
+            
             if (keys['ArrowUp'] || keys['w'] || keys['W']) {
-                player.y -= player.speed;
+                newY -= player.speed;
                 player.direction = -Math.PI/2;
             }
             if (keys['ArrowDown'] || keys['s'] || keys['S']) {
-                player.y += player.speed;
+                newY += player.speed;
                 player.direction = Math.PI/2;
             }
             if (keys['ArrowLeft'] || keys['a'] || keys['A']) {
-                player.x -= player.speed;
+                newX -= player.speed;
                 player.direction = Math.PI;
             }
             if (keys['ArrowRight'] || keys['d'] || keys['D']) {
-                player.x += player.speed;
+                newX += player.speed;
                 player.direction = 0;
             }
             
-            // Keep player in bounds
-            player.x = Math.max(player.size, Math.min(canvas.width - player.size, player.x));
-            player.y = Math.max(player.size, Math.min(canvas.height - player.size, player.y));
+            // Check if new position is valid (not inside a building)
+            if (!isInBuilding(newX, newY)) {
+                player.x = newX;
+                player.y = newY;
+            }
             
-            // Move zombies
-            zombies.forEach(zombie => {
+            // Keep player in bounds
+            player.x = Math.max(player.size, Math.min(mapWidth - player.size, player.x));
+            player.y = Math.max(player.size, Math.min(mapHeight - player.size, player.y));
+            
+            // Shoot weapon
+            if (keys['q'] || keys['Q']) {
+                if (player.ammo > 0) {
+                    player.ammo--;
+                    updateStats();
+                    
+                    // Create a bullet
+                    bullets.push({
+                        x: player.x,
+                        y: player.y,
+                        direction: player.direction,
+                        speed: 15,
+                        range: 200
+                    });
+                    
+                    // Reset key state to prevent continuous shooting
+                    keys['q'] = false;
+                    keys['Q'] = false;
+                }
+            }
+            
+            // Update bullets
+            for (let i = bullets.length - 1; i >= 0; i--) {
+                const bullet = bullets[i];
+                
+                // Move bullet
+                bullet.x += Math.cos(bullet.direction) * bullet.speed;
+                bullet.y += Math.sin(bullet.direction) * bullet.speed;
+                bullet.range -= bullet.speed;
+                
+                // Check for zombie hits
+                for (const zombie of zombies) {
+                    if (zombie.stunned <= 0 && checkCollision(bullet, zombie)) {
+                        // Stun the zombie
+                        zombie.stunned = 300; // 5 seconds at 60fps
+                        zombie.color = '#555';
+                    }
+                }
+                
+                // Remove bullets that are out of range or off map
+                if (bullet.range <= 0 || 
+                    bullet.x < 0 || bullet.x > mapWidth || 
+                    bullet.y < 0 || bullet.y > mapHeight) {
+                    bullets.splice(i, 1);
+                }
+            }
+            
+            // Update zombies
+            for (const zombie of zombies) {
+                if (zombie.stunned > 0) {
+                    zombie.stunned--;
+                    if (zombie.stunned <= 0) {
+                        zombie.color = '#3eff3e';
+                    }
+                    continue;
+                }
+                
                 // Move toward player
                 const dx = player.x - zombie.x;
                 const dy = player.y - zombie.y;
                 const dist = Math.sqrt(dx * dx + dy * dy);
                 
-                if (dist < 300) {
+                if (dist < 400) { // Detection range
                     zombie.x += (dx / dist) * zombie.speed;
                     zombie.y += (dy / dist) * zombie.speed;
                 } else {
@@ -537,18 +958,18 @@
                 }
                 
                 // Keep zombies in bounds
-                zombie.x = Math.max(zombie.size, Math.min(canvas.width - zombie.size, zombie.x));
-                zombie.y = Math.max(zombie.size, Math.min(canvas.height - zombie.size, zombie.y));
+                zombie.x = Math.max(zombie.size, Math.min(mapWidth - zombie.size, zombie.x));
+                zombie.y = Math.max(zombie.size, Math.min(mapHeight - zombie.size, zombie.y));
                 
                 // Check for collision with player
                 const collisionDist = player.size + zombie.size;
                 if (dist < collisionDist) {
                     player.health -= 0.5;
                 }
-            });
+            }
             
             // Check for gas can collection
-            gasCans.forEach(can => {
+            for (const can of gasCans) {
                 if (!can.collected) {
                     const dx = player.x - can.x;
                     const dy = player.y - can.y;
@@ -562,7 +983,7 @@
                         }
                     }
                 }
-            });
+            }
             
             // Check for car interaction
             const carDx = player.x - car.x;
