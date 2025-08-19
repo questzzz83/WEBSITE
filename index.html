@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Luis Paiva — Web & UI/UX Designer</title>
-  <meta name="description" content="Professional portfolio of Luis Paiva - Web Designer, UI/UX Specialist & Frontend Developer creating beautiful digital experiences." />
+  <title>Luis Paiva — Web Designer & Python Developer</title>
+  <meta name="description" content="Portfolio for Luis Paiva: Web Designer & Python Developer specializing in clean, functional websites." />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -18,6 +18,12 @@
       --card-bg: rgba(30, 30, 32, 0.6);
     }
     
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
     body {
       margin: 0;
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -25,6 +31,7 @@
       color: var(--text);
       line-height: 1.6;
       -webkit-font-smoothing: antialiased;
+      padding-bottom: 1px; /* Prevent margin collapse */
     }
     
     header {
@@ -33,16 +40,21 @@
       text-align: center;
       position: sticky;
       top: 0;
-      background-color: rgba(10, 10, 11, 0.9);
+      background-color: rgba(10, 10, 11, 0.95);
       backdrop-filter: blur(8px);
       z-index: 100;
     }
     
     header h1 {
       font-weight: 800;
-      font-size: 1.5rem;
+      font-size: 1.8rem;
       margin: 0;
       letter-spacing: -0.5px;
+      background: linear-gradient(90deg, var(--brand), var(--brand-2));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      display: inline-block;
     }
     
     nav {
@@ -80,10 +92,14 @@
       width: 100%;
     }
     
-    .section {
-      padding: 5rem 1.5rem;
+    .container {
       max-width: 1200px;
       margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+    
+    .section {
+      padding: 5rem 0;
       scroll-margin-top: 100px;
     }
     
@@ -93,10 +109,6 @@
       margin-bottom: 1.5rem;
       letter-spacing: -1px;
       line-height: 1.2;
-      background: linear-gradient(90deg, var(--brand), var(--brand-2));
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
     }
     
     h3 {
@@ -108,12 +120,13 @@
       color: var(--text-secondary);
       font-size: 1.1rem;
       max-width: 65ch;
+      margin-bottom: 1.5rem;
     }
     
     .btn {
       display: inline-flex;
       align-items: center;
-      margin-top: 1.5rem;
+      margin-top: 1rem;
       padding: 0.75rem 1.5rem;
       border-radius: 0.5rem;
       text-decoration: none;
@@ -122,12 +135,14 @@
       color: var(--bg);
       transition: var(--transition);
       box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
     }
     
     .btn:hover {
       transform: translateY(-2px);
       box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
-      opacity: 0.95;
     }
     
     .btn-outline {
@@ -141,100 +156,156 @@
       background: rgba(0, 231, 246, 0.1);
     }
     
-    /* Projects Carousel */
-    .projects-container {
+    /* Hero Section */
+    .hero {
+      text-align: center;
+      padding: 6rem 1rem;
       position: relative;
-      margin: 3rem 0;
+      overflow: hidden;
     }
     
-    .projects-carousel {
-      display: flex;
-      gap: 2rem;
-      overflow-x: auto;
-      scroll-snap-type: x mandatory;
-      padding-bottom: 1.5rem;
-      scrollbar-width: none; /* Firefox */
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(79, 70, 229, 0.1) 0%, transparent 70%);
+      animation: pulse 15s infinite alternate;
+      z-index: -1;
     }
     
-    .projects-carousel::-webkit-scrollbar {
-      display: none; /* Chrome/Safari */
+    @keyframes pulse {
+      0% {
+        transform: translate(0, 0);
+      }
+      100% {
+        transform: translate(10%, 10%);
+      }
     }
     
-    .project-card {
-      min-width: 300px;
-      max-width: 400px;
-      scroll-snap-align: start;
+    .hero h1 {
+      font-size: 3.5rem;
+      font-weight: 800;
+      margin-bottom: 1rem;
+      line-height: 1.1;
+    }
+    
+    .hero p {
+      font-size: 1.3rem;
+      max-width: 600px;
+      margin: 0 auto 2rem;
+    }
+    
+    /* Skills Section */
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+    
+    .skill-item {
+      background: var(--card-bg);
+      padding: 1.5rem;
+      border-radius: 1rem;
+      transition: var(--transition);
+      border: 1px solid var(--border);
+    }
+    
+    .skill-item:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+    
+    .skill-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      color: var(--brand);
+    }
+    
+    .skill-title {
+      font-weight: 700;
+      font-size: 1.25rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .skill-description {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+    }
+    
+    /* Project Section */
+    .project-showcase {
       background: var(--card-bg);
       border-radius: 1rem;
       overflow: hidden;
       border: 1px solid var(--border);
-      transition: var(--transition);
+      margin: 3rem 0;
     }
     
-    .project-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    .project-content {
+      padding: 2rem;
     }
     
     .project-image {
-      height: 200px;
-      background-size: cover;
-      background-position: center;
+      height: 300px;
+      background: linear-gradient(120deg, #2d2d39, #1a1a22);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
     }
     
-    .project-details {
-      padding: 1.5rem;
+    .project-image::before {
+      content: '';
+      position: absolute;
+      width: 200%;
+      height: 200%;
+      background: conic-gradient(transparent, transparent, transparent, var(--brand));
+      animation: border-animate 4s linear infinite;
     }
     
-    .project-title {
-      font-weight: 700;
-      font-size: 1.25rem;
-      margin: 0 0 0.5rem;
+    @keyframes border-animate {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+    
+    .project-image-inner {
+      position: absolute;
+      inset: 5px;
+      background: linear-gradient(120deg, #2d2d39, #1a1a22);
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--brand);
+      font-size: 4rem;
+    }
+    
+    .project-image-inner span {
+      font-size: 1rem;
+      margin-top: 1rem;
+      color: var(--text-secondary);
     }
     
     .project-description {
-      font-size: 0.95rem;
-      color: var(--text-secondary);
-      margin-bottom: 1rem;
+      margin: 1.5rem 0;
     }
     
-    .project-tags {
+    /* Contact Section */
+    .contact-links {
       display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      margin-top: 1rem;
-    }
-    
-    .tag {
-      background: rgba(79, 70, 229, 0.2);
-      color: var(--brand-2);
-      padding: 0.25rem 0.75rem;
-      border-radius: 100px;
-      font-size: 0.75rem;
-      font-weight: 600;
-    }
-    
-    .carousel-nav {
-      display: flex;
-      justify-content: center;
       gap: 1rem;
       margin-top: 1.5rem;
-    }
-    
-    .carousel-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: var(--text-secondary);
-      opacity: 0.5;
-      cursor: pointer;
-      transition: var(--transition);
-    }
-    
-    .carousel-dot.active {
-      background: var(--brand);
-      opacity: 1;
-      transform: scale(1.2);
+      flex-wrap: wrap;
     }
     
     footer {
@@ -243,272 +314,167 @@
       border-top: 1px solid var(--border);
       font-size: 0.9rem;
       color: var(--text-secondary);
+      margin-top: 3rem;
     }
     
-    .skills-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-      gap: 1.5rem;
-      margin-top: 2rem;
-    }
-    
-    .skill-item {
-      background: var(--card-bg);
-      padding: 1.25rem;
-      border-radius: 0.5rem;
-      text-align: center;
-      transition: var(--transition);
-    }
-    
-    .skill-item:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-    }
-    
-    .skill-icon {
-      font-size: 2rem;
-      margin-bottom: 0.5rem;
-      color: var(--brand);
-    }
-    
+    /* Responsive Design */
     @media (max-width: 768px) {
+      .hero h1 {
+        font-size: 2.5rem;
+      }
+      
+      .hero p {
+        font-size: 1.1rem;
+      }
+      
+      nav {
+        gap: 1rem;
+      }
+      
       .section {
-        padding: 3rem 1.25rem;
+        padding: 3rem 0;
       }
       
       h2 {
         font-size: 1.8rem;
       }
       
-      .projects-carousel {
-        gap: 1rem;
-      }
-      
-      .project-card {
-        min-width: 85%;
-      }
-      
       .btn-outline {
         margin-left: 0;
         margin-top: 1rem;
+      }
+      
+      .contact-links {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .contact-links .btn {
+        width: 100%;
+        text-align: center;
+        justify-content: center;
       }
     }
   </style>
 </head>
 <body>
   <header>
-    <h1>Luis Paiva</h1>
-    <nav>
-      <a href="#about">About</a>
-      <a href="#work">My Work</a>
-      <a href="#skills">Skills</a>
-      <a href="#contact">Contact</a>
-    </nav>
+    <div class="container">
+      <h1>Luis Paiva</h1>
+      <nav>
+        <a href="#about">About</a>
+        <a href="#skills">Skills</a>
+        <a href="#projects">Projects</a>
+        <a href="#contact">Contact</a>
+      </nav>
+    </div>
   </header>
 
-  <section id="about" class="section">
-    <h2>Web & UI/UX Designer</h2>
-    <p>I design and build beautiful, functional websites with a focus on user experience and modern aesthetics. With 5+ years in the industry, I help brands translate their vision into compelling digital experiences.</p>
-    <div class="btn-group">
-      <a class="btn" href="#work">
-        View My Work
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-left: 8px;">
-          <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </a>
-      <a class="btn btn-outline" href="#contact">
-        Hire Me
-      </a>
-    </div>
-  </section>
+  <main>
+    <section class="hero">
+      <div class="container">
+        <h1>Web Designer & Python Developer</h1>
+        <p>Creating clean, functional, and immersive digital experiences with code and design</p>
+        <a href="#projects" class="btn">View My Work</a>
+      </div>
+    </section>
 
-  <section id="work" class="section">
-    <h2>Featured Projects</h2>
-    <p>Selected work showcasing my design process and development capabilities.</p>
-    
-    <div class="projects-container">
-      <div class="projects-carousel" id="projectsCarousel">
-        <div class="project-card">
-          <div class="project-image" style="background-image: url('https://images.unsplash.com/photo-1551650975-87deedd944c3?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80');"></div>
-          <div class="project-details">
-            <h3 class="project-title">E-Commerce Redesign</h3>
-            <p class="project-description">Complete redesign of fashion e-commerce platform with improved UX flows and modern aesthetic.</p>
-            <div class="project-tags">
-              <span class="tag">UI Design</span>
-              <span class="tag">UX Research</span>
-              <span class="tag">Figma</span>
-            </div>
-          </div>
-        </div>
-        
-        <div class="project-card">
-          <div class="project-image" style="background-image: url('https://images.unsplash.com/photo-1467232004584-a241de8bcf5d?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80');"></div>
-          <div class="project-details">
-            <h3 class="project-title">Portfolio Website</h3>
-            <p class="project-description">Minimalist portfolio for a photographer with custom image gallery and smooth animations.</p>
-            <div class="project-tags">
-              <span class="tag">Web Design</span>
-              <span class="tag">GSAP</span>
-              <span class="tag">Responsive</span>
-            </div>
-          </div>
-        </div>
-        
-        <div class="project-card">
-          <div class="project-image" style="background-image: url('https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80');"></div>
-          <div class="project-details">
-            <h3 class="project-title">SaaS Dashboard</h3>
-            <p class="project-description">Analytics dashboard for SaaS product with data visualization components and dark mode.</p>
-            <div class="project-tags">
-              <span class="tag">UI Kit</span>
-              <span class="tag">React</span>
-              <span class="tag">Chart.js</span>
-            </div>
-          </div>
-        </div>
-        
-        <div class="project-card">
-          <div class="project-image" style="background-image: url('https://images.unsplash.com/photo-1547658719-da2b51169166?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80');"></div>
-          <div class="project-details">
-            <h3 class="project-title">Mobile App UI</h3>
-            <p class="project-description">Fitness tracking app with custom illustrations and interactive workout planner.</p>
-            <div class="project-tags">
-              <span class="tag">Mobile UI</span>
-              <span class="tag">Illustration</span>
-              <span class="tag">Prototyping</span>
-            </div>
-          </div>
-        </div>
+    <section id="about" class="section">
+      <div class="container">
+        <h2>About Me</h2>
+        <p>Hello! I'm Luis Paiva, a passionate Web Designer and Python Developer focused on creating clean, functional websites and applications. I believe in the power of simplicity and user-centered design to create digital experiences that truly resonate with people.</p>
+        <p>My approach combines technical expertise with an eye for design, ensuring that every project I work on is not only functional but also visually appealing and intuitive to use.</p>
       </div>
-      
-      <div class="carousel-nav" id="carouselNav">
-        <div class="carousel-dot active"></div>
-        <div class="carousel-dot"></div>
-        <div class="carousel-dot"></div>
-        <div class="carousel-dot"></div>
-      </div>
-    </div>
-    
-    <a class="btn" href="#" style="display: inline-flex; align-items: center;">
-      View All Projects
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-left: 8px;">
-        <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </a>
-  </section>
+    </section>
 
-  <section id="skills" class="section">
-    <h2>Design & Development Skills</h2>
-    <p>I combine design thinking with technical expertise to create comprehensive digital solutions.</p>
-    
-    <div class="skills-grid">
-      <div class="skill-item">
-        <div class="skill-icon">🖌️</div>
-        <h3>UI Design</h3>
-        <p>Creating beautiful, functional interfaces</p>
+    <section id="skills" class="section">
+      <div class="container">
+        <h2>My Skills</h2>
+        <p>I specialize in these technologies and constantly strive to expand my knowledge and expertise.</p>
+        
+        <div class="skills-grid">
+          <div class="skill-item">
+            <div class="skill-icon">🐍</div>
+            <h3 class="skill-title">Python Development</h3>
+            <p class="skill-description">Building efficient back-end systems, automation scripts, and data processing applications with Python.</p>
+          </div>
+          
+          <div class="skill-item">
+            <div class="skill-icon">⚡</div>
+            <h3 class="skill-title">HTML & CSS</h3>
+            <p class="skill-description">Creating responsive, modern website layouts with clean, semantic HTML and CSS.</p>
+          </div>
+          
+          <div class="skill-item">
+            <div class="skill-icon">☕</div>
+            <h3 class="skill-title">Java Programming</h3>
+            <p class="skill-description">Developing applications and understanding object-oriented programming principles with Java.</p>
+          </div>
+        </div>
       </div>
-      
-      <div class="skill-item">
-        <div class="skill-icon">🧠</div>
-        <h3>UX Research</h3>
-        <p>User-centered design approach</p>
-      </div>
-      
-      <div class="skill-item">
-        <div class="skill-icon">📱</div>
-        <h3>Responsive Design</h3>
-        <p>Perfect on any device</p>
-      </div>
-      
-      <div class="skill-item">
-        <div class="skill-icon">🎨</div>
-        <h3>Figma/Sketch</h3>
-        <p>Wireframing & prototyping</p>
-      </div>
-      
-      <div class="skill-item">
-        <div class="skill-icon">💻</div>
-        <h3>Frontend Dev</h3>
-        <p>HTML, CSS, JavaScript</p>
-      </div>
-      
-      <div class="skill-item">
-        <div class="skill-icon">📊</div>
-        <h3>Web Animation</h3>
-        <p>Engaging micro-interactions</p>
-      </div>
-    </div>
-  </section>
+    </section>
 
-  <section id="contact" class="section">
-    <h2>Let's Work Together</h2>
-    <p>Have a project in mind or want to discuss potential opportunities? I'd love to hear from you.</p>
-    <a class="btn" href="mailto:luispaiva83@gmail.com">
-      Email Me
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-left: 8px;">
-        <path d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M22 6L12 13L2 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </a>
-  </section>
+    <section id="projects" class="section">
+      <div class="container">
+        <h2>Featured Project</h2>
+        <p>Here's my hand-tracking drawing application that I've developed:</p>
+        
+        <div class="project-showcase">
+          <div class="project-image">
+            <div class="project-image-inner">
+              ✨
+              <span>AirDraw Project Preview</span>
+            </div>
+          </div>
+          <div class="project-content">
+            <h3>AirDraw - Hand Tracking Drawing App</h3>
+            <p class="project-description">An experimental web application that uses computer vision to track hand movements, allowing users to draw in the air and see their gestures translated onto a digital canvas in real-time.</p>
+            <a href="airdraw.html" class="btn">Launch AirDraw App</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="contact" class="section">
+      <div class="container">
+        <h2>Let's Connect</h2>
+        <p>Interested in working together or have a project idea? I'm always open to discussing new opportunities and creative ideas.</p>
+        
+        <div class="contact-links">
+          <a class="btn" href="mailto:luispaiva83@gmail.com">
+            Email Me
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-left: 8px;">
+              <path d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M22 6L12 13L2 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
 
   <footer>
-    <p>© <span id="year"></span> Luis Paiva. All rights reserved.</p>
+    <div class="container">
+      <p>© <span id="year"></span> Luis Paiva. All rights reserved.</p>
+    </div>
   </footer>
 
   <script>
+    // Set current year in footer
     document.getElementById('year').textContent = new Date().getFullYear();
     
-    // Smooth scrolling for anchor links
+    // Smooth scrolling for navigation links
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
       anchor.addEventListener('click', function (e) {
         e.preventDefault();
-        document.querySelector(this.getAttribute('href')).scrollIntoView({
-          behavior: 'smooth'
-        });
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
       });
-    });
-    
-    // Projects carousel functionality
-    const carousel = document.getElementById('projectsCarousel');
-    const dots = document.querySelectorAll('.carousel-dot');
-    let currentIndex = 0;
-    
-    // Update dot indicators
-    function updateDots(index) {
-      dots.forEach((dot, i) => {
-        dot.classList.toggle('active', i === index);
-      });
-    }
-    
-    // Scroll to project
-    function scrollToProject(index) {
-      const projectWidth = document.querySelector('.project-card').offsetWidth + 32; // card width + gap
-      carousel.scrollTo({
-        left: index * projectWidth,
-        behavior: 'smooth'
-      });
-      currentIndex = index;
-      updateDots(currentIndex);
-    }
-    
-    // Dot click events
-    dots.forEach((dot, index) => {
-      dot.addEventListener('click', () => scrollToProject(index));
-    });
-    
-    // Auto-advance carousel (optional)
-    setInterval(() => {
-      currentIndex = (currentIndex + 1) % dots.length;
-      scrollToProject(currentIndex);
-    }, 5000);
-    
-    // Detect scroll to update dots
-    carousel.addEventListener('scroll', () => {
-      const projectWidth = document.querySelector('.project-card').offsetWidth + 32;
-      const scrollPos = carousel.scrollLeft;
-      currentIndex = Math.round(scrollPos / projectWidth);
-      updateDots(currentIndex);
     });
   </script>
 </body>
