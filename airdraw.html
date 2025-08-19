@@ -3,16 +3,25 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Magic Air Draw</title>
+  <title>Magic Air Draw - Kids Edition</title>
   <style>
     body {
       margin: 0;
       overflow: hidden;
-      font-family: sans-serif;
+      font-family: 'Comic Sans MS', cursive, sans-serif;
       background: white;
     }
     video { display: none; }
-    canvas { position: absolute; top: 0; left: 0; }
+    canvas { 
+      position: absolute; 
+      top: 0; 
+      left: 0; 
+    }
+    #drawingCanvas {
+      border: 4px solid #4b9fff;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+    }
     #controls {
       position: fixed;
       top: 10px;
@@ -21,21 +30,126 @@
       display: flex;
       gap: 10px;
       z-index: 10;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 10px;
+      border-radius: 20px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     }
     button, select {
-      padding: 8px 12px;
-      font-size: 14px;
-      border-radius: 8px;
+      padding: 10px 15px;
+      font-size: 16px;
+      border-radius: 12px;
       border: none;
       cursor: pointer;
+      font-family: 'Comic Sans MS', cursive, sans-serif;
     }
     #clearBtn { background: #ff6b6b; color: white; }
     #eraserBtn { background: #ffd93d; }
     #bgBtn { background: #6bcB77; color: white; }
+    #shapesBtn { background: #9b5fe0; color: white; }
+    #tutorialBtn { background: #ff8c00; color: white; }
+    
+    #cursor {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: rgba(255, 0, 0, 0.5);
+      pointer-events: none;
+      z-index: 100;
+      display: none;
+    }
+    
+    #tutorial {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 25px;
+      border-radius: 20px;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+      width: 80%;
+      max-width: 600px;
+      display: none;
+    }
+    
+    #tutorial h2 {
+      color: #4b9fff;
+      text-align: center;
+      margin-top: 0;
+    }
+    
+    .tutorial-step {
+      margin: 20px 0;
+      display: flex;
+      align-items: center;
+    }
+    
+    .tutorial-step img {
+      width: 80px;
+      height: 80px;
+      margin-right: 20px;
+      border: 2px solid #4b9fff;
+      border-radius: 10px;
+    }
+    
+    #closeTutorial {
+      display: block;
+      margin: 20px auto 0;
+      background: #4b9fff;
+      color: white;
+    }
+    
+    #shapesPanel {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 15px;
+      border-radius: 20px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      z-index: 10;
+      display: none;
+    }
+    
+    .shape-btn {
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      border-radius: 10px;
+      background: #f0f0f0;
+      border: 2px solid #ccc;
+      cursor: pointer;
+    }
+    
+    .shape-btn:hover {
+      background: #e0e0e0;
+    }
+    
+    #status {
+      position: fixed;
+      bottom: 10px;
+      right: 10px;
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 8px 15px;
+      border-radius: 20px;
+      font-size: 14px;
+      z-index: 10;
+    }
   </style>
 </head>
 <body>
   <div id="controls">
+    <button id="tutorialBtn">Show Tutorial</button>
     <button id="clearBtn">Clear</button>
     <button id="eraserBtn">Eraser Off</button>
     <select id="brushSize">
@@ -44,10 +158,49 @@
       <option value="10">Large Brush</option>
     </select>
     <button id="bgBtn">Background: White</button>
+    <button id="shapesBtn">Shapes</button>
   </div>
+
+  <div id="shapesPanel">
+    <div class="shape-btn" data-shape="circle">○</div>
+    <div class="shape-btn" data-shape="square">□</div>
+    <div class="shape-btn" data-shape="triangle">△</div>
+    <div class="shape-btn" data-shape="heart">❤️</div>
+    <div class="shape-btn" data-shape="star">⭐</div>
+  </div>
+
+  <div id="tutorial">
+    <h2>How to Draw in the Air ✨</h2>
+    
+    <div class="tutorial-step">
+      <div style="width: 80px; height: 80px; margin-right: 20px; display: flex; align-items: center; justify-content: center; font-size: 40px;">👆</div>
+      <div>Show your hand to the camera. Make sure it can see your fingers!</div>
+    </div>
+    
+    <div class="tutorial-step">
+      <div style="width: 80px; height: 80px; margin-right: 20px; display: flex; align-items: center; justify-content: center; font-size: 40px;">🤏</div>
+      <div>Pinch your index finger and thumb together to start drawing</div>
+    </div>
+    
+    <div class="tutorial-step">
+      <div style="width: 80px; height: 80px; margin-right: 20px; display: flex; align-items: center; justify-content: center; font-size: 40px;">👋</div>
+      <div>Move your hand to draw. Release the pinch to stop drawing</div>
+    </div>
+    
+    <div class="tutorial-step">
+      <div style="width: 80px; height: 80px; margin-right: 20px; display: flex; align-items: center; justify-content: center; font-size: 40px;">🧽</div>
+      <div>Turn on the eraser to remove parts of your drawing</div>
+    </div>
+    
+    <button id="closeTutorial">Got it!</button>
+  </div>
+
+  <div id="cursor"></div>
+  <div id="status">Looking for hands...</div>
 
   <video id="video" playsinline></video>
   <canvas id="output"></canvas>
+  <canvas id="drawingCanvas"></canvas>
 
   <!-- MediaPipe Hands -->
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
@@ -57,20 +210,49 @@
   <script>
     const videoElement = document.getElementById('video');
     const canvasElement = document.getElementById('output');
-    const ctx = canvasElement.getContext('2d');
+    const drawingCanvas = document.getElementById('drawingCanvas');
+    const ctx = drawingCanvas.getContext('2d');
+    const cursor = document.getElementById('cursor');
+    const statusDiv = document.getElementById('status');
 
     let points = [];
     let isEraser = false;
     let brushSize = 6;
     let bgMode = 'white';
     let hue = 0;
+    let currentShape = null;
+    let shapeStartPoint = null;
+
+    // Set up drawing boundaries (80% of window)
+    const drawingMargin = 0.1; // 10% margin on each side
+    let drawingWidth, drawingHeight, drawingX, drawingY;
+
+    function setupDrawingArea() {
+      drawingWidth = window.innerWidth * 0.8;
+      drawingHeight = window.innerHeight * 0.8;
+      drawingX = window.innerWidth * 0.1;
+      drawingY = window.innerHeight * 0.1;
+      
+      drawingCanvas.width = drawingWidth;
+      drawingCanvas.height = drawingHeight;
+      drawingCanvas.style.left = `${drawingX}px`;
+      drawingCanvas.style.top = `${drawingY}px`;
+    }
+
+    window.addEventListener('resize', () => {
+      resizeCanvas();
+      setupDrawingArea();
+      drawBackground();
+      redrawStrokes();
+    });
+    
+    setupDrawingArea();
+    resizeCanvas();
 
     function resizeCanvas() {
       canvasElement.width = window.innerWidth;
       canvasElement.height = window.innerHeight;
     }
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas();
 
     const hands = new Hands({
       locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
@@ -96,90 +278,292 @@
     function drawBackground() {
       if (bgMode === 'white') {
         ctx.fillStyle = 'white';
-        ctx.fillRect(0, 0, canvasElement.width, canvasElement.height);
+        ctx.fillRect(0, 0, drawingCanvas.width, drawingCanvas.height);
       } else {
-        ctx.fillStyle = 'black';
-        ctx.fillRect(0, 0, canvasElement.width, canvasElement.height);
+        // Gradient for space background
+        const gradient = ctx.createLinearGradient(0, 0, 0, drawingCanvas.height);
+        gradient.addColorStop(0, "#000033");
+        gradient.addColorStop(1, "#000066");
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, drawingCanvas.width, drawingCanvas.height);
+        
         // stars
+        ctx.fillStyle = 'white';
         for (let i = 0; i < 100; i++) {
-          ctx.fillStyle = 'white';
-          ctx.fillRect(Math.random()*canvasElement.width, Math.random()*canvasElement.height, 2, 2);
+          const size = Math.random() * 2 + 1;
+          ctx.beginPath();
+          ctx.arc(
+            Math.random() * drawingCanvas.width, 
+            Math.random() * drawingCanvas.height, 
+            size, 0, Math.PI * 2
+          );
+          ctx.fill();
         }
       }
+    }
+
+    function redrawStrokes() {
+      drawBackground();
+      
+      for (let stroke of points) {
+        ctx.strokeStyle = stroke.color;
+        ctx.lineWidth = stroke.size;
+        ctx.beginPath();
+        for (let i = 1; i < stroke.path.length; i++) {
+          ctx.moveTo(stroke.path[i-1].x, stroke.path[i-1].y);
+          ctx.lineTo(stroke.path[i].x, stroke.path[i].y);
+        }
+        ctx.stroke();
+      }
+    }
+
+    function drawShape(shape, startX, startY, endX, endY) {
+      const width = endX - startX;
+      const height = endY - startY;
+      
+      ctx.strokeStyle = `hsl(${hue},100%,50%)`;
+      ctx.lineWidth = brushSize;
+      ctx.beginPath();
+      
+      switch(shape) {
+        case 'circle':
+          const radius = Math.sqrt(width*width + height*height) / 2;
+          ctx.arc(startX + width/2, startY + height/2, radius, 0, Math.PI * 2);
+          break;
+        case 'square':
+          ctx.rect(startX, startY, width, height);
+          break;
+        case 'triangle':
+          ctx.moveTo(startX + width/2, startY);
+          ctx.lineTo(startX, startY + height);
+          ctx.lineTo(startX + width, startY + height);
+          ctx.closePath();
+          break;
+        case 'heart':
+          drawHeart(ctx, startX, startY, endX, endY);
+          break;
+        case 'star':
+          drawStar(ctx, startX + width/2, startY + height/2, 5, width/2, width/4);
+          break;
+      }
+      
+      ctx.stroke();
+    }
+
+    function drawHeart(ctx, x, y, width, height) {
+      const heartWidth = width;
+      const heartHeight = height;
+      const centerX = x + heartWidth / 2;
+      const centerY = y + heartHeight / 2;
+      
+      ctx.moveTo(centerX, centerY);
+      ctx.bezierCurveTo(
+        centerX, centerY - heartHeight / 2,
+        centerX - heartWidth, centerY - heartHeight / 2,
+        centerX - heartWidth, centerY
+      );
+      ctx.bezierCurveTo(
+        centerX - heartWidth, centerY + heartHeight / 2,
+        centerX, centerY + heartHeight,
+        centerX, centerY + heartHeight
+      );
+      ctx.bezierCurveTo(
+        centerX, centerY + heartHeight,
+        centerX + heartWidth, centerY + heartHeight / 2,
+        centerX + heartWidth, centerY
+      );
+      ctx.bezierCurveTo(
+        centerX + heartWidth, centerY - heartHeight / 2,
+        centerX, centerY - heartHeight / 2,
+        centerX, centerY
+      );
+    }
+
+    function drawStar(ctx, cx, cy, spikes, outerRadius, innerRadius) {
+      let rot = Math.PI / 2 * 3;
+      let x = cx;
+      let y = cy;
+      let step = Math.PI / spikes;
+
+      ctx.moveTo(cx, cy - outerRadius);
+      for (let i = 0; i < spikes; i++) {
+        x = cx + Math.cos(rot) * outerRadius;
+        y = cy + Math.sin(rot) * outerRadius;
+        ctx.lineTo(x, y);
+        rot += step;
+
+        x = cx + Math.cos(rot) * innerRadius;
+        y = cy + Math.sin(rot) * innerRadius;
+        ctx.lineTo(x, y);
+        rot += step;
+      }
+      ctx.lineTo(cx, cy - outerRadius);
+      ctx.closePath();
     }
 
     function onResults(results) {
-  hue = (hue + 1) % 360;
-
-  // Mirror effect
-  ctx.save();
-  ctx.scale(-1, 1);
-  ctx.translate(-canvasElement.width, 0);
-
-  drawBackground();
-
-  // Draw stored lines (mirrored)
-  for (let stroke of points) {
-    ctx.strokeStyle = stroke.color;
-    ctx.lineWidth = stroke.size;
-    ctx.beginPath();
-    for (let i = 1; i < stroke.path.length; i++) {
-      ctx.moveTo(canvasElement.width - stroke.path[i-1].x, stroke.path[i-1].y);
-      ctx.lineTo(canvasElement.width - stroke.path[i].x, stroke.path[i].y);
-    }
-    ctx.stroke();
-  }
-
-  ctx.restore();
-
-  if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
-    const landmarks = results.multiHandLandmarks[0];
-    const indexTip = landmarks[8];
-    const thumbTip = landmarks[4];
-    const pinchDist = distance(indexTip, thumbTip);
-
-    // Flip the X coordinate so movement matches
-    const x = (1 - indexTip.x) * canvasElement.width;
-    const y = indexTip.y * canvasElement.height;
-
-    const pinch = pinchDist < 0.05;
-    if (pinch) {
-      if (isEraser) {
-        points = points.map(stroke => ({
-          ...stroke,
-          path: stroke.path.filter(p => Math.hypot(p.x - x, p.y - y) > brushSize*2)
-        }));
-      } else {
-        if (points.length === 0 || points[points.length-1].done) {
-          points.push({ 
-            color: `hsl(${hue},100%,50%)`, 
-            size: brushSize, 
-            path: [], 
-            done: false 
-          });
+      hue = (hue + 1) % 360;
+      
+      // Clear the output canvas
+      const outputCtx = canvasElement.getContext('2d');
+      outputCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+      
+      // Draw the drawing area border
+      outputCtx.strokeStyle = '#4b9fff';
+      outputCtx.lineWidth = 4;
+      outputCtx.strokeRect(drawingX, drawingY, drawingWidth, drawingHeight);
+      
+      // Draw "Draw Here!" text
+      outputCtx.font = '24px Comic Sans MS';
+      outputCtx.fillStyle = '#4b9fff';
+      outputCtx.textAlign = 'center';
+      outputCtx.fillText('Draw Here!', canvasElement.width / 2, drawingY - 15);
+      
+      if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+        statusDiv.textContent = "Hand detected! Pinch to draw";
+        statusDiv.style.background = "rgba(76, 175, 80, 0.7)";
+        
+        const landmarks = results.multiHandLandmarks[0];
+        const indexTip = landmarks[8];
+        const thumbTip = landmarks[4];
+        const pinchDist = distance(indexTip, thumbTip);
+        
+        // Convert normalized coordinates to screen coordinates
+        const x = indexTip.x * canvasElement.width;
+        const y = indexTip.y * canvasElement.height;
+        
+        // Show cursor only if inside drawing area
+        if (x > drawingX && x < drawingX + drawingWidth && 
+            y > drawingY && y < drawingY + drawingHeight) {
+          cursor.style.display = 'block';
+          cursor.style.left = `${x - 10}px`;
+          cursor.style.top = `${y - 10}px`;
+          cursor.style.background = isEraser ? 'rgba(255, 0, 0, 0.5)' : `hsl(${hue},100%,50%)`;
+          cursor.style.width = `${brushSize * 3}px`;
+          cursor.style.height = `${brushSize * 3}px`;
+        } else {
+          cursor.style.display = 'none';
         }
-        points[points.length-1].path.push({x, y});
-      }
-    } else {
-      if (points.length > 0 && !points[points.length-1].done) {
-        points[points.length-1].done = true;
+        
+        const pinch = pinchDist < 0.05;
+        
+        if (pinch) {
+          // Convert to drawing canvas coordinates
+          const drawX = x - drawingX;
+          const drawY = y - drawingY;
+          
+          // Only draw if inside the drawing area
+          if (drawX > 0 && drawX < drawingWidth && drawY > 0 && drawY < drawingHeight) {
+            if (isEraser) {
+              // Erase near the cursor
+              points = points.map(stroke => ({
+                ...stroke,
+                path: stroke.path.filter(p => Math.hypot(p.x - drawX, p.y - drawY) > brushSize*2)
+              }));
+              redrawStrokes();
+            } else if (currentShape) {
+              if (!shapeStartPoint) {
+                shapeStartPoint = {x: drawX, y: drawY};
+              } else {
+                redrawStrokes();
+                drawShape(currentShape, shapeStartPoint.x, shapeStartPoint.y, drawX, drawY);
+              }
+            } else {
+              if (points.length === 0 || points[points.length-1].done) {
+                points.push({ 
+                  color: `hsl(${hue},100%,50%)`, 
+                  size: brushSize, 
+                  path: [], 
+                  done: false 
+                });
+              }
+              points[points.length-1].path.push({x: drawX, y: drawY});
+              redrawStrokes();
+            }
+          }
+        } else {
+          if (points.length > 0 && !points[points.length-1].done && !currentShape) {
+            points[points.length-1].done = true;
+          }
+          
+          if (shapeStartPoint && currentShape) {
+            // Add the shape to points for persistence
+            points.push({ 
+              color: `hsl(${hue},100%,50%)`, 
+              size: brushSize, 
+              path: [], 
+              done: true,
+              isShape: true,
+              shape: currentShape,
+              startX: shapeStartPoint.x,
+              startY: shapeStartPoint.y,
+              endX: shapeStartPoint.x, // Will be updated on next pinch
+              endY: shapeStartPoint.y
+            });
+            shapeStartPoint = null;
+          }
+        }
+        
+        // Draw hand landmarks
+        drawConnectors(outputCtx, landmarks, HAND_CONNECTIONS, 
+                      {color: '#FF0000', lineWidth: 1});
+        drawLandmarks(outputCtx, landmarks, {color: '#00FF00', lineWidth: 1, radius: 3});
+      } else {
+        statusDiv.textContent = "Looking for hands...";
+        statusDiv.style.background = "rgba(0, 0, 0, 0.7)";
+        cursor.style.display = 'none';
       }
     }
-  }
-}
 
-    document.getElementById('clearBtn').onclick = () => points = [];
+    // UI Event Listeners
+    document.getElementById('clearBtn').onclick = () => {
+      points = [];
+      redrawStrokes();
+    };
+    
     document.getElementById('eraserBtn').onclick = (e) => {
       isEraser = !isEraser;
       e.target.textContent = isEraser ? 'Eraser On' : 'Eraser Off';
+      currentShape = null;
+      document.getElementById('shapesPanel').style.display = 'none';
     };
+    
     document.getElementById('brushSize').onchange = (e) => {
       brushSize = parseInt(e.target.value);
     };
+    
     document.getElementById('bgBtn').onclick = (e) => {
       bgMode = bgMode === 'white' ? 'space' : 'white';
       e.target.textContent = bgMode === 'white' ? 'Background: White' : 'Background: Space';
+      redrawStrokes();
     };
+    
+    document.getElementById('tutorialBtn').onclick = () => {
+      document.getElementById('tutorial').style.display = 'block';
+    };
+    
+    document.getElementById('closeTutorial').onclick = () => {
+      document.getElementById('tutorial').style.display = 'none';
+    };
+    
+    document.getElementById('shapesBtn').onclick = () => {
+      const shapesPanel = document.getElementById('shapesPanel');
+      shapesPanel.style.display = shapesPanel.style.display === 'none' ? 'flex' : 'none';
+      isEraser = false;
+      document.getElementById('eraserBtn').textContent = 'Eraser Off';
+    };
+    
+    // Shape buttons
+    document.querySelectorAll('.shape-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        currentShape = btn.dataset.shape;
+        document.getElementById('shapesPanel').style.display = 'none';
+        statusDiv.textContent = `Selected: ${currentShape}. Pinch to set start point`;
+      });
+    });
+
+    // Initialize
+    drawBackground();
   </script>
 </body>
 </html>
