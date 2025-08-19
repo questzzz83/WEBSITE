@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Heist</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #0a0f1e 0%, #1e0514 100%);
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            color: #e0e0ff;
+        }
+        
+        #game-container {
+            position: relative;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+        }
+        
+        #game-canvas {
+            display: block;
+            background-color: #0a0f1e;
+        }
+        
+        #ui-overlay {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 10px;
+            background-color: rgba(0, 0, 30, 0.7);
+            border-radius: 5px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+        }
+        
+        #reality-indicator {
+            font-weight: bold;
+            margin-bottom: 8px;
+            text-shadow: 0 0 5px rgba(0, 255, 255, 0.8);
+        }
+        
+        #instructions {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            background-color: rgba(0, 0, 30, 0.7);
+            padding: 10px 20px;
+            border-radius: 5px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+        }
+        
+        .primary-reality {
+            color: #00aaff;
+        }
+        
+        .echo-reality {
+            color: #ff00aa;
+        }
+        
+        .key {
+            display: inline-block;
+            padding: 2px 6px;
+            background-color: rgba(0, 255, 255, 0.2);
+            border-radius: 4px;
+            border: 1px solid rgba(0, 255, 255, 0.5);
+            margin: 0 2px;
+        }
+        
+        #title-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(5, 10, 20, 0.9);
+            z-index: 10;
+        }
+        
+        h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+            color: #00ffff;
+        }
+        
+        h2 {
+            font-size: 24px;
+            margin-bottom: 40px;
+            color: #ff00aa;
+        }
+        
+        #start-button {
+            padding: 12px 30px;
+            font-size: 20px;
+            background: linear-gradient(to right, #00aaff, #ff00aa);
+            border: none;
+            border-radius: 30px;
+            color: white;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 30px;
+            transition: all 0.3s ease;
+        }
+        
+        #start-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
+        }
+        
+        #game-over, #level-complete {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(5, 10, 20, 0.9);
+            z-index: 10;
+        }
+        
+        #level-complete {
+            color: #00ffaa;
+        }
+        
+        #game-over {
+            color: #ff3366;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="game-canvas" width="800" height="600"></canvas>
+        
+        <div id="ui-overlay">
+            <div id="reality-indicator" class="primary-reality">PRIMARY REALITY</div>
+            <div id="data-counter">Data: 0/3</div>
+        </div>
+        
+        <div id="instructions">
+            <span class="key">←</span> <span class="key">→</span> Move | 
+            <span class="key">Space</span> Jump | 
+            <span class="key">Q</span> Shift Reality
+        </div>
+        
+        <div id="title-screen">
+            <h1>QUANTUM HEIST</h1>
+            <h2>A Cyberpunk Puzzle-Platformer</h2>
+            <button id="start-button">Start Mission</button>
+        </div>
+        
+        <div id="game-over">
+            <h1>MISSION FAILED</h1>
+            <h2>You've been detected</h2>
+            <button id="restart-button">Try Again</button>
+        </div>
+        
+        <div id="level-complete">
+            <h1>LEVEL COMPLETE</h1>
+            <h2>Data secured: <span id="final-data">0</span>/3</h2>
+            <button id="next-level-button">Next Level</button>
+        </div>
+    </div>
+
+    <script>
+        // Game constants and variables
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+        const realityIndicator = document.getElementById('reality-indicator');
+        const dataCounter = document.getElementById('data-counter');
+        const titleScreen = document.getElementById('title-screen');
+        const gameOverScreen = document.getElementById('game-over');
+        const levelCompleteScreen = document.getElementById('level-complete');
+        const startButton = document.getElementById('start-button');
+        const restartButton = document.getElementById('restart-button');
+        const nextLevelButton = document.getElementById('next-level-button');
+        const finalData = document.getElementById('final-data');
+
+        // Game state
+        let gameState = 'title'; // title, playing, gameOver, levelComplete
+        let reality = 'primary'; // primary or echo
+        let shiftCooldown = 0;
+        let shiftEffect = 0;
+        let collectedData = 0;
+        let totalData = 3;
+
+        // Player object
+        const player = {
+            x: 50,
+            y: 300,
+            width: 30,
+            height: 50,
+            velX: 0,
+            velY: 0,
+            speed: 5,
+            jumpPower: -15,
+            gravity: 0.8,
+            onGround: false,
+            color: '#00ffc8'
+        };
+
+        // Platforms
+        const platforms = [
+            // Ground
+            { x: 0, y: 550, width: 800, height: 50, reality: 'both' },
+            // Primary reality platforms
+            { x: 200, y: 450, width: 100, height: 20, reality: 'primary' },
+            { x: 400, y: 350, width: 100, height: 20, reality: 'primary' },
+            { x: 600, y: 250, width: 100, height: 20, reality: 'primary' },
+            // Echo reality platforms
+            { x: 300, y: 350, width: 100, height: 20, reality: 'echo' },
+            { x: 500, y: 250, width: 100, height: 20, reality: 'echo' },
+            // Floating platforms (both realities)
+            { x: 150, y: 200, width: 70, height: 20, reality: 'both' },
+            { x: 350, y: 150, width: 70, height: 20, reality: 'both' }
+        ];
+
+        // Guards
+        const guards = [
+            { x: 300, y: 500, width: 30, height: 50, patrolDistance: 100, direction: 1, reality: 'primary' },
+            { x: 600, y: 500, width: 30, height: 50, patrolDistance: 100, direction: 1, reality: 'echo' }
+        ];
+
+        // Data packets
+        const dataPackets = [
+            { x: 250, y: 400, width: 20, height: 20, reality: 'primary', collected: false },
+            { x: 550, y: 200, width: 20, height: 20, reality: 'echo', collected: false },
+            { x: 700, y: 400, width: 20, height: 20, reality: 'both', collected: false }
+        ];
+
+        // Lasers
+        const lasers = [
+            { x: 200, y: 300, length: 100, horizontal: true, reality: 'primary' },
+            { x: 500, y: 200, length: 100, horizontal: false, reality: 'echo' }
+        ];
+
+        // Exit
+        const exit = {
+            x: 650,
+            y: 450,
+            width: 50,
+            height: 100
+        };
+
+        // Input handling
+        const keys = {};
+
+        window.addEventListener('keydown', function(e) {
+            keys[e.key] = true;
+            
+            if (gameState === 'playing') {
+                if (e.key === ' ' && player.onGround) {
+                    player.velY = player.jumpPower;
+                }
+                
+                if (e.key === 'q' && shiftCooldown <= 0) {
+                    reality = reality === 'primary' ? 'echo' : 'primary';
+                    shiftCooldown = 10;
+                    shiftEffect = 15;
+                    
+                    // Update reality indicator
+                    realityIndicator.textContent = reality === 'primary' ? 'PRIMARY REALITY' : 'QUANTUM ECHO';
+                    realityIndicator.className = reality === 'primary' ? 'primary-reality' : 'echo-reality';
+                }
+            }
+        });
+
+        window.addEventListener('keyup', function(e) {
+            keys[e.key] = false;
+        });
+
+        // Button event listeners
+        startButton.addEventListener('click', startGame);
+        restartButton.addEventListener('click', restartGame);
+        nextLevelButton.addEventListener('click', nextLevel);
+
+        function startGame() {
+            gameState = 'playing';
+            titleScreen.style.display = 'none';
+        }
+
+        function restartGame() {
+            gameState = 'playing';
+            gameOverScreen.style.display = 'none';
+            
+            // Reset player position
+            player.x = 50;
+            player.y = 300;
+            player.velX = 0;
+            player.velY = 0;
+            
+            // Reset data collection
+            collectedData = 0;
+            dataCounter.textContent = `Data: ${collectedData}/${totalData}`;
+            dataPackets.forEach(packet => packet.collected = false);
+            
+            // Reset reality
+            reality = 'primary';
+            realityIndicator.textContent = 'PRIMARY REALITY';
+            realityIndicator.className = 'primary-reality';
+        }
+
+        function nextLevel() {
+            gameState = 'playing';
+            levelCompleteScreen.style.display = 'none';
+            
+            // For a full game, you would load a new level here
+            // For this demo, we'll just restart
+            restartGame();
+        }
+
+        function checkCollision(obj1, obj2) {
+            return obj1.x < obj2.x + obj2.width &&
+                   obj1.x + obj1.width > obj2.x &&
+                   obj1.y < obj2.y + obj2.height &&
+                   obj1.y + obj1.height > obj2.y;
+        }
+
+        function update() {
+            if (gameState !== 'playing') return;
+            
+            // Apply gravity
+            player.velY += player.gravity;
+            
+            // Handle movement
+            if (keys['ArrowLeft']) {
+                player.velX = -player.speed;
+            } else if (keys['ArrowRight']) {
+                player.velX = player.speed;
+            } else {
+                player.velX = 0;
+            }
+            
+            // Update player position
+            player.x += player.velX;
+            player.y += player.velY;
+            
+            // Check for collisions with platforms
+            player.onGround = false;
+            const visiblePlatforms = platforms.filter(p => p.reality === 'both' || p.reality === reality);
+            
+            for (const platform of visiblePlatforms) {
+                if (checkCollision(player, platform)) {
+                    // Bottom collision (landing)
+                    if (player.velY > 0 && player.y + player.height > platform.y && player.y < platform.y) {
+                        player.y = platform.y - player.height;
+                        player.velY = 0;
+                        player.onGround = true;
+                    }
+                    // Top collision (hitting head)
+                    else if (player.velY < 0 && player.y < platform.y + platform.height && player.y + player.height > platform.y + platform.height) {
+                        player.y = platform.y + platform.height;
+                        player.velY = 0;
+                    }
+                    // Right collision
+                    else if (player.velX > 0 && player.x + player.width > platform.x && player.x < platform.x) {
+                        player.x = platform.x - player.width;
+                    }
+                    // Left collision
+                    else if (player.velX < 0 && player.x < platform.x + platform.width && player.x + player.width > platform.x + platform.width) {
+                        player.x = platform.x + platform.width;
+                    }
+                }
+            }
+            
+            // Screen boundaries
+            if (player.x < 0) player.x = 0;
+            if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+            if (player.y < 0) {
+                player.y = 0;
+                player.velY = 0;
+            }
+            if (player.y + player.height > canvas.height) {
+                player.y = canvas.height - player.height;
+                player.velY = 0;
+                player.onGround = true;
+            }
+            
+            // Update guards
+            for (const guard of guards) {
+                if (guard.reality === reality) {
+                    guard.x += 2 * guard.direction;
+                    
+                    if (guard.x > guard.patrolDistance + 300 || guard.x < 300 - guard.patrolDistance) {
+                        guard.direction *= -1;
+                    }
+                    
+                    // Check for collision with player
+                    if (checkCollision(player, guard)) {
+                        gameState = 'gameOver';
+                        gameOverScreen.style.display = 'flex';
+                    }
+                }
+            }
+            
+            // Check for data collection
+            for (const data of dataPackets) {
+                if (!data.collected && (data.reality === 'both' || data.reality === reality)) {
+                    if (checkCollision(player, data)) {
+                        data.collected = true;
+                        collectedData++;
+                        dataCounter.textContent = `Data: ${collectedData}/${totalData}`;
+                    }
+                }
+            }
+            
+            // Check for laser collision
+            for (const laser of lasers) {
+                if (laser.reality === reality) {
+                    let laserCollision = false;
+                    
+                    if (laser.horizontal) {
+                        laserCollision = (player.y < laser.y && player.y + player.height > laser.y) &&
+                                         (player.x < laser.x + laser.length && player.x + player.width > laser.x);
+                    } else {
+                        laserCollision = (player.x < laser.x && player.x + player.width > laser.x) &&
+                                         (player.y < laser.y + laser.length && player.y + player.height > laser.y);
+                    }
+                    
+                    if (laserCollision) {
+                        gameState = 'gameOver';
+                        gameOverScreen.style.display = 'flex';
+                    }
+                }
+            }
+            
+            // Check for exit
+            if (checkCollision(player, exit)) {
+                gameState = 'levelComplete';
+                levelCompleteScreen.style.display = 'flex';
+                finalData.textContent = collectedData;
+            }
+            
+            // Update shift cooldown
+            if (shiftCooldown > 0) shiftCooldown--;
+            if (shiftEffect > 0) shiftEffect--;
+        }
+
+        function draw() {
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw background based on current reality
+            if (reality === 'primary') {
+                ctx.fillStyle = '#0a0f1e';
+            } else {
+                ctx.fillStyle = '#1e0514';
+            }
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw grid lines for high-tech feel
+            ctx.strokeStyle = reality === 'primary' ? 'rgba(0, 170, 255, 0.1)' : 'rgba(255, 0, 170, 0.1)';
+            ctx.lineWidth = 1;
+            
+            for (let x = 0; x < canvas.width; x += 50) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            
+            for (let y = 0; y < canvas.height; y += 50) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+            
+            // Draw exit
+            ctx.fillStyle = '#00ff00';
+            ctx.fillRect(exit.x, exit.y, exit.width, exit.height);
+            
+            // Draw platforms
+            for (const platform of platforms) {
+                if (platform.reality === 'both' || platform.reality === reality) {
+                    ctx.fillStyle = platform.reality === 'primary' ? '#3264c8' : '#c83296';
+                    ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
+                    
+                    // Platform details
+                    ctx.strokeStyle = platform.reality === 'primary' ? '#00aaff' : '#ff00aa';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(platform.x, platform.y, platform.width, platform.height);
+                    
+                    // Platform tech lines
+                    ctx.beginPath();
+                    ctx.moveTo(platform.x + 10, platform.y + platform.height/2);
+                    ctx.lineTo(platform.x + platform.width - 10, platform.y + platform.height/2);
+                    ctx.stroke();
+                }
+            }
+            
+            // Draw lasers
+            for (const laser of lasers) {
+                if (laser.reality === reality) {
+                    ctx.strokeStyle = '#ff0000';
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    
+                    if (laser.horizontal) {
+                        ctx.moveTo(laser.x, laser.y);
+                        ctx.lineTo(laser.x + laser.length, laser.y);
+                    } else {
+                        ctx.moveTo(laser.x, laser.y);
+                        ctx.lineTo(laser.x, laser.y + laser.length);
+                    }
+                    
+                    ctx.stroke();
+                    
+                    // Laser glow
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = '#ff0000';
+                    ctx.stroke();
+                    ctx.shadowBlur = 0;
+                }
+            }
+            
+            // Draw guards
+            for (const guard of guards) {
+                if (guard.reality === reality) {
+                    ctx.fillStyle = '#ff3232';
+                    ctx.fillRect(guard.x, guard.y, guard.width, guard.height);
+                    
+                    // Guard vision cone
+                    ctx.fillStyle = 'rgba(255, 50, 50, 0.2)';
+                    ctx.beginPath();
+                    ctx.moveTo(guard.x + guard.width/2, guard.y);
+                    
+                    if (guard.direction > 0) {
+                        ctx.lineTo(guard.x + guard.width + 100, guard.y - 50);
+                        ctx.lineTo(guard.x + guard.width + 100, guard.y + guard.height + 50);
+                    } else {
+                        ctx.lineTo(guard.x - 100, guard.y - 50);
+                        ctx.lineTo(guard.x - 100, guard.y + guard.height + 50);
+                    }
+                    
+                    ctx.closePath();
+                    ctx.fill();
+                }
+            }
+            
+            // Draw data packets
+            for (const data of dataPackets) {
+                if (!data.collected && (data.reality === 'both' || data.reality === reality)) {
+                    ctx.fillStyle = '#ffff00';
+                    ctx.fillRect(data.x, data.y, data.width, data.height);
+                    
+                    // Data packet glow
+                    ctx.shadowBlur = 15;
+                    ctx.shadowColor = '#ffff00';
+                    ctx.fillRect(data.x, data.y, data.width, data.height);
+                    ctx.shadowBlur = 0;
+                    
+                    // Data packet details
+                    ctx.fillStyle = '#000000';
+                    ctx.fillRect(data.x + 5, data.y + 5, 10, 10);
+                }
+            }
+            
+            // Draw player
+            ctx.fillStyle = player.color;
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+            
+            // Draw shift effect if active
+            if (shiftEffect > 0) {
+                ctx.fillStyle = reality === 'primary' ? 'rgba(0, 170, 255, 0.2)' : 'rgba(255, 0, 170, 0.2)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // Draw shift lines
+                ctx.strokeStyle = reality === 'primary' ? 'rgba(0, 170, 255, 0.5)' : 'rgba(255, 0, 170, 0.5)';
+                ctx.lineWidth = 2;
+                
+                for (let i = 0; i < 20; i++) {
+                    const x = Math.random() * canvas.width;
+                    ctx.beginPath();
+                    ctx.moveTo(x, 0);
+                    ctx.lineTo(x, canvas.height);
+                    ctx.stroke();
+                }
+            }
+        }
+
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Start the game loop
+        gameLoop();
+    </script>
+</body>
+</html>
