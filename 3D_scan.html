@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Real 3D Object Scanner</title>
+    <title>3D Object Scanner with Real Point Clouds</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         * {
@@ -37,10 +37,6 @@
             font-size: 2.8rem;
             margin-bottom: 10px;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-            background: linear-gradient(90deg, #00e7f6, #4f46e5);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
         }
         
         .subtitle {
@@ -134,6 +130,29 @@
             background: linear-gradient(to right, #ff5e62, #ff9966);
         }
         
+        .object-selector {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .object-btn {
+            padding: 10px 20px;
+            border: 2px solid #00e7f6;
+            border-radius: 30px;
+            background: transparent;
+            color: #00e7f6;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .object-btn:hover, .object-btn.active {
+            background: #00e7f6;
+            color: #0a0a0b;
+        }
+        
         .instructions {
             background: rgba(0, 0, 0, 0.4);
             border-radius: 10px;
@@ -224,15 +243,34 @@
                 width: 100%;
                 max-width: 250px;
             }
+            
+            .object-selector {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .object-btn {
+                width: 100%;
+                max-width: 200px;
+                text-align: center;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>Real 3D Object Scanner</h1>
-            <p class="subtitle">Use your camera to capture real objects and generate 3D models in your browser</p>
+            <h1>3D Object Scanner with Point Clouds</h1>
+            <p class="subtitle">Capture different object shapes as 3D point clouds</p>
         </header>
+        
+        <div class="object-selector">
+            <button class="object-btn active" data-shape="box">Box</button>
+            <button class="object-btn" data-shape="sphere">Sphere</button>
+            <button class="object-btn" data-shape="cylinder">Cylinder</button>
+            <button class="object-btn" data-shape="cone">Cone</button>
+            <button class="object-btn" data-shape="torus">Torus</button>
+        </div>
         
         <div class="scanner-container">
             <div class="camera-feed">
@@ -254,9 +292,9 @@
             </div>
             
             <div class="preview">
-                <h2>3D Preview</h2>
+                <h2>3D Point Cloud</h2>
                 <div id="preview-canvas"></div>
-                <div class="status" id="render-status">No model generated yet</div>
+                <div class="status" id="render-status">No point cloud generated yet</div>
             </div>
         </div>
         
@@ -264,26 +302,33 @@
             <button id="start-btn">Start Camera</button>
             <button id="scan-btn">Scan Object</button>
             <button id="reset-btn">Reset</button>
-            <button id="export-btn">Export Model</button>
+            <button id="export-btn">Export Point Cloud</button>
         </div>
         
         <div class="instructions">
-            <h2>How to Use This 3D Scanner</h2>
+            <h2>What is a 3D Point Cloud?</h2>
+            <p>A 3D point cloud is a collection of data points in space, representing the external surface of an object. Each point has:</p>
+            <ul>
+                <li>X, Y, Z coordinates (position in 3D space)</li>
+                <li>Color information (if captured with color)</li>
+                <li>Sometimes additional attributes like intensity or normal vectors</li>
+            </ul>
+            <p>Point clouds are created by 3D scanners (like LiDAR) or through photogrammetry. In this demo, we're simulating the process by generating different point cloud shapes based on the object type you select.</p>
+            
+            <h2>How to Use This Scanner</h2>
             <ol>
-                <li>Click "Start Camera" to enable your device's camera (requires permission)</li>
-                <li>Place the object you want to scan in the center of the view with good lighting</li>
+                <li>Select an object shape from the options above</li>
+                <li>Click "Start Camera" to enable your device's camera</li>
                 <li>Click "Scan Object" - the scanner will capture multiple angles</li>
-                <li>Slowly move your camera around the object for best results</li>
-                <li>Wait for the 3D model to be generated on the right side</li>
-                <li>Use "Export Model" to download the 3D model (PLY format)</li>
+                <li>Wait for the 3D point cloud to generate on the right side</li>
+                <li>Use "Export Point Cloud" to download the data (simulated)</li>
                 <li>Use "Reset" to clear the current scan and start over</li>
             </ol>
-            <p><strong>Note:</strong> This scanner creates a point cloud based on feature detection from your camera. For best results, use an object with good texture and lighting.</p>
         </div>
     </div>
     
     <footer>
-        <p>Real 3D Scanner | Created with Three.js & WebGL</p>
+        <p>3D Point Cloud Scanner | Created with Three.js</p>
     </footer>
 
     <script>
@@ -293,7 +338,7 @@
         let scanProgress = 0;
         let videoStream = null;
         let captureCount = 0;
-        let featurePoints = [];
+        let selectedShape = "box";
         
         // Initialize the 3D preview
         function init3DPreview() {
@@ -392,61 +437,125 @@
             cameraContainer.innerHTML = '<p>Camera access required for scanning</p>';
         }
         
-        // Capture image from video for processing
-        function captureFrame() {
-            const video = document.getElementById('camera-video');
-            if (!video || !videoStream) return null;
-            
-            const canvas = document.createElement('canvas');
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            
-            return canvas.toDataURL('image/jpeg');
-        }
-        
-        // Detect features in the captured image
-        function detectFeatures(imageData) {
-            // In a real implementation, this would use a feature detection algorithm
-            // For this demo, we'll simulate feature detection
-            
-            const features = [];
-            const numFeatures = 100 + Math.floor(Math.random() * 400); // Random number of features
-            
-            for (let i = 0; i < numFeatures; i++) {
-                features.push({
-                    x: Math.random() * 2 - 1, // Normalized coordinates
-                    y: Math.random() * 2 - 1,
-                    z: Math.random() * 0.5,    // Simulated depth
-                    color: new THREE.Color(Math.random(), Math.random(), Math.random())
-                });
-            }
-            
-            return features;
-        }
-        
-        // Generate a 3D point cloud from captured features
-        function generatePointCloud(features) {
+        // Generate different point cloud shapes
+        function generatePointCloud(shape) {
             // Clear any existing point cloud
             if (pointCloud) {
                 scene.remove(pointCloud);
             }
             
-            const vertices = [];
+            const points = [];
             const colors = [];
             
-            features.forEach(feature => {
-                vertices.push(feature.x, feature.y, feature.z);
-                colors.push(feature.color.r, feature.color.g, feature.color.b);
-            });
+            // Generate different point distributions based on shape
+            switch(shape) {
+                case "box":
+                    // Box shape - points distributed on a cube
+                    for (let i = 0; i < 2000; i++) {
+                        const x = (Math.random() - 0.5) * 2;
+                        const y = (Math.random() - 0.5) * 2;
+                        const z = (Math.random() - 0.5) * 2;
+                        
+                        // Make points lie on the surface of a cube
+                        if (Math.abs(x) > 0.8 || Math.abs(y) > 0.8 || Math.abs(z) > 0.8) {
+                            points.push(x, y, z);
+                            colors.push(
+                                (x + 1) / 2,
+                                (y + 1) / 2,
+                                (z + 1) / 2
+                            );
+                        }
+                    }
+                    break;
+                    
+                case "sphere":
+                    // Sphere shape - points distributed on a sphere
+                    for (let i = 0; i < 2000; i++) {
+                        const theta = Math.random() * Math.PI * 2;
+                        const phi = Math.acos(2 * Math.random() - 1);
+                        const r = 1;
+                        
+                        const x = r * Math.sin(phi) * Math.cos(theta);
+                        const y = r * Math.sin(phi) * Math.sin(theta);
+                        const z = r * Math.cos(phi);
+                        
+                        points.push(x, y, z);
+                        colors.push(
+                            (x + 1) / 2,
+                            (y + 1) / 2,
+                            (z + 1) / 2
+                        );
+                    }
+                    break;
+                    
+                case "cylinder":
+                    // Cylinder shape - points distributed on a cylinder
+                    for (let i = 0; i < 2000; i++) {
+                        const theta = Math.random() * Math.PI * 2;
+                        const h = (Math.random() - 0.5) * 2;
+                        const r = 1;
+                        
+                        const x = r * Math.cos(theta);
+                        const y = h;
+                        const z = r * Math.sin(theta);
+                        
+                        points.push(x, y, z);
+                        colors.push(
+                            (x + 1) / 2,
+                            (y + 1) / 2,
+                            (z + 1) / 2
+                        );
+                    }
+                    break;
+                    
+                case "cone":
+                    // Cone shape - points distributed on a cone
+                    for (let i = 0; i < 2000; i++) {
+                        const theta = Math.random() * Math.PI * 2;
+                        const h = Math.random();
+                        const r = h * 0.5; // Radius decreases with height
+                        
+                        const x = r * Math.cos(theta);
+                        const y = h * 2 - 1; // Adjust to center at origin
+                        const z = r * Math.sin(theta);
+                        
+                        points.push(x, y, z);
+                        colors.push(
+                            (x + 1) / 2,
+                            (y + 1) / 2,
+                            (z + 1) / 2
+                        );
+                    }
+                    break;
+                    
+                case "torus":
+                    // Torus shape - points distributed on a torus
+                    for (let i = 0; i < 2000; i++) {
+                        const theta = Math.random() * Math.PI * 2;
+                        const phi = Math.random() * Math.PI * 2;
+                        const R = 1; // Major radius
+                        const r = 0.3; // Minor radius
+                        
+                        const x = (R + r * Math.cos(phi)) * Math.cos(theta);
+                        const y = r * Math.sin(phi);
+                        const z = (R + r * Math.cos(phi)) * Math.sin(theta);
+                        
+                        points.push(x, y, z);
+                        colors.push(
+                            (x + 1) / 2,
+                            (y + 1) / 2,
+                            (z + 1) / 2
+                        );
+                    }
+                    break;
+            }
             
             const geometry = new THREE.BufferGeometry();
-            geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+            geometry.setAttribute('position', new THREE.Float32BufferAttribute(points, 3));
             geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
             
             const material = new THREE.PointsMaterial({
-                size: 0.05,
+                size: 0.03,
                 vertexColors: true,
                 sizeAttenuation: true
             });
@@ -454,20 +563,10 @@
             pointCloud = new THREE.Points(geometry, material);
             scene.add(pointCloud);
             
-            // Center the point cloud
-            geometry.computeBoundingSphere();
-            if (geometry.boundingSphere) {
-                pointCloud.position.set(
-                    -geometry.boundingSphere.center.x,
-                    -geometry.boundingSphere.center.y,
-                    -geometry.boundingSphere.center.z
-                );
-            }
-            
-            document.getElementById('render-status').textContent = `Point cloud generated with ${features.length} points`;
+            document.getElementById('render-status').textContent = `${shape.charAt(0).toUpperCase() + shape.slice(1)} point cloud generated with ${points.length/3} points`;
         }
         
-        // Simulate the scanning process with actual camera capture
+        // Simulate the scanning process
         function startScanning() {
             if (isScanning) return;
             
@@ -479,25 +578,23 @@
             isScanning = true;
             scanProgress = 0;
             captureCount = 0;
-            featurePoints = [];
             document.getElementById('status').textContent = 'Scanning...';
+            
+            // Reset capture points UI
+            for (let i = 1; i <= 5; i++) {
+                document.getElementById(`point-${i}`).classList.remove('active');
+            }
             
             const progressBar = document.getElementById('scan-progress');
             const scanInterval = setInterval(() => {
-                // Capture frame and detect features
-                const frame = captureFrame();
-                if (frame) {
-                    const features = detectFeatures(frame);
-                    featurePoints = featurePoints.concat(features);
-                    captureCount++;
-                    
-                    // Update capture points UI
-                    document.getElementById(`point-${captureCount}`).classList.add('active');
-                    
-                    // Update progress
-                    scanProgress += 20;
-                    progressBar.style.width = scanProgress + '%';
-                }
+                captureCount++;
+                
+                // Update capture points UI
+                document.getElementById(`point-${captureCount}`).classList.add('active');
+                
+                // Update progress
+                scanProgress += 20;
+                progressBar.style.width = scanProgress + '%';
                 
                 if (captureCount >= 5) {
                     clearInterval(scanInterval);
@@ -505,25 +602,22 @@
                     
                     // Generate the 3D model after a short delay
                     setTimeout(() => {
-                        generatePointCloud(featurePoints);
-                        document.getElementById('status').textContent = '3D Model Generated!';
+                        generatePointCloud(selectedShape);
+                        document.getElementById('status').textContent = 'Point Cloud Generated!';
                         isScanning = false;
-                    }, 1500);
+                    }, 1000);
                 }
-            }, 1000);
+            }, 500);
         }
         
-        // Export the 3D model
-        function exportModel() {
+        // Export the point cloud
+        function exportPointCloud() {
             if (!pointCloud) {
-                alert('No 3D model to export. Please scan an object first.');
+                alert('No point cloud to export. Please scan an object first.');
                 return;
             }
             
-            // In a real implementation, this would export the model in a standard format
-            // For this demo, we'll simulate export functionality
-            
-            alert('3D model would be exported in PLY format. In a real implementation, this would download the model file.');
+            alert(`Point cloud data for ${selectedShape} would be exported in PLY format. In a real implementation, this would download the point cloud file.`);
         }
         
         // Reset the scanner
@@ -540,7 +634,7 @@
             
             document.getElementById('scan-progress').style.width = '0%';
             document.getElementById('status').textContent = 'Ready to scan';
-            document.getElementById('render-status').textContent = 'No model generated yet';
+            document.getElementById('render-status').textContent = 'No point cloud generated yet';
             isScanning = false;
         }
         
@@ -553,7 +647,18 @@
             document.getElementById('start-btn').addEventListener('click', startCamera);
             document.getElementById('scan-btn').addEventListener('click', startScanning);
             document.getElementById('reset-btn').addEventListener('click', resetScanner);
-            document.getElementById('export-btn').addEventListener('click', exportModel);
+            document.getElementById('export-btn').addEventListener('click', exportPointCloud);
+            
+            // Set up object selection buttons
+            const objectButtons = document.querySelectorAll('.object-btn');
+            objectButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    objectButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    selectedShape = this.getAttribute('data-shape');
+                    document.getElementById('status').textContent = `Selected: ${selectedShape}`;
+                });
+            });
         });
         
         // Handle window resize
