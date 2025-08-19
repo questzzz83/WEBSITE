@@ -13,7 +13,11 @@
       color: #333;
     }
     video { display: none; }
-    canvas { position: absolute; top: 0; left: 0; }
+    canvas { 
+      position: absolute; 
+      top: 0; 
+      left: 0; 
+    }
     #drawingCanvas {
       border: 4px solid #4b9fff;
       border-radius: 12px;
@@ -25,7 +29,6 @@
       left: 50%;
       transform: translateX(-50%);
       display: flex;
-      flex-wrap: wrap;
       gap: 10px;
       z-index: 10;
       background: rgba(255, 255, 255, 0.9);
@@ -53,34 +56,96 @@
     #tutorialBtn { background: #ff8c00; color: white; }
     #calibrateBtn { background: #16a085; color: white; }
     #avatarBtn { background: #ff5e94; color: white; }
-    #saveBtn { background: #4b9fff; color: white; }
-    #undoBtn { background: #8e44ad; color: white; }
-    #redoBtn { background: #3498db; color: white; }
-
+    
     #cursor {
       position: absolute;
+      width: 20px;
+      height: 20px;
       border-radius: 50%;
       background: rgba(255, 0, 0, 0.5);
       pointer-events: none;
       z-index: 100;
       display: none;
     }
-
-    #palette {
-      display: flex;
-      gap: 5px;
-      margin-left: 10px;
+    
+    #tutorial {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 25px;
+      border-radius: 20px;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+      width: 80%;
+      max-width: 600px;
+      display: none;
     }
-    .color-btn {
-      width: 25px; height: 25px;
-      border-radius: 50%;
-      border: 2px solid #333;
+    
+    #tutorial h2 {
+      color: #4b9fff;
+      text-align: center;
+      margin-top: 0;
+    }
+    
+    .tutorial-step {
+      margin: 20px 0;
+      display: flex;
+      align-items: center;
+    }
+    
+    .tutorial-step img {
+      width: 80px;
+      height: 80px;
+      margin-right: 20px;
+      border: 2px solid #4b9fff;
+      border-radius: 10px;
+    }
+    
+    #closeTutorial {
+      display: block;
+      margin: 20px auto 0;
+      background: #4b9fff;
+      color: white;
+    }
+    
+    #shapesPanel {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 15px;
+      border-radius: 20px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      z-index: 10;
+      display: none;
+    }
+    
+    .shape-btn {
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      border-radius: 10px;
+      background: #f0f0f0;
+      border: 2px solid #ccc;
       cursor: pointer;
     }
-
-    #avatarPanel, #shapesPanel, #tutorial { /* same as your original CSS */ }
+    
+    .shape-btn:hover {
+      background: #e0e0e0;
+    }
+    
     #status {
-      position: fixed; bottom: 10px; right: 10px;
+      position: fixed;
+      bottom: 10px;
+      right: 10px;
       background: rgba(0, 0, 0, 0.7);
       color: white;
       padding: 8px 15px;
@@ -88,6 +153,68 @@
       font-size: 14px;
       z-index: 10;
     }
+    
+    .calibration-mode #drawingCanvas {
+      display: none;
+    }
+    
+    .calibration-mode #cursor {
+      display: none;
+    }
+    
+    .calibration-mode #status {
+      background: rgba(255, 165, 0, 0.7);
+    }
+    
+    #avatarPanel {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 15px;
+      border-radius: 20px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      z-index: 10;
+      display: none;
+      max-width: 80%;
+      justify-content: center;
+    }
+    
+    .avatar-item {
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 30px;
+      border-radius: 10px;
+      background: #f0f0f0;
+      border: 2px solid #ccc;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .avatar-item:hover {
+      transform: scale(1.1);
+      background: #e0e0e0;
+    }
+    
+    .face-mode #drawingCanvas {
+      display: none;
+    }
+    
+    .face-mode #cursor {
+      display: none;
+    }
+    
+    .face-mode #status {
+      background: rgba(255, 105, 180, 0.7);
+    }
+    
     h1 {
       position: fixed;
       top: 70px;
@@ -117,23 +244,52 @@
     </select>
     <button id="bgBtn">Background: White</button>
     <button id="shapesBtn">Shapes</button>
-    <button id="undoBtn">Undo</button>
-    <button id="redoBtn">Redo</button>
-    <button id="saveBtn">Save</button>
-    <div id="palette">
-      <div class="color-btn" style="background:red" data-color="red"></div>
-      <div class="color-btn" style="background:blue" data-color="blue"></div>
-      <div class="color-btn" style="background:green" data-color="green"></div>
-      <div class="color-btn" style="background:yellow" data-color="yellow"></div>
-      <div class="color-btn" style="background:purple" data-color="purple"></div>
-      <div class="color-btn" style="background:black" data-color="black"></div>
-      <div class="color-btn" style="background:rainbow" data-color="rainbow"></div>
-    </div>
   </div>
 
-  <div id="shapesPanel"> ... </div>
-  <div id="avatarPanel"> ... </div>
-  <div id="tutorial"> ... </div>
+  <div id="shapesPanel">
+    <div class="shape-btn" data-shape="circle">○</div>
+    <div class="shape-btn" data-shape="square">□</div>
+    <div class="shape-btn" data-shape="triangle">△</div>
+    <div class="shape-btn" data-shape="heart">❤️</div>
+    <div class="shape-btn" data-shape="star">⭐</div>
+  </div>
+
+  <div id="avatarPanel">
+    <div class="avatar-item" data-item="glasses">👓</div>
+    <div class="avatar-item" data-item="hat">🎩</div>
+    <div class="avatar-item" data-item="mustache">🧔</div>
+    <div class="avatar-item" data-item="crown">👑</div>
+    <div class="avatar-item" data-item="mask">😷</div>
+    <div class="avatar-item" data-item="sunglasses">😎</div>
+    <div class="avatar-item" data-item="animal">🐯</div>
+    <div class="avatar-item" data-item="hearts">💕</div>
+  </div>
+
+  <div id="tutorial">
+    <h2>How to Use Magic Avatar Creator ✨</h2>
+    
+    <div class="tutorial-step">
+      <div style="width: 80px; height: 80px; margin-right: 20px; display: flex; align-items: center; justify-content: center; font-size: 40px;">👆</div>
+      <div>Show your hand to the camera to draw, or your face to create avatars!</div>
+    </div>
+    
+    <div class="tutorial-step">
+      <div style="width: 80px; height: 80px; margin-right: 20px; display: flex; align-items: center; justify-content: center; font-size: 40px;">🤏</div>
+      <div>Pinch your index finger and thumb together to start drawing</div>
+    </div>
+    
+    <div class="tutorial-step">
+      <div style="width: 80px; height: 80px; margin-right: 20px; display: flex; align-items: center; justify-content: center; font-size: 40px;">😀</div>
+      <div>In Avatar Mode, move your face to add fun accessories</div>
+    </div>
+    
+    <div class="tutorial-step">
+      <div style="width: 80px; height: 80px; margin-right: 20px; display: flex; align-items: center; justify-content: center; font-size: 40px;">🧽</div>
+      <div>Turn on the eraser to remove parts of your drawing</div>
+    </div>
+    
+    <button id="closeTutorial">Got it!</button>
+  </div>
 
   <div id="cursor"></div>
   <div id="status">Looking for hands or faces...</div>
@@ -142,36 +298,98 @@
   <canvas id="output"></canvas>
   <canvas id="drawingCanvas"></canvas>
 
-  <!-- MediaPipe -->
+  <!-- MediaPipe Libraries -->
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
 
   <script>
-    // existing variables...
-    let history = [], redoStack = [];
-    let selectedColor = "rainbow";
-    let stars = [];
+    const videoElement = document.getElementById('video');
+    const canvasElement = document.getElementById('output');
+    const drawingCanvas = document.getElementById('drawingCanvas');
+    const ctx = drawingCanvas.getContext('2d');
+    const cursor = document.getElementById('cursor');
+    const statusDiv = document.getElementById('status');
 
-    // === Sound effects ===
-    const sounds = {
-      click: new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg"),
-      erase: new Audio("https://actions.google.com/sounds/v1/cartoon/pop.ogg"),
-      mode: new Audio("https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg")
-    };
+    let points = [];
+    let isEraser = false;
+    let brushSize = 6;
+    let bgMode = 'white';
+    let hue = 0;
+    let currentShape = null;
+    let shapeStartPoint = null;
+    let isCalibrating = false;
+    let isAvatarMode = false;
+    let currentAvatarItem = null;
+    let faceLandmarks = null;
 
-    // Init stars
-    function initStars() {
-      stars = [];
-      for (let i = 0; i < 100; i++) {
-        stars.push({
-          x: Math.random() * drawingCanvas.width,
-          y: Math.random() * drawingCanvas.height,
-          r: Math.random() * 2 + 1,
-          t: Math.random() * 100
-        });
-      }
+    // Set up drawing boundaries (80% of window)
+    const drawingMargin = 0.1; // 10% margin on each side
+    let drawingWidth, drawingHeight, drawingX, drawingY;
+
+    function setupDrawingArea() {
+      drawingWidth = window.innerWidth * 0.8;
+      drawingHeight = window.innerHeight * 0.8;
+      drawingX = window.innerWidth * 0.1;
+      drawingY = window.innerHeight * 0.1;
+      
+      drawingCanvas.width = drawingWidth;
+      drawingCanvas.height = drawingHeight;
+      drawingCanvas.style.left = `${drawingX}px`;
+      drawingCanvas.style.top = `${drawingY}px`;
+    }
+
+    window.addEventListener('resize', () => {
+      resizeCanvas();
+      setupDrawingArea();
+      drawBackground();
+      redrawStrokes();
+    });
+    
+    setupDrawingArea();
+    resizeCanvas();
+
+    function resizeCanvas() {
+      canvasElement.width = window.innerWidth;
+      canvasElement.height = window.innerHeight;
+    }
+
+    // Initialize MediaPipe Hands
+    const hands = new Hands({
+      locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+    });
+    hands.setOptions({
+      maxNumHands: 1,
+      modelComplexity: 1,
+      minDetectionConfidence: 0.7,
+      minTrackingConfidence: 0.5
+    });
+    hands.onResults(onHandResults);
+
+    // Initialize MediaPipe Face Mesh
+    const faceMesh = new FaceMesh({
+      locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
+    });
+    faceMesh.setOptions({
+      maxNumFaces: 1,
+      refineLandmarks: true,
+      minDetectionConfidence: 0.5,
+      minTrackingConfidence: 0.5
+    });
+    faceMesh.onResults(onFaceResults);
+
+    const camera = new Camera(videoElement, {
+      onFrame: async () => { 
+        await hands.send({ image: videoElement });
+        await faceMesh.send({ image: videoElement });
+      },
+      width: 640, height: 480
+    });
+    camera.start();
+
+    function distance(a, b) {
+      return Math.sqrt((a.x - b.x)**2 + (a.y - b.y)**2);
     }
 
     function drawBackground() {
@@ -179,89 +397,501 @@
         ctx.fillStyle = 'white';
         ctx.fillRect(0, 0, drawingCanvas.width, drawingCanvas.height);
       } else {
-        const gradient = ctx.createLinearGradient(0,0,0,drawingCanvas.height);
-        gradient.addColorStop(0,"#000033"); gradient.addColorStop(1,"#000066");
+        // Gradient for space background
+        const gradient = ctx.createLinearGradient(0, 0, 0, drawingCanvas.height);
+        gradient.addColorStop(0, "#000033");
+        gradient.addColorStop(1, "#000066");
         ctx.fillStyle = gradient;
-        ctx.fillRect(0,0,drawingCanvas.width,drawingCanvas.height);
-
-        stars.forEach(s=>{
+        ctx.fillRect(0, 0, drawingCanvas.width, drawingCanvas.height);
+        
+        // stars
+        ctx.fillStyle = 'white';
+        for (let i = 0; i < 100; i++) {
+          const size = Math.random() * 2 + 1;
           ctx.beginPath();
-          ctx.globalAlpha = 0.5 + 0.5*Math.sin(Date.now()/200 + s.t);
-          ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
-          ctx.fillStyle="white"; ctx.fill();
-        });
-        ctx.globalAlpha = 1;
+          ctx.arc(
+            Math.random() * drawingCanvas.width, 
+            Math.random() * drawingCanvas.height, 
+            size, 0, Math.PI * 2
+          );
+          ctx.fill();
+        }
       }
     }
 
-    function pushHistory() {
-      history.push(JSON.stringify(points));
-      redoStack = [];
+    function redrawStrokes() {
+      drawBackground();
+      
+      for (let stroke of points) {
+        if (stroke.isShape) {
+          // Redraw shapes
+          ctx.strokeStyle = stroke.color;
+          ctx.lineWidth = stroke.size;
+          drawShape(stroke.shape, stroke.startX, stroke.startY, stroke.endX, stroke.endY);
+        } else {
+          // Redraw freehand strokes
+          ctx.strokeStyle = stroke.color;
+          ctx.lineWidth = stroke.size;
+          ctx.beginPath();
+          for (let i = 1; i < stroke.path.length; i++) {
+            ctx.moveTo(stroke.path[i-1].x, stroke.path[i-1].y);
+            ctx.lineTo(stroke.path[i].x, stroke.path[i].y);
+          }
+          ctx.stroke();
+        }
+      }
     }
 
-    document.getElementById("undoBtn").onclick = ()=>{
-      if(history.length>0){
-        redoStack.push(JSON.stringify(points));
-        points = JSON.parse(history.pop());
-        redrawStrokes();
+    function drawShape(shape, startX, startY, endX, endY) {
+      const width = endX - startX;
+      const height = endY - startY;
+      
+      ctx.beginPath();
+      
+      switch(shape) {
+        case 'circle':
+          const radius = Math.sqrt(width*width + height*height) / 2;
+          ctx.arc(startX + width/2, startY + height/2, radius, 0, Math.PI * 2);
+          break;
+        case 'square':
+          ctx.rect(startX, startY, width, height);
+          break;
+        case 'triangle':
+          ctx.moveTo(startX + width/2, startY);
+          ctx.lineTo(startX, startY + height);
+          ctx.lineTo(startX + width, startY + height);
+          ctx.closePath();
+          break;
+        case 'heart':
+          drawHeart(ctx, startX, startY, endX, endY);
+          break;
+        case 'star':
+          drawStar(ctx, startX + width/2, startY + height/2, 5, Math.min(width, height)/2, Math.min(width, height)/4);
+          break;
       }
-    };
-    document.getElementById("redoBtn").onclick = ()=>{
-      if(redoStack.length>0){
-        history.push(JSON.stringify(points));
-        points = JSON.parse(redoStack.pop());
-        redrawStrokes();
-      }
-    };
-    document.getElementById("saveBtn").onclick = ()=>{
-      const link = document.createElement('a');
-      link.download = "drawing.png";
-      link.href = drawingCanvas.toDataURL();
-      link.click();
-    };
+      
+      ctx.stroke();
+    }
 
-    document.querySelectorAll(".color-btn").forEach(btn=>{
-      btn.onclick=()=>{
-        selectedColor = btn.dataset.color;
-        sounds.click.play();
-      };
+    function drawHeart(ctx, x, y, width, height) {
+      const heartWidth = width;
+      const heartHeight = height;
+      const centerX = x + heartWidth / 2;
+      const centerY = y + heartHeight / 2;
+      
+      ctx.moveTo(centerX, centerY);
+      ctx.bezierCurveTo(
+        centerX, centerY - heartHeight / 2,
+        centerX - heartWidth, centerY - heartHeight / 2,
+        centerX - heartWidth, centerY
+      );
+      ctx.bezierCurveTo(
+        centerX - heartWidth, centerY + heartHeight / 2,
+        centerX, centerY + heartHeight,
+        centerX, centerY + heartHeight
+      );
+      ctx.bezierCurveTo(
+        centerX, centerY + heartHeight,
+        centerX + heartWidth, centerY + heartHeight / 2,
+        centerX + heartWidth, centerY
+      );
+      ctx.bezierCurveTo(
+        centerX + heartWidth, centerY - heartHeight / 2,
+        centerX, centerY - heartHeight / 2,
+        centerX, centerY
+      );
+    }
+
+    function drawStar(ctx, cx, cy, spikes, outerRadius, innerRadius) {
+      let rot = Math.PI / 2 * 3;
+      let x = cx;
+      y = cy;
+      let step = Math.PI / spikes;
+
+      ctx.moveTo(cx, cy - outerRadius);
+      for (let i = 0; i < spikes; i++) {
+        x = cx + Math.cos(rot) * outerRadius;
+        y = cy + Math.sin(rot) * outerRadius;
+        ctx.lineTo(x, y);
+        rot += step;
+
+        x = cx + Math.cos(rot) * innerRadius;
+        y = cy + Math.sin(rot) * innerRadius;
+        ctx.lineTo(x, y);
+        rot += step;
+      }
+      ctx.lineTo(cx, cy - outerRadius);
+      ctx.closePath();
+    }
+
+    function drawAvatarItem(item, landmarks) {
+      const outputCtx = canvasElement.getContext('2d');
+      
+      if (!landmarks || landmarks.length === 0) return;
+      
+      // Get face dimensions
+      const faceLeft = landmarks[234].x * canvasElement.width;  // Left side of face
+      const faceRight = landmarks[454].x * canvasElement.width; // Right side of face
+      const faceTop = landmarks[10].y * canvasElement.height;   // Top of face
+      const faceBottom = landmarks[152].y * canvasElement.height; // Bottom of face
+      
+      const faceWidth = faceRight - faceLeft;
+      const faceHeight = faceBottom - faceTop;
+      const faceCenterX = (faceLeft + faceRight) / 2;
+      
+      outputCtx.save();
+      outputCtx.scale(-1, 1);
+      outputCtx.translate(-canvasElement.width, 0);
+      
+      switch(item) {
+        case 'glasses':
+          // Draw glasses
+          outputCtx.lineWidth = 4;
+          outputCtx.strokeStyle = 'blue';
+          outputCtx.beginPath();
+          outputCtx.arc(faceCenterX - faceWidth/4, faceTop + faceHeight/3, faceWidth/6, 0, Math.PI * 2);
+          outputCtx.stroke();
+          outputCtx.beginPath();
+          outputCtx.arc(faceCenterX + faceWidth/4, faceTop + faceHeight/3, faceWidth/6, 0, Math.PI * 2);
+          outputCtx.stroke();
+          outputCtx.beginPath();
+          outputCtx.moveTo(faceCenterX - faceWidth/4 + faceWidth/6, faceTop + faceHeight/3);
+          outputCtx.lineTo(faceCenterX + faceWidth/4 - faceWidth/6, faceTop + faceHeight/3);
+          outputCtx.stroke();
+          break;
+          
+        case 'hat':
+          // Draw hat
+          outputCtx.fillStyle = 'red';
+          outputCtx.beginPath();
+          outputCtx.ellipse(faceCenterX, faceTop - faceHeight/10, faceWidth/2, faceHeight/6, 0, 0, Math.PI * 2);
+          outputCtx.fill();
+          outputCtx.beginPath();
+          outputCtx.rect(faceCenterX - faceWidth/3, faceTop - faceHeight/10, faceWidth*2/3, faceHeight/10);
+          outputCtx.fill();
+          break;
+          
+        case 'mustache':
+          // Draw mustache
+          outputCtx.fillStyle = 'black';
+          outputCtx.beginPath();
+          outputCtx.ellipse(faceCenterX, faceTop + faceHeight/2, faceWidth/4, faceHeight/10, 0, 0, Math.PI * 2);
+          outputCtx.fill();
+          break;
+          
+        case 'crown':
+          // Draw crown
+          outputCtx.fillStyle = 'gold';
+          outputCtx.beginPath();
+          outputCtx.moveTo(faceCenterX - faceWidth/2, faceTop - faceHeight/10);
+          for (let i = 0; i < 5; i++) {
+            outputCtx.lineTo(faceCenterX - faceWidth/2 + (i * faceWidth/4), faceTop - faceHeight/4);
+            outputCtx.lineTo(faceCenterX - faceWidth/2 + ((i + 0.5) * faceWidth/4), faceTop - faceHeight/10);
+          }
+          outputCtx.lineTo(faceCenterX + faceWidth/2, faceTop - faceHeight/10);
+          outputCtx.closePath();
+          outputCtx.fill();
+          break;
+          
+        case 'mask':
+          // Draw mask
+          outputCtx.fillStyle = 'lightblue';
+          outputCtx.beginPath();
+          outputCtx.ellipse(faceCenterX, faceTop + faceHeight/2, faceWidth/2.5, faceHeight/3, 0, 0, Math.PI * 2);
+          outputCtx.fill();
+          
+          // Draw mask straps
+          outputCtx.strokeStyle = 'white';
+          outputCtx.lineWidth = 3;
+          outputCtx.beginPath();
+          outputCtx.moveTo(faceCenterX - faceWidth/2.5, faceTop + faceHeight/2);
+          outputCtx.lineTo(faceCenterX - faceWidth/2, faceTop + faceHeight/4);
+          outputCtx.stroke();
+          outputCtx.beginPath();
+          outputCtx.moveTo(faceCenterX + faceWidth/2.5, faceTop + faceHeight/2);
+          outputCtx.lineTo(faceCenterX + faceWidth/2, faceTop + faceHeight/4);
+          outputCtx.stroke();
+          break;
+          
+        case 'sunglasses':
+          // Draw sunglasses
+          outputCtx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+          outputCtx.beginPath();
+          outputCtx.rect(faceCenterX - faceWidth/2.2, faceTop + faceHeight/3, faceWidth/2.2, faceHeight/8);
+          outputCtx.rect(faceCenterX + faceWidth/10, faceTop + faceHeight/3, faceWidth/2.2, faceHeight/8);
+          outputCtx.fill();
+          
+          outputCtx.strokeStyle = 'black';
+          outputCtx.lineWidth = 3;
+          outputCtx.beginPath();
+          outputCtx.moveTo(faceCenterX - faceWidth/10, faceTop + faceHeight/3);
+          outputCtx.lineTo(faceCenterX + faceWidth/10, faceTop + faceHeight/3);
+          outputCtx.stroke();
+          break;
+          
+        case 'animal':
+          // Draw animal ears
+          outputCtx.fillStyle = 'brown';
+          outputCtx.beginPath();
+          outputCtx.arc(faceCenterX - faceWidth/3, faceTop - faceHeight/4, faceWidth/6, 0, Math.PI * 2);
+          outputCtx.fill();
+          outputCtx.beginPath();
+          outputCtx.arc(faceCenterX + faceWidth/3, faceTop - faceHeight/4, faceWidth/6, 0, Math.PI * 2);
+          outputCtx.fill();
+          
+          // Draw nose
+          outputCtx.beginPath();
+          outputCtx.arc(faceCenterX, faceTop + faceHeight/3, faceWidth/10, 0, Math.PI * 2);
+          outputCtx.fill();
+          break;
+          
+        case 'hearts':
+          // Draw floating hearts
+          outputCtx.fillStyle = 'pink';
+          for (let i = 0; i < 3; i++) {
+            const x = faceCenterX - faceWidth/2 + (i * faceWidth/2);
+            const y = faceTop - faceHeight/3;
+            drawHeart(outputCtx, x, y, 30, 30);
+            outputCtx.fill();
+          }
+          break;
+      }
+      
+      outputCtx.restore();
+    }
+
+    function onHandResults(results) {
+      hue = (hue + 1) % 360;
+      
+      // Clear the output canvas
+      const outputCtx = canvasElement.getContext('2d');
+      outputCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+      
+      if (!isCalibrating && !isAvatarMode) {
+        // Draw the drawing area border
+        outputCtx.strokeStyle = '#4b9fff';
+        outputCtx.lineWidth = 4;
+        outputCtx.strokeRect(drawingX, drawingY, drawingWidth, drawingHeight);
+        
+        // Draw "Draw Here!" text
+        outputCtx.font = '24px Comic Sans MS';
+        outputCtx.fillStyle = '#4b9fff';
+        outputCtx.textAlign = 'center';
+        outputCtx.fillText('Draw Here!', canvasElement.width / 2, drawingY - 15);
+      }
+      
+      if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0 && !isAvatarMode) {
+        statusDiv.textContent = isCalibrating ? "Calibrating - Move your hand around" : "Hand detected! Pinch to draw";
+        statusDiv.style.background = isCalibrating ? "rgba(255, 165, 0, 0.7)" : "rgba(76, 175, 80, 0.7)";
+        
+        const landmarks = results.multiHandLandmarks[0];
+        const indexTip = landmarks[8];
+        const thumbTip = landmarks[4];
+        const pinchDist = distance(indexTip, thumbTip);
+        
+        // Convert normalized coordinates to screen coordinates
+        // Mirror the X coordinate for natural movement
+        const x = (1 - indexTip.x) * canvasElement.width;
+        const y = indexTip.y * canvasElement.height;
+        
+        // Show cursor only if inside drawing area and not in calibration mode
+        if (!isCalibrating && x > drawingX && x < drawingX + drawingWidth && 
+            y > drawingY && y < drawingY + drawingHeight) {
+          cursor.style.display = 'block';
+          cursor.style.left = `${x - 10}px`;
+          cursor.style.top = `${y - 10}px`;
+          cursor.style.background = isEraser ? 'rgba(255, 0, 0, 0.5)' : `hsl(${hue},100%,50%)`;
+          cursor.style.width = `${brushSize * 3}px`;
+          cursor.style.height = `${brushSize * 3}px`;
+        } else {
+          cursor.style.display = 'none';
+        }
+        
+        const pinch = pinchDist < 0.05;
+        
+        if (pinch && !isCalibrating) {
+          // Convert to drawing canvas coordinates
+          const drawX = x - drawingX;
+          const drawY = y - drawingY;
+          
+          // Only draw if inside the drawing area
+          if (drawX > 0 && drawX < drawingWidth && drawY > 0 && drawY < drawingHeight) {
+            if (isEraser) {
+              // Erase near the cursor
+              points = points.map(stroke => ({
+                ...stroke,
+                path: stroke.path.filter(p => Math.hypot(p.x - drawX, p.y - drawY) > brushSize*2)
+              }));
+              redrawStrokes();
+            } else if (currentShape) {
+              if (!shapeStartPoint) {
+                shapeStartPoint = {x: drawX, y: drawY};
+              } else {
+                redrawStrokes();
+                drawShape(currentShape, shapeStartPoint.x, shapeStartPoint.y, drawX, drawY);
+              }
+            } else {
+              if (points.length === 0 || points[points.length-1].done) {
+                points.push({ 
+                  color: `hsl(${hue},100%,50%)`, 
+                  size: brushSize, 
+                  path: [], 
+                  done: false 
+                });
+              }
+              points[points.length-1].path.push({x: drawX, y: drawY});
+              redrawStrokes();
+            }
+          }
+        } else {
+          if (points.length > 0 && !points[points.length-1].done && !currentShape && !isCalibrating) {
+            points[points.length-1].done = true;
+          }
+          
+          if (shapeStartPoint && currentShape && !isCalibrating) {
+            // Add the shape to points for persistence
+            points.push({ 
+              color: `hsl(${hue},100%,50%)`, 
+              size: brushSize, 
+              path: [], 
+              done: true,
+              isShape: true,
+              shape: currentShape,
+              startX: shapeStartPoint.x,
+              startY: shapeStartPoint.y,
+              endX: drawX,
+              endY: drawY
+            });
+            shapeStartPoint = null;
+            redrawStrokes();
+          }
+        }
+        
+        // Draw hand landmarks (mirrored)
+        outputCtx.save();
+        outputCtx.scale(-1, 1);
+        outputCtx.translate(-canvasElement.width, 0);
+        
+        drawConnectors(outputCtx, landmarks, HAND_CONNECTIONS, 
+                      {color: '#FF0000', lineWidth: 1});
+        drawLandmarks(outputCtx, landmarks, {color: '#00FF00', lineWidth: 1, radius: 3});
+        
+        outputCtx.restore();
+      } else if (!isAvatarMode) {
+        statusDiv.textContent = isCalibrating ? "Calibrating - Show your hand to the camera" : "Looking for hands...";
+        statusDiv.style.background = "rgba(0, 0, 0, 0.7)";
+        cursor.style.display = 'none';
+      }
+    }
+
+    function onFaceResults(results) {
+      if (isAvatarMode && results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
+        statusDiv.textContent = "Face detected! Adding avatar items";
+        statusDiv.style.background = "rgba(255, 105, 180, 0.7)";
+        
+        faceLandmarks = results.multiFaceLandmarks[0];
+        
+        if (currentAvatarItem) {
+          drawAvatarItem(currentAvatarItem, faceLandmarks);
+        }
+      } else if (isAvatarMode) {
+        statusDiv.textContent = "Looking for faces...";
+        statusDiv.style.background = "rgba(0, 0, 0, 0.7)";
+      }
+    }
+
+    function toggleCalibration() {
+      isCalibrating = !isCalibrating;
+      isAvatarMode = false;
+      document.body.classList.toggle('calibration-mode', isCalibrating);
+      document.body.classList.remove('face-mode');
+      document.getElementById('calibrateBtn').textContent = isCalibrating ? 'Exit Calibration' : 'Calibrate Hand';
+      document.getElementById('avatarPanel').style.display = 'none';
+      
+      if (!isCalibrating) {
+        // Redraw everything when exiting calibration
+        redrawStrokes();
+      }
+    }
+
+    function toggleAvatarMode() {
+      isAvatarMode = !isAvatarMode;
+      isCalibrating = false;
+      document.body.classList.toggle('face-mode', isAvatarMode);
+      document.body.classList.remove('calibration-mode');
+      document.getElementById('avatarBtn').textContent = isAvatarMode ? 'Exit Avatar Mode' : 'Avatar Mode';
+      document.getElementById('avatarPanel').style.display = isAvatarMode ? 'flex' : 'none';
+      document.getElementById('shapesPanel').style.display = 'none';
+      
+      if (!isAvatarMode) {
+        // Redraw everything when exiting avatar mode
+        redrawStrokes();
+      }
+    }
+
+    // UI Event Listeners
+    document.getElementById('clearBtn').onclick = () => {
+      points = [];
+      redrawStrokes();
+    };
+    
+    document.getElementById('eraserBtn').onclick = (e) => {
+      isEraser = !isEraser;
+      e.target.textContent = isEraser ? 'Eraser On' : 'Eraser Off';
+      currentShape = null;
+      document.getElementById('shapesPanel').style.display = 'none';
+    };
+    
+    document.getElementById('brushSize').onchange = (e) => {
+      brushSize = parseInt(e.target.value);
+    };
+    
+    document.getElementById('bgBtn').onclick = (e) => {
+      bgMode = bgMode === 'white' ? 'space' : 'white';
+      e.target.textContent = bgMode === 'white' ? 'Background: White' : 'Background: Space';
+      redrawStrokes();
+    };
+    
+    document.getElementById('tutorialBtn').onclick = () => {
+      document.getElementById('tutorial').style.display = 'block';
+    };
+    
+    document.getElementById('closeTutorial').onclick = () => {
+      document.getElementById('tutorial').style.display = 'none';
+    };
+    
+    document.getElementById('shapesBtn').onclick = () => {
+      const shapesPanel = document.getElementById('shapesPanel');
+      shapesPanel.style.display = shapesPanel.style.display === 'none' ? 'flex' : 'none';
+      isEraser = false;
+      document.getElementById('eraserBtn').textContent = 'Eraser Off';
+    };
+    
+    // Calibration button
+    document.getElementById('calibrateBtn').onclick = toggleCalibration;
+    
+    // Avatar mode button
+    document.getElementById('avatarBtn').onclick = toggleAvatarMode;
+    
+    // Shape buttons
+    document.querySelectorAll('.shape-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        currentShape = btn.dataset.shape;
+        document.getElementById('shapesPanel').style.display = 'none';
+        statusDiv.textContent = `Selected: ${currentShape}. Pinch to set start point`;
+      });
+    });
+    
+    // Avatar item buttons
+    document.querySelectorAll('.avatar-item').forEach(btn => {
+      btn.addEventListener('click', () => {
+        currentAvatarItem = btn.dataset.item;
+        statusDiv.textContent = `Selected: ${currentAvatarItem}. Move your face to see it!`;
+      });
     });
 
-    // Overwrite drawing color logic:
-    function getStrokeColor() {
-      if(selectedColor==="rainbow") return `hsl(${hue},100%,50%)`;
-      return selectedColor;
-    }
-
-    // cartoon face preview instead of raw video
-    function drawCartoonFace(landmarks) {
-      const ctxOut = canvasElement.getContext("2d");
-      ctxOut.clearRect(0,0,canvasElement.width,canvasElement.height);
-      if(!landmarks) return;
-
-      const left = landmarks[234], right = landmarks[454], top = landmarks[10], bottom = landmarks[152];
-      const xL = (1-left.x)*canvasElement.width, xR=(1-right.x)*canvasElement.width;
-      const yT=top.y*canvasElement.height, yB=bottom.y*canvasElement.height;
-      const w = xR-xL, h=yB-yT;
-      ctxOut.strokeStyle="black"; ctxOut.lineWidth=3;
-      ctxOut.beginPath(); ctxOut.ellipse((xL+xR)/2,(yT+yB)/2,w/2,h/2,0,0,Math.PI*2); ctxOut.stroke();
-      ctxOut.fillStyle="black";
-      ctxOut.beginPath(); ctxOut.arc(xL+w*0.3,yT+h*0.4,10,0,Math.PI*2); ctxOut.fill();
-      ctxOut.beginPath(); ctxOut.arc(xL+w*0.7,yT+h*0.4,10,0,Math.PI*2); ctxOut.fill();
-      ctxOut.beginPath(); ctxOut.arc((xL+xR)/2,yT+h*0.7,20,0,Math.PI); ctxOut.stroke();
-    }
-
-    // modify onFaceResults
-    function onFaceResults(results){
-      if(isAvatarMode && results.multiFaceLandmarks.length>0){
-        faceLandmarks = results.multiFaceLandmarks[0];
-        drawCartoonFace(faceLandmarks);
-        if(currentAvatarItem) drawAvatarItem(currentAvatarItem,faceLandmarks);
-      }
-    }
-
-    // remember to call pushHistory() whenever a stroke/shape is finished
-    // e.g. after points[points.length-1].done=true;
+    // Initialize
+    drawBackground();
   </script>
 </body>
 </html>
