@@ -1,1176 +1,298 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Luis Paiva — Production Planner, Web Designer & Python Developer</title>
-  <meta name="description" content="Portfolio for Luis Paiva: Web Designer & Python Developer specializing in clean, functional websites." />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    :root {
-      --bg: #0a0a0b;
-      --text: #f8fafc;
-      --text-secondary: #9aa3b2;
-      --brand: #00e7f6;
-      --brand-2: #4f46e5;
-      --border: rgba(255, 255, 255, 0.12);
-      --transition: all 0.3s ease;
-      --card-bg: rgba(30, 30, 32, 0.6);
-    }
-    
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-    
-    body {
-      margin: 0;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.6;
-      -webkit-font-smoothing: antialiased;
-      padding-bottom: 1px;
-    }
-    
-    header {
-      padding: 1.5rem 0;
-      border-bottom: 1px solid var(--border);
-      text-align: center;
-      position: sticky;
-      top: 0;
-      background-color: rgba(10, 10, 11, 0.95);
-      backdrop-filter: blur(8px);
-      z-index: 100;
-    }
-    
-    header h1 {
-      font-weight: 800;
-      font-size: 1.8rem;
-      margin: 0;
-      letter-spacing: -0.5px;
-      background: linear-gradient(90deg, var(--brand), var(--brand-2));
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      display: inline-block;
-    }
-    
-    nav {
-      margin-top: 1rem;
-      display: flex;
-      justify-content: center;
-      gap: 1.5rem;
-    }
-    
-    nav a {
-      text-decoration: none;
-      color: var(--text-secondary);
-      font-weight: 600;
-      font-size: 0.95rem;
-      transition: var(--transition);
-      position: relative;
-    }
-    
-    nav a:hover {
-      color: var(--brand);
-    }
-    
-    nav a::after {
-      content: '';
-      position: absolute;
-      bottom: -4px;
-      left: 0;
-      width: 0;
-      height: 2px;
-      background: var(--brand);
-      transition: var(--transition);
-    }
-    
-    nav a:hover::after {
-      width: 100%;
-    }
-    
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 1.5rem;
-    }
-    
-    .section {
-      padding: 5rem 0;
-      scroll-margin-top: 100px;
-    }
-    
-    h2 {
-      font-weight: 800;
-      font-size: 2.25rem;
-      margin-bottom: 1.5rem;
-      letter-spacing: -1px;
-      line-height: 1.2;
-    }
-    
-    h3 {
-      font-size: 1.5rem;
-      margin: 1.5rem 0 1rem;
-    }
-    
-    p {
-      color: var(--text-secondary);
-      font-size: 1.1rem;
-      max-width: 65ch;
-      margin-bottom: 1.5rem;
-    }
-    
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      margin-top: 1rem;
-      padding: 0.75rem 1.5rem;
-      border-radius: 0.5rem;
-      text-decoration: none;
-      font-weight: 600;
-      background: linear-gradient(90deg, var(--brand), var(--brand-2));
-      color: var(--bg);
-      transition: var(--transition);
-      box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
-      border: none;
-      cursor: pointer;
-      font-family: inherit;
-    }
-    
-    .btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
-    }
-    
-    .btn-outline {
-      background: transparent;
-      color: var(--brand);
-      border: 2px solid var(--brand);
-      margin-left: 1rem;
-    }
-    
-    .btn-outline:hover {
-      background: rgba(0, 231, 246, 0.1);
-    }
-    
-    /* Hero Section */
-    .hero {
-      text-align: center;
-      padding: 6rem 1rem;
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .hero::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(circle, rgba(79, 70, 229, 0.1) 0%, transparent 70%);
-      animation: pulse 15s infinite alternate;
-      z-index: -1;
-    }
-    
-    @keyframes pulse {
-      0% {
-        transform: translate(0, 0);
-      }
-      100% {
-        transform: translate(10%, 10%);
-      }
-    }
-    
-    .hero h1 {
-      font-size: 3.5rem;
-      font-weight: 800;
-      margin-bottom: 1rem;
-      line-height: 1.1;
-    }
-    
-    .hero p {
-      font-size: 1.3rem;
-      max-width: 600px;
-      margin: 0 auto 2rem;
-    }
-    
-    /* Skills Section */
-    .skills-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 1.5rem;
-      margin-top: 2rem;
-    }
-    
-    .skill-item {
-      background: var(--card-bg);
-      padding: 1.5rem;
-      border-radius: 1rem;
-      transition: var(--transition);
-      border: 1px solid var(--border);
-    }
-    
-    .skill-item:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-    }
-    
-    .skill-icon {
-      font-size: 2.5rem;
-      margin-bottom: 1rem;
-      color: var(--brand);
-    }
-    
-    .skill-title {
-      font-weight: 700;
-      font-size: 1.25rem;
-      margin-bottom: 0.5rem;
-    }
-    
-    .skill-description {
-      font-size: 0.95rem;
-      color: var(--text-secondary);
-    }
-    
-    /* Projects Section */
-    .projects-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-      gap: 2rem;
-      margin-top: 3rem;
-    }
-    
-    .project-card {
-      background: var(--card-bg);
-      border-radius: 1rem;
-      overflow: hidden;
-      border: 1px solid var(--border);
-      transition: var(--transition);
-    }
-    
-    .project-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
-    }
-    
-    .project-image {
-      height: 200px;
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .project-image-inner {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--brand);
-      font-size: 4rem;
-      background: linear-gradient(120deg, #2d2d39, #1a1a22);
-    }
-    
-    .project-image-inner.airdraw {
-      background: linear-gradient(120deg, #2d2d39, #1a1a22);
-    }
-    
-    .project-image-inner.clean-boss {
-      background: linear-gradient(120deg, #1a2a3a, #0d1b2a);
-    }
-    
-    .project-image-inner.scanner {
-      background: linear-gradient(120deg, #1a1a3a, #0d0b2a);
-    }
-    
-    .project-content {
-      padding: 1.5rem;
-    }
-    
-    .project-title {
-      font-weight: 700;
-      font-size: 1.5rem;
-      margin-bottom: 0.5rem;
-    }
-    
-    .project-description {
-      color: var(--text-secondary);
-      margin-bottom: 1.5rem;
-      font-size: 1rem;
-    }
-    
-    .project-tech {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      margin-bottom: 1.5rem;
-    }
-    
-    .tech-tag {
-      background: rgba(79, 70, 229, 0.2);
-      color: var(--brand-2);
-      padding: 0.25rem 0.75rem;
-      border-radius: 100px;
-      font-size: 0.75rem;
-      font-weight: 600;
-    }
-    
-    .project-links {
-      display: flex;
-      gap: 1rem;
-    }
-    
-    /* Scanner Modal Styles */
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.8);
-      z-index: 1000;
-      overflow: auto;
-      backdrop-filter: blur(5px);
-    }
-    
-    .modal-content {
-      background-color: var(--card-bg);
-      margin: 5% auto;
-      padding: 0;
-      border-radius: 1rem;
-      width: 90%;
-      max-width: 900px;
-      position: relative;
-      border: 1px solid var(--border);
-      overflow: hidden;
-    }
-    
-    .close-modal {
-      position: absolute;
-      top: 15px;
-      right: 15px;
-      color: var(--text);
-      font-size: 28px;
-      font-weight: bold;
-      cursor: pointer;
-      z-index: 10;
-      background: rgba(0, 0, 0, 0.5);
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    .close-modal:hover {
-      background: rgba(0, 0, 0, 0.7);
-    }
-    
-    .modal-body {
-      padding: 2rem;
-    }
-    
-    /* Scanner App Styles */
-    .scanner-container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 20px;
-      margin-bottom: 30px;
-    }
-    
-    .camera-feed, .preview {
-      flex: 1;
-      min-width: 300px;
-      background: rgba(0, 0, 0, 0.4);
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
-      position: relative;
-    }
-    
-    .camera-placeholder, #preview-canvas {
-      width: 100%;
-      height: 300px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #111;
-    }
-    
-    #camera-video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transform: scaleX(-1); /* Mirror the camera feed */
-    }
-    
-    .scanner-controls {
-      display: flex;
-      justify-content: center;
-      gap: 15px;
-      padding: 20px;
-    }
-    
-    .scanner-btn {
-      padding: 12px 25px;
-      border: none;
-      border-radius: 50px;
-      background: linear-gradient(to right, #3494E6, #EC6EAD);
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
-    }
-    
-    .scanner-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.3);
-    }
-    
-    .scanner-btn:active {
-      transform: translateY(1px);
-    }
-    
-    #scan-btn {
-      background: linear-gradient(to right, #00b09b, #96c93d);
-    }
-    
-    #reset-scanner-btn {
-      background: linear-gradient(to right, #ff5e62, #ff9966);
-    }
-    
-    .scanner-instructions {
-      background: rgba(0, 0, 0, 0.4);
-      border-radius: 10px;
-      padding: 20px;
-      margin-top: 20px;
-      line-height: 1.6;
-    }
-    
-    .scanner-instructions h2 {
-      margin-bottom: 10px;
-      font-size: 1.5rem;
-    }
-    
-    .scanner-instructions ol {
-      padding-left: 20px;
-    }
-    
-    .scanner-instructions li {
-      margin-bottom: 10px;
-    }
-    
-    .scanner-status {
-      text-align: center;
-      padding: 10px;
-      font-weight: bold;
-      background: rgba(0, 0, 0, 0.3);
-      border-radius: 5px;
-      margin-top: 10px;
-    }
-    
-    .progress-bar {
-      height: 10px;
-      background: #333;
-      border-radius: 5px;
-      margin: 10px 0;
-      overflow: hidden;
-    }
-    
-    .progress {
-      height: 100%;
-      background: linear-gradient(to right, #00b09b, #96c93d);
-      width: 0%;
-      transition: width 0.5s;
-    }
-    
-    .capture-points {
-      display: flex;
-      justify-content: center;
-      gap: 8px;
-      margin-top: 10px;
-    }
-    
-    .capture-point {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background: #666;
-    }
-    
-    .capture-point.active {
-      background: #00e7f6;
-      box-shadow: 0 0 10px #00e7f6;
-    }
-    
-    /* Contact Section */
-    .contact-links {
-      display: flex;
-      gap: 1rem;
-      margin-top: 1.5rem;
-      flex-wrap: wrap;
-    }
-    
-    footer {
-      padding: 2rem;
-      text-align: center;
-      border-top: 1px solid var(--border);
-      font-size: 0.9rem;
-      color: var(--text-secondary);
-      margin-top: 3rem;
-    }
-    
-    /* Responsive Design */
-    @media (max-width: 768px) {
-      .hero h1 {
-        font-size: 2.5rem;
-      }
-      
-      .hero p {
-        font-size: 1.1rem;
-      }
-      
-      nav {
-        gap: 1rem;
-      }
-      
-      .section {
-        padding: 3rem 0;
-      }
-      
-      h2 {
-        font-size: 1.8rem;
-      }
-      
-      .btn-outline {
-        margin-left: 0;
-        margin-top: 1rem;
-      }
-      
-      .contact-links {
-        flex-direction: column;
-        align-items: center;
-      }
-      
-      .contact-links .btn {
-        width: 100%;
-        text-align: center;
-        justify-content: center;
-      }
-      
-      .projects-grid {
-        grid-template-columns: 1fr;
-      }
-      
-      .project-links {
-        flex-direction: column;
-      }
-      
-      .scanner-container {
-        flex-direction: column;
-      }
-      
-      .modal-content {
-        width: 95%;
-        margin: 10% auto;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luis Paiva - Web Designer & Programmer</title>
+    <meta name="description" content="Luis Paiva is a professional web designer and programmer specializing in full-stack development, machine learning, and modern web applications.">
+    <link rel="icon" type="image/svg+xml" href="/icon.svg">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(to bottom right, #0f172a, #1e293b);
+            color: #f1f5f9;
+            min-height: 100vh;
+        }
+        
+        .nav-link {
+            position: relative;
+            transition: color 0.3s ease;
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-link:hover::after {
+            width: 100%;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .project-card {
+            background: rgba(30, 41, 59, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(100, 116, 139, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .project-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(59, 130, 246, 0.5);
+            box-shadow: 0 20px 40px rgba(59, 130, 246, 0.1);
+        }
+        
+        .skill-badge {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: #93c5fd;
+            transition: all 0.3s ease;
+        }
+        
+        .skill-badge:hover {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: rgba(59, 130, 246, 0.5);
+        }
+        
+        .cta-button {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        }
+        
+        .cta-button:hover {
+            box-shadow: 0 6px 25px rgba(59, 130, 246, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        .social-link {
+            transition: all 0.3s ease;
+        }
+        
+        .social-link:hover {
+            color: #3b82f6;
+            transform: translateY(-2px);
+        }
+    </style>
 </head>
 <body>
-  <header>
-    <div class="container">
-      <h1>Luis Paiva</h1>
-      <nav>
-        <a href="#about">About</a>
-        <a href="#skills">Skills</a>
-        <a href="#projects">Projects</a>
-        <a href="#contact">Contact</a>
-      </nav>
-    </div>
-  </header>
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-slate-900/80 border-b border-slate-700/50">
+        <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="text-xl font-bold gradient-text">Luis Paiva</div>
+            <div class="hidden md:flex gap-8">
+                <a href="#about" class="nav-link text-slate-300 hover:text-white">About</a>
+                <a href="#projects" class="nav-link text-slate-300 hover:text-white">Projects</a>
+                <a href="#skills" class="nav-link text-slate-300 hover:text-white">Skills</a>
+                <a href="#contact" class="nav-link text-slate-300 hover:text-white">Contact</a>
+            </div>
+        </div>
+    </nav>
 
-  <main>
-    <section class="hero">
-      <div class="container">
-        <h1>Web Designer & Python Developer</h1>
-        <p>Creating clean, functional, and immersive digital experiences with code and design</p>
-        <a href="#projects" class="btn">View My Work</a>
-      </div>
+    <!-- Hero Section -->
+    <section class="pt-32 pb-20 px-6">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center">
+                <h1 class="text-5xl md:text-7xl font-bold mb-6 leading-tight">
+                    Web Designer &<br>
+                    <span class="gradient-text">Full-Stack Developer</span>
+                </h1>
+                <p class="text-xl md:text-2xl text-slate-400 mb-8 max-w-2xl mx-auto">
+                    Building polished software and web experiences with a focus on design, performance, and modern technologies.
+                </p>
+                <div class="flex gap-4 justify-center">
+                    <a href="#projects" class="cta-button px-8 py-3 rounded-lg font-semibold text-white">
+                        View Projects
+                    </a>
+                    <a href="#contact" class="px-8 py-3 rounded-lg font-semibold border border-slate-600 hover:border-blue-500 text-white transition-all">
+                        Get in Touch
+                    </a>
+                </div>
+            </div>
+        </div>
     </section>
 
-    <section id="about" class="section">
-      <div class="container">
-        <h2>About Me</h2>
-        <p>Hello! I'm Luis Paiva, a passionate Web Designer and Python Developer focused on creating clean, functional websites and applications. I believe in the power of simplicity and user-centered design to create digital experiences that truly resonate with people.</p>
-        <p>My approach combines technical expertise with an eye for design, ensuring that every project I work on is not only functional but also visually appealing and intuitive to use.</p>
-      </div>
+    <!-- About Section -->
+    <section id="about" class="py-20 px-6">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-3xl md:text-4xl font-bold mb-8 gradient-text">About Me</h2>
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div>
+                    <p class="text-lg text-slate-300 leading-relaxed mb-4">
+                        I'm a passionate web designer and programmer who crafts accessible, pixel-perfect user interfaces that blend thoughtful design with robust engineering.
+                    </p>
+                    <p class="text-lg text-slate-300 leading-relaxed mb-4">
+                        My work lies at the intersection of design and development, creating experiences that not only look great but are meticulously built for performance and usability.
+                    </p>
+                    <p class="text-lg text-slate-300 leading-relaxed">
+                        Specialized in React, Next.js, TypeScript, and modern web technologies, I build full-stack applications with a focus on user experience and technical excellence.
+                    </p>
+                </div>
+                <div class="space-y-4">
+                    <div class="project-card p-6 rounded-xl">
+                        <h3 class="text-xl font-semibold mb-2 text-blue-400">Experience</h3>
+                        <p class="text-slate-400">10+ years building web applications</p>
+                    </div>
+                    <div class="project-card p-6 rounded-xl">
+                        <h3 class="text-xl font-semibold mb-2 text-purple-400">Focus</h3>
+                        <p class="text-slate-400">Full-stack development, ML, UI/UX</p>
+                    </div>
+                    <div class="project-card p-6 rounded-xl">
+                        <h3 class="text-xl font-semibold mb-2 text-pink-400">Location</h3>
+                        <p class="text-slate-400">Available for remote work worldwide</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </section>
 
-    <section id="skills" class="section">
-      <div class="container">
-        <h2>My Skills</h2>
-        <p>I specialize in these technologies and constantly strive to expand my knowledge and expertise.</p>
-        
-        <div class="skills-grid">
-          <div class="skill-item">
-            <div class="skill-icon">🐍</div>
-            <h3 class="skill-title">Python Development</h3>
-            <p class="skill-description">Building efficient back-end systems, automation scripts, and data processing applications with Python.</p>
-          </div>
-          
-          <div class="skill-item">
-            <div class="skill-icon">⚡</div>
-            <h3 class="skill-title">HTML & CSS</h3>
-            <p class="skill-description">Creating responsive, modern website layouts with clean, semantic HTML and CSS.</p>
-          </div>
-          
-          <div class="skill-item">
-            <div class="skill-icon">☕</div>
-            <h3 class="skill-title">Java Programming</h3>
-            <p class="skill-description">Developing applications and understanding object-oriented programming principles with Java.</p>
-          </div>
+    <!-- Projects Section -->
+    <section id="projects" class="py-20 px-6">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-3xl md:text-4xl font-bold mb-12 gradient-text">Featured Projects</h2>
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- EuroMillions ML Predictor -->
+                <a href="/app" class="project-card p-8 rounded-2xl block group">
+                    <div class="flex items-start justify-between mb-4">
+                        <h3 class="text-2xl font-bold text-white group-hover:text-blue-400 transition-colors">
+                            EuroMillions ML Predictor
+                        </h3>
+                        <svg class="w-6 h-6 text-slate-400 group-hover:text-blue-400 transition-all group-hover:translate-x-1 group-hover:-translate-y-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                        </svg>
+                    </div>
+                    <p class="text-slate-400 mb-6 leading-relaxed">
+                        A full-stack ML application that analyzes historical EuroMillions data using TensorFlow.js to predict lottery numbers. Features real-time training, validation tracking, and performance analytics.
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="skill-badge px-3 py-1 rounded-full text-sm">Next.js</span>
+                        <span class="skill-badge px-3 py-1 rounded-full text-sm">TensorFlow.js</span>
+                        <span class="skill-badge px-3 py-1 rounded-full text-sm">Supabase</span>
+                        <span class="skill-badge px-3 py-1 rounded-full text-sm">TypeScript</span>
+                    </div>
+                </a>
+
+                <!-- Portfolio Placeholder -->
+                <div class="project-card p-8 rounded-2xl">
+                    <div class="flex items-start justify-between mb-4">
+                        <h3 class="text-2xl font-bold text-white">More Projects Coming Soon</h3>
+                    </div>
+                    <p class="text-slate-400 mb-6 leading-relaxed">
+                        Currently working on exciting new projects involving AI, web3, and modern web technologies. Stay tuned for updates!
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="skill-badge px-3 py-1 rounded-full text-sm">React</span>
+                        <span class="skill-badge px-3 py-1 rounded-full text-sm">Node.js</span>
+                        <span class="skill-badge px-3 py-1 rounded-full text-sm">PostgreSQL</span>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
     </section>
 
-    <section id="projects" class="section">
-      <div class="container">
-        <h2>My Projects</h2>
-        <p>Here are some of the projects I've developed to showcase my skills and creativity.</p>
-        
-        <div class="projects-grid">
-          <div class="project-card">
-            <div class="project-image">
-              <div class="project-image-inner airdraw">
-                ✨
-              </div>
+    <!-- Skills Section -->
+    <section id="skills" class="py-20 px-6">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-3xl md:text-4xl font-bold mb-12 gradient-text">Skills & Technologies</h2>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="project-card p-6 rounded-xl">
+                    <h3 class="text-xl font-semibold mb-4 text-blue-400">Frontend</h3>
+                    <div class="space-y-2">
+                        <div class="text-slate-300">React & Next.js</div>
+                        <div class="text-slate-300">TypeScript</div>
+                        <div class="text-slate-300">Tailwind CSS</div>
+                        <div class="text-slate-300">HTML5 & CSS3</div>
+                    </div>
+                </div>
+                <div class="project-card p-6 rounded-xl">
+                    <h3 class="text-xl font-semibold mb-4 text-purple-400">Backend</h3>
+                    <div class="space-y-2">
+                        <div class="text-slate-300">Node.js</div>
+                        <div class="text-slate-300">PostgreSQL</div>
+                        <div class="text-slate-300">Supabase</div>
+                        <div class="text-slate-300">API Design</div>
+                    </div>
+                </div>
+                <div class="project-card p-6 rounded-xl">
+                    <h3 class="text-xl font-semibold mb-4 text-pink-400">Tools & AI</h3>
+                    <div class="space-y-2">
+                        <div class="text-slate-300">TensorFlow.js</div>
+                        <div class="text-slate-300">Git & GitHub</div>
+                        <div class="text-slate-300">Vercel</div>
+                        <div class="text-slate-300">Machine Learning</div>
+                    </div>
+                </div>
             </div>
-            <div class="project-content">
-              <h3 class="project-title">AirDraw</h3>
-              <p class="project-description">An experimental web application that uses computer vision to track hand movements, allowing users to draw in the air and see their gestures translated onto a digital canvas in real-time.</p>
-              
-              <div class="project-tech">
-                <span class="tech-tag">JavaScript</span>
-                <span class="tech-tag">Computer Vision</span>
-                <span class="tech-tag">Interactive</span>
-              </div>
-              
-              <div class="project-links">
-                <a href="airdraw.html" class="btn">
-                  <i class="fas fa-external-link-alt"></i>
-                  Launch App
-                </a>
-                <a href="#" class="btn btn-outline">
-                  <i class="fab fa-github"></i>
-                  Code
-                </a>
-              </div>
-            </div>
-          </div>
-          
-          <div class="project-card">
-            <div class="project-image">
-              <div class="project-image-inner clean-boss">
-                💼
-              </div>
-            </div>
-            <div class="project-content">
-              <h3 class="project-title">Clean Boss Website</h3>
-              <p class="project-description">A modern, responsive website for a cleaning service business. Features a clean design with service information, pricing, and contact details in an elegant layout.</p>
-              
-              <div class="project-tech">
-                <span class="tech-tag">HTML/CSS</span>
-                <span class="tech-tag">Responsive</span>
-                <span class="tech-tag">Business</span>
-              </div>
-              
-              <div class="project-links">
-                <a href="https://v0-clean-boss-website.vercel.app/" target="_blank" class="btn">
-                  <i class="fas fa-external-link-alt"></i>
-                  Visit Website
-                </a>
-                <a href="#" class="btn btn-outline">
-                  <i class="fab fa-github"></i>
-                  Code
-                </a>
-              </div>
-            </div>
-          </div>
-          
-          <div class="project-card">
-            <div class="project-image">
-              <div class="project-image-inner scanner">
-                📷
-              </div>
-            </div>
-            <div class="project-content">
-              <h3 class="project-title">3D Object Scanner</h3>
-              <p class="project-description">An interactive web application that uses your camera to scan real-world objects and generates 3D models. Demonstrates 3D rendering capabilities in the browser.</p>
-              
-              <div class="project-tech">
-                <span class="tech-tag">Three.js</span>
-                <span class="tech-tag">3D Rendering</span>
-                <span class="tech-tag">WebGL</span>
-              </div>
-              
-              <div class="project-links">
-                <a href="#" class="btn launch-scanner">
-                  <i class="fas fa-external-link-alt"></i>
-                  Launch App
-                </a>
-                <a href="#" class="btn btn-outline">
-                  <i class="fab fa-github"></i>
-                  Code
-                </a>
-              </div>
-            </div>
-          </div>
-          
-          <div class="project-card">
-            <div class="project-image">
-              <img src="/placeholder.svg?height=200&width=300" alt="Hand Gesture Hub" />
-            </div>
-            <div class="project-content">
-              <h3 class="project-title">Hand Gesture Hub</h3>
-              <p class="project-description">Interactive gesture recognition app featuring Rock Paper Scissors game and Sign Language Translator using MediaPipe hand tracking technology.</p>
-              
-              <div class="project-tech">
-                <span class="tech-tag">React</span>
-                <span class="tech-tag">TypeScript</span>
-                <span class="tech-tag">MediaPipe</span>
-                <span class="tech-tag">Hand Tracking</span>
-              </div>
-              
-              <div class="project-links">
-                <a href="/hand-gesture-hub" class="btn">
-                  <i class="fas fa-external-link-alt"></i>
-                  Launch App
-                </a>
-                <a href="#" class="btn btn-outline">
-                  <i class="fab fa-github"></i>
-                  Code
-                </a>
-              </div>
-            </div>
-          </div>
         </div>
-      </div>
     </section>
 
-    <section id="contact" class="section">
-      <div class="container">
-        <h2>Let's Connect</h2>
-        <p>Interested in working together or have a project idea? I'm always open to discussing new opportunities and creative ideas.</p>
-        
-        <div class="contact-links">
-          <a class="btn" href="mailto:luispaiva83@gmail.com">
-            <i class="fas fa-envelope"></i>
-            Email Me
-          </a>
-          <a class="btn btn-outline" href="#">
-            <i class="fab fa-linkedin"></i>
-            LinkedIn
-          </a>
-          <a class="btn btn-outline" href="#">
-            <i class="fab fa-github"></i>
-            GitHub
-          </a>
+    <!-- Contact Section -->
+    <section id="contact" class="py-20 px-6">
+        <div class="max-w-6xl mx-auto text-center">
+            <h2 class="text-3xl md:text-4xl font-bold mb-8 gradient-text">Let's Work Together</h2>
+            <p class="text-xl text-slate-400 mb-8 max-w-2xl mx-auto">
+                If you'd like to discuss a project or just say hi, I'm always down to chat.
+            </p>
+            <div class="flex gap-6 justify-center mb-8">
+                <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="social-link text-slate-400">
+                    <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                    </svg>
+                </a>
+                <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" class="social-link text-slate-400">
+                    <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                    </svg>
+                </a>
+                <a href="mailto:contact@luispaiva.dev" class="social-link text-slate-400">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                    </svg>
+                </a>
+            </div>
         </div>
-      </div>
     </section>
-  </main>
 
-  <footer>
-    <div class="container">
-      <p>© <span id="year"></span> Luis Paiva. All rights reserved.</p>
-    </div>
-  </footer>
+    <!-- Footer -->
+    <footer class="py-8 px-6 border-t border-slate-700/50">
+        <div class="max-w-6xl mx-auto text-center text-slate-400">
+            <p>© 2025 by Luis Paiva. All rights reserved.</p>
+            <p class="text-sm mt-2">Built with Next.js, deployed on Vercel</p>
+        </div>
+    </footer>
 
-  <!-- 3D Scanner Modal -->
-  <div id="scanner-modal" class="modal">
-    <div class="modal-content">
-      <span class="close-modal">&times;</span>
-      <div class="modal-body">
-        <h2>3D Object Scanner</h2>
-        <p>Use your camera to scan real-world objects and generate 3D models in your browser.</p>
-        
-        <div class="scanner-container">
-          <div class="camera-feed">
-            <h3>Camera Feed</h3>
-            <div class="camera-placeholder" id="camera-container">
-              <p>Camera access required for scanning</p>
-            </div>
-            <div class="capture-points">
-              <div class="capture-point" id="point-1"></div>
-              <div class="capture-point" id="point-2"></div>
-              <div class="capture-point" id="point-3"></div>
-              <div class="capture-point" id="point-4"></div>
-              <div class="capture-point" id="point-5"></div>
-            </div>
-            <div class="progress-bar">
-              <div class="progress" id="scan-progress"></div>
-            </div>
-            <div class="scanner-status" id="scanner-status">Ready to scan</div>
-          </div>
-          
-          <div class="preview">
-            <h3>3D Preview</h3>
-            <div id="preview-canvas"></div>
-            <div class="scanner-status" id="render-status">No model generated yet</div>
-          </div>
-        </div>
-        
-        <div class="scanner-controls">
-          <button id="start-camera-btn" class="scanner-btn">Start Camera</button>
-          <button id="scan-btn" class="scanner-btn">Scan Object</button>
-          <button id="reset-scanner-btn" class="scanner-btn">Reset</button>
-          <button id="export-btn" class="scanner-btn">Export Model</button>
-        </div>
-        
-        <div class="scanner-instructions">
-          <h3>How to Use This Scanner</h3>
-          <ol>
-            <li>Click "Start Camera" to enable your device's camera (requires permission)</li>
-            <li>Place the object you want to scan in the center of the view with good lighting</li>
-            <li>Click "Scan Object" - the scanner will capture multiple angles</li>
-            <li>Slowly move your camera around the object for best results</li>
-            <li>Wait for the 3D model to be generated on the right side</li>
-            <li>Use "Export Model" to download the 3D model (PLY format)</li>
-            <li>Use "Reset" to clear the current scan and start over</li>
-          </ol>
-          <p><strong>Note:</strong> This scanner creates a point cloud based on feature detection from your camera. For best results, use an object with good texture and lighting.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script>
-    // Set current year in footer
-    document.getElementById('year').textContent = new Date().getFullYear();
-    
-    // Smooth scrolling for navigation links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-      anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        if (target) {
-          target.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start'
-          });
-        }
-      });
-    });
-    
-    // Modal functionality for the 3D scanner
-    const modal = document.getElementById('scanner-modal');
-    const launchScannerBtn = document.querySelector('.launch-scanner');
-    const closeModalBtn = document.querySelector('.close-modal');
-    
-    launchScannerBtn.addEventListener('click', function(e) {
-      e.preventDefault();
-      modal.style.display = 'block';
-      document.body.style.overflow = 'hidden';
-      init3DPreview();
-    });
-    
-    closeModalBtn.addEventListener('click', function() {
-      modal.style.display = 'none';
-      document.body.style.overflow = 'auto';
-      stopCamera();
-    });
-    
-    window.addEventListener('click', function(e) {
-      if (e.target === modal) {
-        modal.style.display = 'none';
-        document.body.style.overflow = 'auto';
-        stopCamera();
-      }
-    });
-    
-    // 3D Scanner functionality
-    let scene, camera, renderer, pointCloud;
-    let isScanning = false;
-    let scanProgress = 0;
-    let videoStream = null;
-    let captureCount = 0;
-    let featurePoints = [];
-    
-    // Initialize the 3D preview
-    function init3DPreview() {
-      // Set up the scene
-      scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x1a1a2e);
-      
-      // Set up the camera
-      const previewCanvas = document.getElementById('preview-canvas');
-      camera = new THREE.PerspectiveCamera(75, previewCanvas.offsetWidth / previewCanvas.offsetHeight, 0.1, 1000);
-      camera.position.z = 5;
-      
-      // Set up the renderer
-      renderer = new THREE.WebGLRenderer({ antialias: true });
-      renderer.setSize(previewCanvas.offsetWidth, previewCanvas.offsetHeight);
-      previewCanvas.innerHTML = '';
-      previewCanvas.appendChild(renderer.domElement);
-      
-      // Add some lights
-      const ambientLight = new THREE.AmbientLight(0x404040);
-      scene.add(ambientLight);
-      
-      const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-      directionalLight.position.set(1, 1, 1);
-      scene.add(directionalLight);
-      
-      // Add a grid helper
-      const gridHelper = new THREE.GridHelper(10, 10);
-      scene.add(gridHelper);
-      
-      // Add axes helper
-      const axesHelper = new THREE.AxesHelper(2);
-      scene.add(axesHelper);
-      
-      // Initial render
-      animate();
-      
-      // Set up scanner buttons
-      document.getElementById('start-camera-btn').addEventListener('click', startCamera);
-      document.getElementById('scan-btn').addEventListener('click', startScanning);
-      document.getElementById('reset-scanner-btn').addEventListener('click', resetScanner);
-      document.getElementById('export-btn').addEventListener('click', exportModel);
-    }
-    
-    // Animation loop
-    function animate() {
-      requestAnimationFrame(animate);
-      
-      if (pointCloud) {
-        pointCloud.rotation.y += 0.005;
-      }
-      
-      renderer.render(scene, camera);
-    }
-    
-    // Start the camera
-    async function startCamera() {
-      try {
-        // Request camera access
-        videoStream = await navigator.mediaDevices.getUserMedia({ 
-          video: { 
-            facingMode: 'environment',
-            width: { ideal: 1280 },
-            height: { ideal: 720 }
-          }, 
-          audio: false 
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
         });
-        
-        // Create video element and add to page
-        const cameraContainer = document.getElementById('camera-container');
-        cameraContainer.innerHTML = '';
-        
-        const video = document.createElement('video');
-        video.id = 'camera-video';
-        video.srcObject = videoStream;
-        video.autoplay = true;
-        video.playsInline = true;
-        
-        cameraContainer.appendChild(video);
-        
-        document.getElementById('scanner-status').textContent = 'Camera active - Position your object';
-        
-      } catch (error) {
-        console.error('Error accessing camera:', error);
-        document.getElementById('scanner-status').textContent = 'Camera access denied. Please allow camera permissions.';
-      }
-    }
-    
-    // Stop the camera
-    function stopCamera() {
-      if (videoStream) {
-        videoStream.getTracks().forEach(track => track.stop());
-        videoStream = null;
-      }
-      
-      const cameraContainer = document.getElementById('camera-container');
-      cameraContainer.innerHTML = '<p>Camera access required for scanning</p>';
-    }
-    
-    // Capture image from video for processing
-    function captureFrame() {
-      const video = document.getElementById('camera-video');
-      if (!video || !videoStream) return null;
-      
-      const canvas = document.createElement('canvas');
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      
-      return canvas.toDataURL('image/jpeg');
-    }
-    
-    // Detect features in the captured image
-    function detectFeatures(imageData) {
-      // In a real implementation, this would use a feature detection algorithm
-      // For this demo, we'll simulate feature detection
-      
-      const features = [];
-      const numFeatures = 100 + Math.floor(Math.random() * 400); // Random number of features
-      
-      for (let i = 0; i < numFeatures; i++) {
-        features.push({
-          x: Math.random() * 2 - 1, // Normalized coordinates
-          y: Math.random() * 2 - 1,
-          z: Math.random() * 0.5,    // Simulated depth
-          color: new THREE.Color(Math.random(), Math.random(), Math.random())
-        });
-      }
-      
-      return features;
-    }
-    
-    // Generate a 3D point cloud from captured features
-    function generatePointCloud(features) {
-      // Clear any existing point cloud
-      if (pointCloud) {
-        scene.remove(pointCloud);
-      }
-      
-      const vertices = [];
-      const colors = [];
-      
-      features.forEach(feature => {
-        vertices.push(feature.x, feature.y, feature.z);
-        colors.push(feature.color.r, feature.color.g, feature.color.b);
-      });
-      
-      const geometry = new THREE.BufferGeometry();
-      geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
-      geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
-      
-      const material = new THREE.PointsMaterial({
-        size: 0.05,
-        vertexColors: true,
-        sizeAttenuation: true
-      });
-      
-      pointCloud = new THREE.Points(geometry, material);
-      scene.add(pointCloud);
-      
-      // Center the point cloud
-      geometry.computeBoundingSphere();
-      if (geometry.boundingSphere) {
-        pointCloud.position.set(
-          -geometry.boundingSphere.center.x,
-          -geometry.boundingSphere.center.y,
-          -geometry.boundingSphere.center.z
-        );
-      }
-      
-      document.getElementById('render-status').textContent = `Point cloud generated with ${features.length} points`;
-    }
-    
-    // Simulate the scanning process with actual camera capture
-    function startScanning() {
-      if (isScanning) return;
-      
-      if (!videoStream) {
-        document.getElementById('scanner-status').textContent = 'Please start the camera first';
-        return;
-      }
-      
-      isScanning = true;
-      scanProgress = 0;
-      captureCount = 0;
-      featurePoints = [];
-      
-      // Reset capture points UI
-      for (let i = 1; i <= 5; i++) {
-        document.getElementById(`point-${i}`).classList.remove('active');
-      }
-      
-      document.getElementById('scanner-status').textContent = 'Scanning...';
-      
-      const progressBar = document.getElementById('scan-progress');
-      const scanInterval = setInterval(() => {
-        // Capture frame and detect features
-        const frame = captureFrame();
-        if (frame) {
-          const features = detectFeatures(frame);
-          featurePoints = featurePoints.concat(features);
-          captureCount++;
-          
-          // Update capture points UI
-          document.getElementById(`point-${captureCount}`).classList.add('active');
-          
-          // Update progress
-          scanProgress += 20;
-          progressBar.style.width = scanProgress + '%';
-        }
-        
-        if (captureCount >= 5) {
-          clearInterval(scanInterval);
-          document.getElementById('scanner-status').textContent = 'Processing captured data...';
-          
-          // Generate the 3D model after a short delay
-          setTimeout(() => {
-            generatePointCloud(featurePoints);
-            document.getElementById('scanner-status').textContent = '3D Model Generated!';
-            isScanning = false;
-          }, 1500);
-        }
-      }, 1000);
-    }
-    
-    // Export the 3D model
-    function exportModel() {
-      if (!pointCloud) {
-        alert('No 3D model to export. Please scan an object first.');
-        return;
-      }
-      
-      // In a real implementation, this would export the model in a standard format
-      // For this demo, we'll simulate export functionality
-      
-      alert('3D model would be exported in PLY format. In a real implementation, this would download the model file.');
-    }
-    
-    // Reset the scanner
-    function resetScanner() {
-      if (pointCloud) {
-        scene.remove(pointCloud);
-        pointCloud = null;
-      }
-      
-      // Reset capture points UI
-      for (let i = 1; i <= 5; i++) {
-        document.getElementById(`point-${i}`).classList.remove('active');
-      }
-      
-      document.getElementById('scan-progress').style.width = '0%';
-      document.getElementById('scanner-status').textContent = 'Ready to scan';
-      document.getElementById('render-status').textContent = 'No model generated yet';
-      isScanning = false;
-    }
-    
-    // Handle window resize for the 3D preview
-    window.addEventListener('resize', () => {
-      if (camera && renderer) {
-        const previewCanvas = document.getElementById('preview-canvas');
-        camera.aspect = previewCanvas.offsetWidth / previewCanvas.offsetHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(previewCanvas.offsetWidth, previewCanvas.offsetHeight);
-      }
-    });
-  </script>
+    </script>
 </body>
 </html>
-
