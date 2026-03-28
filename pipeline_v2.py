@@ -24,7 +24,7 @@ OLLAMA_URL      = "http://127.0.0.1:11434/api/chat"
 MODELS = {
     "scout"      : "llama3.1:8b",
     "strategist" : "qwen2.5-coder:7b",
-    "writer"     : "qwen2.5-coder:7b",
+    "writer"     : "llama3.1:8b",
     "gatekeeper" : "llama3.1:8b",
     "courier"    : "llama3.1:8b",
 }

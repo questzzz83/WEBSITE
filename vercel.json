@@ -1,4 +1,14 @@
 {
   "cleanUrls": true,
-  "trailingSlash": false
+  "trailingSlash": false,
+  "rewrites": [
+    { "source": "/docs/:path*", "destination": "/docs/:path*" },
+    { "source": "/about",       "destination": "/about.html"      },
+    { "source": "/privacy",     "destination": "/privacy.html"    },
+    { "source": "/newsletter",  "destination": "/newsletter.html" },
+    { "source": "/:slug",       "destination": "/article.html"    }
+  ],
+  "errorRoutes": [
+    { "status": 404, "destination": "/404.html" }
+  ]
 }
