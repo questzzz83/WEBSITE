@@ -1,15 +1,19 @@
+# -*- coding: utf-8 -*-
 #!/usr/bin/env python3
 """
-Autonomous Blog Pipeline v2 — luispaiva.co.uk
-Agents: Scout → Strategist → Writer → Gatekeeper → Courier (Fridays)
+Autonomous Blog Pipeline v2 -- luispaiva.co.uk
+Agents: Scout -> Strategist -> Writer -> Gatekeeper -> Courier (Fridays)
 Run: python pipeline_v2.py
 """
 
 import os, re, json, time, subprocess, requests
 from datetime import datetime, date
 from pathlib import Path
+import sys
+if sys.stdout.encoding and sys.stdout.encoding.lower() not in ("utf-8", "utf8"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-# ── CONFIG ────────────────────────────────────────────────────────────────────
+# -- CONFIG --------------------------------------------------------------------
 
 SITE_DOMAIN     = "www.luispaiva.co.uk"
 GITHUB_USERNAME = "questzzz83"
@@ -43,7 +47,7 @@ NL_DIR    = BASE_DIR / "newsletters"
 for _d in [DOCS_DIR, STATE_DIR, LOGS_DIR, NL_DIR]:
     _d.mkdir(parents=True, exist_ok=True)
 
-# ── TOPICS ───────────────────────────────────────────────────────────────────
+# -- TOPICS -------------------------------------------------------------------
 
 TOPICS = [
     "best high yield savings accounts UK 2025",
@@ -126,29 +130,29 @@ TOPICS = [
     "best business bank accounts UK for sole traders 2025",
 ]
 
-# ── SYSTEM PROMPTS ────────────────────────────────────────────────────────────
+# -- SYSTEM PROMPTS ------------------------------------------------------------
 
 PROMPTS = {
 
 "scout": """You are Scout, a research agent for a UK personal finance blog at luispaiva.co.uk.
 You receive a topic. You return a research brief. Nothing else.
 
-Output ONLY this exact markdown — no preamble, no sign-off:
+Output ONLY this exact markdown -- no preamble, no sign-off:
 
 # BRIEF
 ## TOPIC
 [restate topic in 10 words max]
 ## READER INTENT
-[one sentence — what problem is the reader solving?]
+[one sentence -- what problem is the reader solving?]
 ## PRIMARY KEYWORD
-[best SEO keyword — must appear verbatim in the H1 title]
+[best SEO keyword -- must appear verbatim in the H1 title]
 ## SECONDARY KEYWORDS
 - [keyword]
 - [keyword]
 - [keyword]
 - [keyword]
 ## ARTICLE ANGLE
-[one sentence — what makes this article different from every other one on this topic?]
+[one sentence -- what makes this article different from every other one on this topic?]
 ## STRUCTURE
 - H2: [heading]
 - H2: [heading]
@@ -171,7 +175,7 @@ Output ONLY this exact markdown — no preamble, no sign-off:
 You receive a research brief. You return an article skeleton. Nothing else.
 
 Rules:
-- H1 must be ≤60 characters and contain the primary keyword exactly
+- H1 must be <=60 characters and contain the primary keyword exactly
 - META description: 150-160 characters, contains primary keyword
 - Each H2 gets a DIRECTIVE comment with: Goal, Angle, Tone, Words, Must, Avoid
 - Place [AFFILIATE:1] [AFFILIATE:2] [AFFILIATE:3] where product links belong
@@ -180,7 +184,7 @@ Rules:
 
 Output ONLY the skeleton in markdown. No preamble. No sign-off.""",
 
-"writer": """You are Writer, a content writer for luispaiva.co.uk — a UK personal finance blog.
+"writer": """You are Writer, a content writer for luispaiva.co.uk -- a UK personal finance blog.
 Voice: like a financially-savvy friend giving honest advice over coffee.
 You receive a brief and skeleton. You return the complete article. Nothing else.
 
@@ -192,12 +196,12 @@ RULES:
 5. Replace [CTA] with a 2-3 sentence friendly call-to-action
 6. Primary keyword in: H1, first sentence, at least 2 H2s
 7. Paragraphs: 2-3 sentences max
-8. UK-specific: £ signs, real UK providers, UK rates
+8. UK-specific: GBP signs, real UK providers, UK rates
 9. Final line must be exactly:
    *Affiliate disclosure: This article contains affiliate links. We may earn a small commission at no extra cost to you. Always do your own research before making financial decisions.*
 
 When fixing after QA FAIL:
-- Fix only what failed — do not rewrite passing sections
+- Fix only what failed -- do not rewrite passing sections
 - Increment <!-- version: N --> at top
 
 Output ONLY the article. Nothing before it. Nothing after it.""",
@@ -210,29 +214,29 @@ CYCLE: [N]
 WORD COUNT: [exact]
 
 CHECKS:
-[✓ or ✗] Word count 1500-2500: [actual]
-[✓ or ✗] H1 contains primary keyword: [quote both]
-[✓ or ✗] Primary keyword in first sentence: yes/no
-[✓ or ✗] No DIRECTIVE comments remaining: yes/no
-[✓ or ✗] No [AFFILIATE:N] placeholders: yes/no
-[✓ or ✗] No [TABLE] placeholder: yes/no
-[✓ or ✗] No [CTA] placeholder: yes/no
-[✓ or ✗] Comparison table present (≥4 cols, ≥5 rows): yes/no
-[✓ or ✗] Affiliate disclaimer at end: yes/no
-[✓ or ✗] No broken markdown links: yes/no
-[✓ or ✗] Paragraphs ≤3 sentences: yes/no
-[✓ or ✗] UK-specific content (£ signs, UK providers): yes/no
+[OK or FAIL] Word count 1500-2500: [actual]
+[OK or FAIL] H1 contains primary keyword: [quote both]
+[OK or FAIL] Primary keyword in first sentence: yes/no
+[OK or FAIL] No DIRECTIVE comments remaining: yes/no
+[OK or FAIL] No [AFFILIATE:N] placeholders: yes/no
+[OK or FAIL] No [TABLE] placeholder: yes/no
+[OK or FAIL] No [CTA] placeholder: yes/no
+[OK or FAIL] Comparison table present (>=4 cols, >=5 rows): yes/no
+[OK or FAIL] Affiliate disclaimer at end: yes/no
+[OK or FAIL] No broken markdown links: yes/no
+[OK or FAIL] Paragraphs <=3 sentences: yes/no
+[OK or FAIL] UK-specific content (GBP signs, UK providers): yes/no
 
 ISSUES:
-[each ✗ with exact problem and exact fix needed]
+[each FAIL with exact problem and exact fix needed]
 [if PASS: None]
 
 VERDICT: [one sentence]
 
-FAIL if ANY check is ✗. PASS only if ALL are ✓.""",
+FAIL if ANY check is FAIL. PASS only if ALL are OK.""",
 
 "courier": """You are Courier, the newsletter writer for luispaiva.co.uk.
-Every Friday you write "The Friday Money Brief" — one short email, under 450 words.
+Every Friday you write "The Friday Money Brief" -- one short email, under 450 words.
 Tone: a smart friend texting you the week's best money tip. Warm, direct, no fluff.
 
 You receive a list of this week's articles. Pick the most compelling as the lead.
@@ -240,16 +244,16 @@ You receive a list of this week's articles. Pick the most compelling as the lead
 Output ONLY the content between the markers:
 
 ---BRIEF START---
-SUBJECT: [max 50 chars — factual, no clickbait]
-PREVIEW: [max 90 chars — continues subject naturally]
+SUBJECT: [max 50 chars -- factual, no clickbait]
+PREVIEW: [max 90 chars -- continues subject naturally]
 
 ---
 
 Hi [FIRST_NAME],
 
-[HOOK — one punchy sentence with the most interesting UK money fact from the lead article]
+[HOOK -- one punchy sentence with the most interesting UK money fact from the lead article]
 
-[BRIDGE — one sentence connecting hook to why the reader should care]
+[BRIDGE -- one sentence connecting hook to why the reader should care]
 
 **[Lead article title as bold link: [Title](URL)]**
 
@@ -260,8 +264,8 @@ Hi [FIRST_NAME],
 ---
 
 **Also this week:**
-- [Article 2 as link](URL) — [one sentence why it matters]
-- [Article 3 as link](URL) — [one sentence why it matters]
+- [Article 2 as link](URL) -- [one sentence why it matters]
+- [Article 3 as link](URL) -- [one sentence why it matters]
 
 ---
 
@@ -274,7 +278,7 @@ Luis
 ---BRIEF END---""",
 }
 
-# ── HELPERS ───────────────────────────────────────────────────────────────────
+# -- HELPERS -------------------------------------------------------------------
 
 _log_path = LOGS_DIR / f"pipeline_{date.today().isoformat()}.log"
 
@@ -316,11 +320,11 @@ def is_friday():
 def today_iso():
     return date.today().isoformat()
 
-# ── OLLAMA ────────────────────────────────────────────────────────────────────
+# -- OLLAMA --------------------------------------------------------------------
 
 def call_agent(agent, user_msg, retries=2):
     model = MODELS[agent]
-    log(f"  → {agent} ({model}) thinking...")
+    log(f"  -> {agent} ({model}) thinking...")
     payload = {
         "model"   : model,
         "stream"  : False,
@@ -334,25 +338,25 @@ def call_agent(agent, user_msg, retries=2):
             r = requests.post(OLLAMA_URL, json=payload, timeout=600)
             r.raise_for_status()
             content = r.json()["message"]["content"]
-            log(f"  ✓ {agent} done ({word_count(content)} words)")
+            log(f"  OK {agent} done ({word_count(content)} words)")
             return content
         except requests.exceptions.Timeout:
-            log(f"  ✗ {agent} timed out (attempt {attempt})", "WARN")
+            log(f"  FAIL {agent} timed out (attempt {attempt})", "WARN")
         except Exception as e:
-            log(f"  ✗ {agent} error: {e} (attempt {attempt})", "WARN")
+            log(f"  FAIL {agent} error: {e} (attempt {attempt})", "WARN")
         if attempt <= retries:
             time.sleep(5)
-    log(f"  ✗ {agent} failed after all attempts", "ERROR")
+    log(f"  FAIL {agent} failed after all attempts", "ERROR")
     return None
 
-# ── TOPIC ─────────────────────────────────────────────────────────────────────
+# -- TOPIC ---------------------------------------------------------------------
 
 def pick_topic():
     done_path = STATE_DIR / "done_topics.txt"
     done = set(done_path.read_text(encoding="utf-8").splitlines()) if done_path.exists() else set()
     remaining = [t for t in TOPICS if t not in done]
     if not remaining:
-        log("All topics exhausted — add more to TOPICS list", "WARN")
+        log("All topics exhausted -- add more to TOPICS list", "WARN")
         return None
     topic = remaining[0]
     with open(done_path, "a", encoding="utf-8") as f:
@@ -360,7 +364,7 @@ def pick_topic():
     log(f"  Topic: {topic}")
     return topic
 
-# ── GIT ───────────────────────────────────────────────────────────────────────
+# -- GIT -----------------------------------------------------------------------
 
 def git_push(commit_msg):
     log(f"  Pushing: {commit_msg}")
@@ -376,68 +380,68 @@ def git_push(commit_msg):
                 return True
             log(f"  git error: {r.stderr.strip()}", "ERROR")
             return False
-    log("  Pushed ✓ — Vercel deploying...")
+    log("  Pushed OK -- Vercel deploying...")
     return True
 
-# ── PIPELINE ──────────────────────────────────────────────────────────────────
+# -- PIPELINE ------------------------------------------------------------------
 
 def run_article_pipeline():
-    log("══ ARTICLE PIPELINE ══════════════════════════════════════")
+    log("== ARTICLE PIPELINE ======================================")
 
     # Check already done today
     if state_read_json(f"delivery_{today_iso()}").get("published"):
-        log("  Already published today — skipping")
+        log("  Already published today -- skipping")
         return True
 
     # 1. Scout
-    log("── Phase 1 · Scout")
+    log("-- Phase 1 - Scout")
     topic = pick_topic()
     if not topic: return False
     brief = call_agent("scout", f"Research this topic for a UK personal finance blog: {topic}")
     if not brief: return False
     state_write("current_brief", brief)
     state_write("current_topic", topic)
-    log("  Brief saved ✓")
+    log("  Brief saved OK")
 
     # 2. Strategist
-    log("── Phase 2 · Strategist")
+    log("-- Phase 2 - Strategist")
     skeleton = call_agent("strategist", f"Create an article skeleton from this brief:\n\n{brief}")
     if not skeleton: return False
     state_write("current_skeleton", skeleton)
-    log("  Skeleton saved ✓")
+    log("  Skeleton saved OK")
 
     # 3. Writer
-    log("── Phase 3 · Writer")
+    log("-- Phase 3 - Writer")
     draft = call_agent("writer", f"Write the full article.\n\nBRIEF:\n{brief}\n\nSKELETON:\n{skeleton}")
     if not draft: return False
     state_write("current_draft", draft)
-    log(f"  Draft: {word_count(draft)} words ✓")
+    log(f"  Draft: {word_count(draft)} words OK")
 
     # 4. Gatekeeper QA loop
     current = draft
     qa_status = "FAIL"
     cycle = 1
     for cycle in range(1, MAX_QA_RETRIES + 1):
-        log(f"── Phase 4 · Gatekeeper (cycle {cycle}/{MAX_QA_RETRIES})")
+        log(f"-- Phase 4 - Gatekeeper (cycle {cycle}/{MAX_QA_RETRIES})")
         qa = call_agent("gatekeeper", f"Review cycle {cycle}.\n\nBRIEF:\n{brief}\n\nARTICLE:\n{current}")
         if not qa: break
         state_write("last_qa_report", qa)
         if "STATUS: PASS" in qa:
             qa_status = "PASS"
-            log("  Gatekeeper: PASS ✓")
+            log("  Gatekeeper: PASS OK")
             break
-        log(f"  Gatekeeper: FAIL — sending back to Writer")
+        log(f"  Gatekeeper: FAIL -- sending back to Writer")
         if cycle < MAX_QA_RETRIES:
             fixed = call_agent("writer", f"Fix this article based on QA feedback.\n\nBRIEF:\n{brief}\n\nARTICLE:\n{current}\n\nQA REPORT:\n{qa}")
             if fixed:
                 current = fixed
                 state_write("current_draft", fixed)
         else:
-            log("  Max QA cycles reached — publishing with warnings", "WARN")
+            log("  Max QA cycles reached -- publishing with warnings", "WARN")
             qa_status = "FORCED"
 
     # 5. Publish
-    log("── Phase 5 · Publish")
+    log("-- Phase 5 - Publish")
     filename = slug(topic) + ".md"
     dest = DOCS_DIR / filename
     dest.write_text(current, encoding="utf-8")
@@ -447,7 +451,7 @@ def run_article_pipeline():
     build_script = BASE_DIR / "build_homepage.py"
     if build_script.exists():
         r = subprocess.run(["python", str(build_script)], cwd=BASE_DIR, capture_output=True, text=True)
-        if r.returncode == 0: log("  Homepage rebuilt ✓")
+        if r.returncode == 0: log("  Homepage rebuilt OK")
         else: log(f"  Homepage rebuild warning: {r.stderr.strip()}", "WARN")
 
     # Record delivery
@@ -469,24 +473,24 @@ def run_article_pipeline():
     history["articles"] = history["articles"][:30]
     state_write_json("article_history", history)
 
-    git_push(f"auto: publish — {topic[:50]}")
+    git_push(f"auto: publish -- {topic[:50]}")
     log(f"  URL: {delivery['url']}")
-    log(f"══ PIPELINE COMPLETE [{qa_status}] ══════════════════════════")
+    log(f"== PIPELINE COMPLETE [{qa_status}] ==========================")
     return True
 
-# ── NEWSLETTER ────────────────────────────────────────────────────────────────
+# -- NEWSLETTER ----------------------------------------------------------------
 
 def run_newsletter_pipeline():
-    log("══ NEWSLETTER PIPELINE ════════════════════════════════════")
+    log("== NEWSLETTER PIPELINE ====================================")
     week_key = f"newsletter_week_{date.today().isocalendar()[1]}"
     if state_read(week_key) == "sent":
-        log("  Already sent this week — skipping")
+        log("  Already sent this week -- skipping")
         return True
 
     history = state_read_json("article_history")
     articles = history.get("articles", [])[:7]
     if len(articles) < 2:
-        log("  Not enough articles yet (need ≥2)", "WARN")
+        log("  Not enough articles yet (need >=2)", "WARN")
         return False
 
     article_list = ""
@@ -519,16 +523,16 @@ def run_newsletter_pipeline():
         _send_beehiiv(subject, preview, body)
         state_write(week_key, "sent")
     else:
-        log("  Beehiiv not configured — saved locally only")
+        log("  Beehiiv not configured -- saved locally only")
 
     git_push("auto: add weekly newsletter")
-    log("══ NEWSLETTER COMPLETE ════════════════════════════════════")
+    log("== NEWSLETTER COMPLETE ====================================")
     return True
 
 def _send_beehiiv(subject, preview, body_md):
     html = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', body_md)
     html = re.sub(r'\[([^\]]+)\]\(([^\)]+)\)', r'<a href="\2">\1</a>', html)
-    html = re.sub(r'^-> (.+)$', r'<p>→ \1</p>', html, flags=re.MULTILINE)
+    html = re.sub(r'^-> (.+)$', r'<p>-> \1</p>', html, flags=re.MULTILINE)
     html = re.sub(r'^- (.+)$', r'<li>\1</li>', html, flags=re.MULTILINE)
     html = re.sub(r'\n{2,}', '</p><p>', html)
     html = f"<p>{html}</p>"
@@ -542,14 +546,14 @@ def _send_beehiiv(subject, preview, body_md):
     try:
         r = requests.post(url, json=payload, headers=headers, timeout=30)
         if r.status_code in (200, 201):
-            log(f"  Beehiiv: sent ✓ id={r.json().get('data',{}).get('id','?')}")
+            log(f"  Beehiiv: sent OK id={r.json().get('data',{}).get('id','?')}")
             return True
         log(f"  Beehiiv: HTTP {r.status_code}: {r.text[:200]}", "ERROR")
     except Exception as e:
         log(f"  Beehiiv error: {e}", "ERROR")
     return False
 
-# ── MAIN ──────────────────────────────────────────────────────────────────────
+# -- MAIN ----------------------------------------------------------------------
 
 def run():
     log("=" * 60)
