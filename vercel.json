@@ -1,13 +1,4 @@
 {
   "cleanUrls": true,
-  "trailingSlash": false,
-  "routes": [
-    { "src": "/about",      "dest": "/about.html"      },
-    { "src": "/privacy",    "dest": "/privacy.html"    },
-    { "src": "/newsletter", "dest": "/newsletter.html" },
-    { "src": "/404",        "dest": "/404.html"        }
-  ],
-  "errorRoutes": [
-    { "status": 404, "dest": "/404.html" }
-  ]
+  "trailingSlash": false
 }
