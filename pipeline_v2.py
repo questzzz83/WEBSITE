@@ -502,10 +502,22 @@ def run_article_pipeline():
 
     # 5. Publish
     log("-- Phase 5 - Publish")
-    filename = slug(topic) + ".md"
+    article_slug = slug(topic)
+    filename = article_slug + ".md"
     dest = DOCS_DIR / filename
     dest.write_text(current, encoding="utf-8")
     log(f"  Saved: docs/{filename}")
+
+    # Build standalone HTML page in a slug/index.html folder
+    try:
+        from build_article import build_article_html
+        slug_dir = BASE_DIR / article_slug
+        slug_dir.mkdir(parents=True, exist_ok=True)
+        html = build_article_html(topic, article_slug, current)
+        (slug_dir / "index.html").write_text(html, encoding="utf-8")
+        log(f"  Saved: {article_slug}/index.html")
+    except Exception as e:
+        log(f"  Article HTML build skipped: {e}", "WARN")
 
     # Rebuild homepage
     build_script = BASE_DIR / "build_homepage.py"

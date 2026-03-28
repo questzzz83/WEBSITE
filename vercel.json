@@ -1,9 +1,4 @@
 {
-  "rewrites": [
-    { "source": "/docs/:path*",  "destination": "/docs/:path*"    },
-    { "source": "/about",        "destination": "/about.html"      },
-    { "source": "/privacy",      "destination": "/privacy.html"    },
-    { "source": "/newsletter",   "destination": "/newsletter.html" },
-    { "source": "/:slug",        "destination": "/article.html"    }
-  ]
+  "cleanUrls": true,
+  "trailingSlash": false
 }
