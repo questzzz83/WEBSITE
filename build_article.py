@@ -290,8 +290,8 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
     // Clicking same button again does nothing
     if (voted === reaction) return;
 
-    // Upsert: insert or update based on slug + session_id unique constraint
-    fetch(SUPABASE_URL + "/rest/v1/article_reactions", {{
+    // Upsert on slug+session_id conflict — updates reaction if row exists
+    fetch(SUPABASE_URL + "/rest/v1/article_reactions?on_conflict=slug,session_id", {{
       method: "POST",
       headers: {{
         "apikey": SUPABASE_KEY,
