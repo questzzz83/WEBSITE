@@ -322,8 +322,48 @@ def today_iso():
 
 # -- OLLAMA --------------------------------------------------------------------
 
+_last_model_used = None
+
+def unload_model(model):
+    """Tell Ollama to unload a model and poll until VRAM is actually clear."""
+    try:
+        requests.post(
+            OLLAMA_URL.replace("/api/chat", "/api/generate"),
+            json={"model": model, "keep_alive": 0},
+            timeout=15
+        )
+        log(f"  Unloaded {model} from VRAM")
+    except Exception:
+        pass
+
+    # Poll /api/ps until model is gone from loaded list (max 60s)
+    for i in range(20):
+        time.sleep(3)
+        try:
+            r = requests.get(
+                OLLAMA_URL.replace("/api/chat", "/api/ps"),
+                timeout=10
+            )
+            loaded = [m.get("name", "") for m in r.json().get("models", [])]
+            if not any(model.split(":")[0] in m for m in loaded):
+                log(f"  VRAM clear confirmed after {(i+1)*3}s")
+                time.sleep(5)  # extra buffer after confirmation
+                return
+        except Exception:
+            pass
+    log("  VRAM poll timeout -- waiting 20s extra", "WARN")
+    time.sleep(20)
+
 def call_agent(agent, user_msg, retries=2):
+    global _last_model_used
     model = MODELS[agent]
+
+    # If switching models, unload previous and wait for VRAM to clear
+    if _last_model_used and _last_model_used != model:
+        log(f"  Switching model: {_last_model_used} -> {model}")
+        unload_model(_last_model_used)
+        time.sleep(20)  # wait for VRAM to fully clear on 8GB GPU
+
     log(f"  -> {agent} ({model}) thinking...")
     payload = {
         "model"   : model,
@@ -332,6 +372,11 @@ def call_agent(agent, user_msg, retries=2):
             {"role": "system", "content": PROMPTS[agent]},
             {"role": "user",   "content": user_msg},
         ],
+        "keep_alive": "5m",
+        "options": {
+            "num_gpu"   : 12,   # conservative split for 8GB VRAM
+            "num_thread": 8,    # CPU threads for remaining layers
+        },
     }
     for attempt in range(1, retries + 2):
         try:
@@ -339,6 +384,7 @@ def call_agent(agent, user_msg, retries=2):
             r.raise_for_status()
             content = r.json()["message"]["content"]
             log(f"  OK {agent} done ({word_count(content)} words)")
+            _last_model_used = model
             return content
         except requests.exceptions.Timeout:
             log(f"  FAIL {agent} timed out (attempt {attempt})", "WARN")
@@ -353,7 +399,21 @@ def call_agent(agent, user_msg, retries=2):
 
 def pick_topic():
     done_path = STATE_DIR / "done_topics.txt"
-    done = set(done_path.read_text(encoding="utf-8").splitlines()) if done_path.exists() else set()
+    next_path = STATE_DIR / "next_topic.txt"
+    done      = set(done_path.read_text(encoding="utf-8").splitlines()) if done_path.exists() else set()
+
+    # Check if trend_scout.py queued a trending topic for today
+    if next_path.exists():
+        trending = next_path.read_text(encoding="utf-8").strip()
+        if trending and trending not in done:
+            log(f"  Topic (trending): {trending}")
+            with open(done_path, "a", encoding="utf-8") as f:
+                f.write(trending + "\n")
+            next_path.unlink()
+            return trending
+        next_path.unlink()
+
+    # Fall back to static list
     remaining = [t for t in TOPICS if t not in done]
     if not remaining:
         log("All topics exhausted -- add more to TOPICS list", "WARN")
@@ -361,7 +421,7 @@ def pick_topic():
     topic = remaining[0]
     with open(done_path, "a", encoding="utf-8") as f:
         f.write(topic + "\n")
-    log(f"  Topic: {topic}")
+    log(f"  Topic (static list): {topic}")
     return topic
 
 # -- GIT -----------------------------------------------------------------------
