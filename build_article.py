@@ -186,6 +186,17 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
 .footer-links a:hover{color:var(--accent)}
 .footer-legal{font-size:.7rem;color:var(--ink-muted);width:100%;margin-top:.5rem}
 @media(max-width:600px){.cta-form{flex-direction:column}}
+.reactions{text-align:center;margin:3rem 0 2rem;padding:2rem;background:var(--cream);border:1px solid var(--rule)}
+.reactions-label{font-size:.85rem;color:var(--ink-muted);margin-bottom:1.25rem;text-transform:uppercase;letter-spacing:.08em}
+.reactions-buttons{display:flex;justify-content:center;gap:1.5rem}
+.reaction-btn{display:flex;flex-direction:column;align-items:center;gap:.4rem;background:var(--paper);border:2px solid var(--rule);padding:.9rem 2rem;cursor:pointer;font-family:var(--sans);transition:all .2s;min-width:90px}
+.reaction-btn:hover{border-color:var(--ink);transform:translateY(-2px)}
+.reaction-btn.active{border-color:var(--accent);background:var(--accent);color:#fff}
+.reaction-btn.active .reaction-count{color:#fff}
+.reaction-btn.dimmed{opacity:.45}
+.reaction-icon{font-size:1.6rem;line-height:1}
+.reaction-count{font-size:.88rem;font-weight:500;color:var(--ink-muted)}
+
 """
 
     return """<!DOCTYPE html>
@@ -212,6 +223,90 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
 <div class="article-label">{cat}</div>
 {body}
 {disclaimer}
+
+<div class="reactions" id="reactions">
+  <p class="reactions-label">Was this article helpful?</p>
+  <div class="reactions-buttons">
+    <button class="reaction-btn" id="btn-like" onclick="react('like')">
+      <span class="reaction-icon">👍</span>
+      <span class="reaction-count" id="count-like">--</span>
+    </button>
+    <button class="reaction-btn" id="btn-dislike" onclick="react('dislike')">
+      <span class="reaction-icon">👎</span>
+      <span class="reaction-count" id="count-dislike">--</span>
+    </button>
+  </div>
+</div>
+
+<script>
+(function() {{
+  var SUPABASE_URL = "https://ypvjjmeuocdntwgagyqd.supabase.co";
+  var SUPABASE_KEY = "sb_publishable_UcS1DYjeWuTiFKduCwlwag_6f4grHGI";
+  var SLUG = "{slug}";
+  var VOTED_KEY = "voted_" + SLUG;
+  var voted = localStorage.getItem(VOTED_KEY);
+
+  function applyVoted(reaction) {{
+    var btnLike = document.getElementById("btn-like");
+    var btnDislike = document.getElementById("btn-dislike");
+    if (!btnLike || !btnDislike) return;
+    btnLike.classList.remove("active","dimmed");
+    btnDislike.classList.remove("active","dimmed");
+    if (reaction === "like") {{
+      btnLike.classList.add("active");
+      btnDislike.classList.add("dimmed");
+    }} else if (reaction === "dislike") {{
+      btnDislike.classList.add("active");
+      btnLike.classList.add("dimmed");
+    }}
+  }}
+
+  function loadCounts() {{
+    fetch(SUPABASE_URL + "/rest/v1/article_reactions?slug=eq." + SLUG + "&select=reaction", {{
+      headers: {{ "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY }}
+    }})
+    .then(function(r) {{ return r.json(); }})
+    .then(function(rows) {{
+      var likes = rows.filter(function(r) {{ return r.reaction === "like"; }}).length;
+      var dislikes = rows.filter(function(r) {{ return r.reaction === "dislike"; }}).length;
+      var el1 = document.getElementById("count-like");
+      var el2 = document.getElementById("count-dislike");
+      if (el1) el1.textContent = likes;
+      if (el2) el2.textContent = dislikes;
+    }})
+    .catch(function() {{}});
+  }}
+
+  window.react = function(reaction) {{
+    if (voted) {{
+      applyVoted(voted);
+      return;
+    }}
+    fetch(SUPABASE_URL + "/rest/v1/article_reactions", {{
+      method: "POST",
+      headers: {{
+        "apikey": SUPABASE_KEY,
+        "Authorization": "Bearer " + SUPABASE_KEY,
+        "Content-Type": "application/json",
+        "Prefer": "return=minimal"
+      }},
+      body: JSON.stringify({{ slug: SLUG, reaction: reaction }})
+    }})
+    .then(function(r) {{
+      if (r.ok || r.status === 201) {{
+        voted = reaction;
+        localStorage.setItem(VOTED_KEY, reaction);
+        applyVoted(reaction);
+        loadCounts();
+      }}
+    }})
+    .catch(function() {{}});
+  }};
+
+  loadCounts();
+  if (voted) applyVoted(voted);
+}})();
+</script>
 <div class="article-cta">
 <h3>The Friday Money Brief</h3>
 <p>One money tip every Friday. No spam. Unsubscribe any time.</p>
