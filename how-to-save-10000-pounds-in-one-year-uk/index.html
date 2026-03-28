@@ -149,29 +149,45 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
   }
 
   window.react = function(reaction) {
-    if (voted) {
-      applyVoted(voted);
-      return;
+    // Clicking same button again does nothing
+    if (voted === reaction) return;
+
+    function insertVote() {
+      fetch(SUPABASE_URL + "/rest/v1/article_reactions", {
+        method: "POST",
+        headers: {
+          "apikey": SUPABASE_KEY,
+          "Authorization": "Bearer " + SUPABASE_KEY,
+          "Content-Type": "application/json",
+          "Prefer": "return=minimal"
+        },
+        body: JSON.stringify({ slug: SLUG, reaction: reaction })
+      })
+      .then(function(r) {
+        if (r.ok || r.status === 201) {
+          voted = reaction;
+          localStorage.setItem(VOTED_KEY, reaction);
+          applyVoted(reaction);
+          loadCounts();
+        }
+      })
+      .catch(function() {});
     }
-    fetch(SUPABASE_URL + "/rest/v1/article_reactions", {
-      method: "POST",
-      headers: {
-        "apikey": SUPABASE_KEY,
-        "Authorization": "Bearer " + SUPABASE_KEY,
-        "Content-Type": "application/json",
-        "Prefer": "return=minimal"
-      },
-      body: JSON.stringify({ slug: SLUG, reaction: reaction })
-    })
-    .then(function(r) {
-      if (r.ok || r.status === 201) {
-        voted = reaction;
-        localStorage.setItem(VOTED_KEY, reaction);
-        applyVoted(reaction);
-        loadCounts();
-      }
-    })
-    .catch(function() {});
+
+    if (voted) {
+      // Delete old vote first, then insert new one
+      fetch(SUPABASE_URL + "/rest/v1/article_reactions?slug=eq." + SLUG + "&reaction=eq." + voted, {
+        method: "DELETE",
+        headers: {
+          "apikey": SUPABASE_KEY,
+          "Authorization": "Bearer " + SUPABASE_KEY
+        }
+      })
+      .then(function() { insertVote(); })
+      .catch(function() { insertVote(); });
+    } else {
+      insertVote();
+    }
   };
 
   loadCounts();
