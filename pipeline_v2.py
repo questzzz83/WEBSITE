@@ -50,7 +50,6 @@ for _d in [DOCS_DIR, STATE_DIR, LOGS_DIR, NL_DIR]:
 # -- TOPICS -------------------------------------------------------------------
 
 TOPICS = [
-    "can i withdraw my lisa savings at 60 uk",  # trending 2026-03-29
     # SAVINGS 2026
     "best high yield savings accounts UK 2026",
     "best easy access savings accounts UK 2026",
@@ -637,6 +636,13 @@ def run_article_pipeline():
         r = subprocess.run(["python", str(build_script)], cwd=BASE_DIR, capture_output=True, text=True)
         if r.returncode == 0: log("  Homepage rebuilt OK")
         else: log(f"  Homepage rebuild warning: {r.stderr.strip()}", "WARN")
+
+    # Rebuild sitemap
+    sitemap_script = BASE_DIR / "build_sitemap.py"
+    if sitemap_script.exists():
+        r = subprocess.run(["python", str(sitemap_script)], cwd=BASE_DIR, capture_output=True, text=True)
+        if r.returncode == 0: log("  Sitemap rebuilt OK")
+        else: log(f"  Sitemap rebuild warning: {r.stderr.strip()}", "WARN")
 
     # Record delivery
     delivery = {
