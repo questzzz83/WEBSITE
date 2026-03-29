@@ -35,7 +35,7 @@
     .cat-item{position:relative;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(247,245,240,.7);padding:.65rem 1.1rem;white-space:nowrap;border-right:1px solid rgba(255,255,255,.1);cursor:pointer;user-select:none;transition:color .15s,background .15s}
     .cat-item:hover,.cat-item.is-open{color:var(--paper);background:rgba(255,255,255,.08)}
     .cat-dropdown{display:none;position:absolute;top:100%;left:0;min-width:260px;max-height:300px;overflow-y:auto;background:var(--paper);border-top:3px solid var(--accent);box-shadow:0 8px 32px rgba(0,0,0,.18);z-index:300}
-    .cat-item.is-open .cat-dropdown{display:block}
+    /* dropdown shown via JS */
     .cat-dropdown a{display:block;padding:.6rem 1rem;font-size:.84rem;font-weight:400;letter-spacing:0;text-transform:none;color:var(--ink-soft);text-decoration:none;border-bottom:1px solid var(--rule);transition:background .12s,color .12s;line-height:1.4}
     .cat-dropdown a:last-child{border-bottom:none}
     .cat-dropdown a:hover{background:var(--cream);color:var(--accent)}
@@ -263,26 +263,32 @@
 
   function initDropdowns() {
     var items = document.querySelectorAll('.cat-item');
+    function closeAll() {
+      items.forEach(function(i){
+        var d = i.querySelector('.cat-dropdown');
+        if (d) d.style.display = 'none';
+      });
+    }
     items.forEach(function(item){
+      var drop = item.querySelector('.cat-dropdown');
+      if (drop) drop.style.display = 'none';
       item.addEventListener('mouseenter', function(){
-        items.forEach(function(i){ i.classList.remove('is-open'); });
-        item.classList.add('is-open');
+        closeAll();
+        if (drop) drop.style.display = 'block';
       });
       item.addEventListener('mouseleave', function(e){
-        var drop = item.querySelector('.cat-dropdown');
         if (drop && drop.contains(e.relatedTarget)) return;
-        item.classList.remove('is-open');
+        if (drop) drop.style.display = 'none';
       });
-      var drop = item.querySelector('.cat-dropdown');
       if (drop) {
         drop.addEventListener('mouseleave', function(e){
           if (item.contains(e.relatedTarget)) return;
-          item.classList.remove('is-open');
+          drop.style.display = 'none';
         });
       }
     });
     document.addEventListener('click', function(e){
-      if (!e.target.closest('.cat-item')) items.forEach(function(i){ i.classList.remove('is-open'); });
+      if (!e.target.closest('.cat-item')) closeAll();
     });
   }
 
