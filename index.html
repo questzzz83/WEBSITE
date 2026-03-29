@@ -206,7 +206,7 @@
     if (!slug) return 'Finance';
     var s = slug.toLowerCase();
     if (s.indexOf('lisa') > -1 || (s.indexOf('isa') > -1 && s.indexOf('saving') === -1)) return 'ISAs';
-    if (s.indexOf('saving') > -1 || s.indexOf('premium-bond') > -1) return 'Savings';
+    if (s.indexOf('sav') > -1 || s.indexOf('premium-bond') > -1) return 'Savings';
     if (s.indexOf('invest') > -1 || s.indexOf('etf') > -1 || s.indexOf('index-fund') > -1) return 'Investing';
     if (s.indexOf('isa') > -1) return 'ISAs';
     if (s.indexOf('credit') > -1) return 'Credit';
