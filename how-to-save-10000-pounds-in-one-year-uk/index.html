@@ -180,7 +180,7 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
 </div>
 
 <script>
-(function() {{
+(function() {
   var SUPABASE_URL = "https://ypvjjmeuocdntwgagyqd.supabase.co";
   var SUPABASE_KEY = "sb_publishable_UcS1DYjeWuTiFKduCwlwag_6f4grHGI";
   var SLUG = "how-to-save-10000-pounds-in-one-year-uk";
@@ -189,77 +189,77 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
 
   // Get or create a stable session ID for this browser
   var sessionId = localStorage.getItem(SESSION_KEY);
-  if (!sessionId) {{
+  if (!sessionId) {
     sessionId = "s_" + Math.random().toString(36).slice(2) + Date.now().toString(36);
     localStorage.setItem(SESSION_KEY, sessionId);
-  }}
+  }
 
   var voted = localStorage.getItem(VOTED_KEY);
 
-  function applyVoted(reaction) {{
+  function applyVoted(reaction) {
     var btnLike = document.getElementById("btn-like");
     var btnDislike = document.getElementById("btn-dislike");
     if (!btnLike || !btnDislike) return;
     btnLike.classList.remove("active", "dimmed");
     btnDislike.classList.remove("active", "dimmed");
-    if (reaction === "like") {{
+    if (reaction === "like") {
       btnLike.classList.add("active");
       btnDislike.classList.add("dimmed");
-    }} else if (reaction === "dislike") {{
+    } else if (reaction === "dislike") {
       btnDislike.classList.add("active");
       btnLike.classList.add("dimmed");
-    }}
-  }}
+    }
+  }
 
-  function loadCounts() {{
-    fetch(SUPABASE_URL + "/rest/v1/article_reactions?slug=eq." + SLUG + "&select=reaction", {{
-      headers: {{ "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY }}
-    }})
-    .then(function(r) {{ return r.json(); }})
-    .then(function(rows) {{
-      var likes = rows.filter(function(r) {{ return r.reaction === "like"; }}).length;
-      var dislikes = rows.filter(function(r) {{ return r.reaction === "dislike"; }}).length;
+  function loadCounts() {
+    fetch(SUPABASE_URL + "/rest/v1/article_reactions?slug=eq." + SLUG + "&select=reaction", {
+      headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY }
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(rows) {
+      var likes = rows.filter(function(r) { return r.reaction === "like"; }).length;
+      var dislikes = rows.filter(function(r) { return r.reaction === "dislike"; }).length;
       var el1 = document.getElementById("count-like");
       var el2 = document.getElementById("count-dislike");
       if (el1) el1.textContent = likes;
       if (el2) el2.textContent = dislikes;
-    }})
-    .catch(function() {{}});
-  }}
+    })
+    .catch(function() {});
+  }
 
-  window.react = function(reaction) {{
+  window.react = function(reaction) {
     // Clicking same button again does nothing
     if (voted === reaction) return;
 
     // Upsert on slug+session_id conflict — updates reaction if row exists
-    fetch(SUPABASE_URL + "/rest/v1/article_reactions?on_conflict=slug,session_id", {{
+    fetch(SUPABASE_URL + "/rest/v1/article_reactions?on_conflict=slug,session_id", {
       method: "POST",
-      headers: {{
+      headers: {
         "apikey": SUPABASE_KEY,
         "Authorization": "Bearer " + SUPABASE_KEY,
         "Content-Type": "application/json",
         "Prefer": "resolution=merge-duplicates,return=minimal"
-      }},
-      body: JSON.stringify({{
+      },
+      body: JSON.stringify({
         slug: SLUG,
         session_id: sessionId,
         reaction: reaction
-      }})
-    }})
-    .then(function(r) {{
-      if (r.ok || r.status === 201) {{
+      })
+    })
+    .then(function(r) {
+      if (r.ok || r.status === 201) {
         voted = reaction;
         localStorage.setItem(VOTED_KEY, reaction);
         applyVoted(reaction);
         loadCounts();
-      }}
-    }})
-    .catch(function() {{}});
-  }};
+      }
+    })
+    .catch(function() {});
+  };
 
   loadCounts();
   if (voted) applyVoted(voted);
-}})();
+})();
 </script>
 
 <div class="article-cta">
