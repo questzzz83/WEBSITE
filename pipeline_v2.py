@@ -50,6 +50,7 @@ for _d in [DOCS_DIR, STATE_DIR, LOGS_DIR, NL_DIR]:
 # -- TOPICS -------------------------------------------------------------------
 
 TOPICS = [
+    "can i withdraw my lisa savings at 60 uk",  # trending 2026-03-29
     # SAVINGS 2026
     "best high yield savings accounts UK 2026",
     "best easy access savings accounts UK 2026",
@@ -299,7 +300,7 @@ Voice: like a financially-savvy friend giving honest advice over coffee.
 You receive a brief and skeleton. You return the complete article. Nothing else.
 
 RULES:
-1. Total words: 1500-2500 (count carefully)
+1. Total words: 1500-2500. This is MANDATORY. Under 1500 words = QA FAIL. Write more detail in each section.
 2. Fill every DIRECTIVE block then delete the comment
 3. Replace [AFFILIATE:N] with real markdown links: [Product Name](https://url)
 4. Replace [TABLE] with a markdown table (min 4 columns, 5 data rows, real UK data)
@@ -324,7 +325,7 @@ CYCLE: [N]
 WORD COUNT: [exact]
 
 CHECKS:
-[OK or FAIL] Word count 1500-2500: [actual]
+[OK or FAIL] Word count 1500-2500: [actual -- FAIL if under 1500, no exceptions]
 [OK or FAIL] H1 contains primary keyword: [quote both]
 [OK or FAIL] Primary keyword in first sentence: yes/no
 [OK or FAIL] No DIRECTIVE comments remaining: yes/no
@@ -343,7 +344,8 @@ ISSUES:
 
 VERDICT: [one sentence]
 
-FAIL if ANY check is FAIL. PASS only if ALL are OK.""",
+FAIL if ANY check is FAIL. PASS only if ALL are OK.
+CRITICAL: Word count under 1500 is ALWAYS a FAIL. No exceptions. Count carefully.""",
 
 "courier": """You are Courier, the newsletter writer for luispaiva.co.uk.
 Every Friday you write "The Friday Money Brief" -- one short email, under 450 words.

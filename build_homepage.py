@@ -8,6 +8,9 @@ Run automatically by pipeline_v2.py after each publish.
 
 import re, json
 from pathlib import Path
+import sys
+if sys.stdout.encoding and sys.stdout.encoding.lower() not in ("utf-8","utf8"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 from datetime import datetime
 
 BASE_DIR   = Path(__file__).parent
@@ -30,7 +33,7 @@ def extract_excerpt(text, words=40):
     text = re.sub(r'`[^`]+`', '', text)
     text = re.sub(r'\n{2,}', '\n', text).strip()
     tokens = text.split()
-    return (' '.join(tokens[:words]) + '…') if len(tokens) > words else ' '.join(tokens)
+    return (' '.join(tokens[:words]) + '...') if len(tokens) > words else ' '.join(tokens)
 
 def build_articles():
     articles = []
@@ -59,7 +62,7 @@ def inject(articles):
             f'{replacement}\n    const ARTICLES = window.SITE_ARTICLES || [];'
         )
     INDEX_HTML.write_text(html, encoding="utf-8")
-    print(f"  build_homepage: injected {len(articles)} articles ✓")
+    print(f"  build_homepage: injected {len(articles)} articles OK")
 
 if __name__ == "__main__":
     print(f"[{datetime.now().strftime('%H:%M:%S')}] Building homepage...")
