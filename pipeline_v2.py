@@ -777,20 +777,49 @@ Remember: copy the FULL URL exactly as given above into every link."""
     match   = re.search(r"---BRIEF START---(.*?)---BRIEF END---", result, re.DOTALL)
     content = match.group(1).strip() if match else result.strip()
 
-    # Fix double-bracketed URLs: ([url]) -> (url)
-    content = re.sub(r'\(\[([^\]]+)\]\(([^)]+)\)\)', r'()', content)
-    # Fix [text]([url]) -> [text](url)
-    content = re.sub(r'\[([^\]]+)\]\(\[([^\]]+)\]\(([^)]+)\)\)', r'[]()', content)
-
-    # Remove links to articles that don't exist in docs/
+    # --- Newsletter post-processing ---
     existing_slugs = {p.stem for p in DOCS_DIR.glob("*.md")}
-    def remove_dead_links(m):
-        url = m.group(2)
-        slug = url.rstrip("/").split("/")[-1]
-        if slug in existing_slugs or "luispaiva.co.uk" not in url:
-            return m.group(0)
-        return m.group(1)  # keep text, remove link
-    content = re.sub(r'\[([^\]]+)\]\((https://www\.luispaiva\.co\.uk/[^)]+)\)', remove_dead_links, content)
+
+    # Step 1: Fix [text]([url](url)) -> [text](url)
+    import re as _re
+    def fix_triple(m):
+        return "[" + m.group(1) + "](" + m.group(3) + ")"
+    content = _re.sub(r"\[([^\]]+)\]\(\[([^\]]+)\]\(([^)]+)\)\)", fix_triple, content)
+
+    # Step 2: Fix ([url](url)) -> (url)
+    def fix_double(m):
+        return "(" + m.group(2) + ")"
+    content = _re.sub(r"\(\[([^\]]+)\]\(([^)]+)\)\)", fix_double, content)
+
+    # Step 3: Fix empty links [text]() -> match to real article or remove
+    def fix_empty(m):
+        words = set(_re.sub(r"[^a-z0-9]", " ", m.group(1).lower()).split())
+        best, best_score = None, 0
+        for a in articles:
+            slug_words = set(a["url"].rstrip("/").split("/")[-1].split("-"))
+            score = len(words & slug_words)
+            if score > best_score:
+                best, best_score = a["url"], score
+        if best and best_score >= 3:
+            return "[" + m.group(1) + "](" + best + ")"
+        return m.group(1)
+    content = _re.sub(r"\[([^\]]+)\]\(\s*\)", fix_empty, content)
+
+    # Step 4: Remove dead links (articles not in docs/)
+    def remove_dead(m):
+        slug = m.group(2).rstrip("/").split("/")[-1]
+        return m.group(0) if slug in existing_slugs else m.group(1)
+    content = _re.sub(r"\[([^\]]+)\]\((https://www\.luispaiva\.co\.uk/[^)]+)\)", remove_dead, content)
+
+    # Step 5: Remove bullet lines with no real links
+    cleaned = []
+    for line in content.splitlines():
+        if line.strip().startswith("- "):
+            found = _re.findall(r"https://www\.luispaiva\.co\.uk/([^/]+)/", line)
+            if not found or not any(s in existing_slugs for s in found):
+                continue
+        cleaned.append(line)
+    content = "\n".join(cleaned)
 
     subject = "The Friday Money Brief"
     preview = "Your weekly personal finance roundup from luispaiva.co.uk"
