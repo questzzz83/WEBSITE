@@ -35,8 +35,8 @@ BEEHIIV_PUBLICATION_ID = "YOUR_PUBLICATION_ID_HERE"
 BEEHIIV_SEND_AT        = "immediate"
 
 MAX_QA_RETRIES  = 3
-TARGET_LO       = 1500
-TARGET_HI       = 2500
+TARGET_LO       = 2500
+TARGET_HI       = 3500
 
 BASE_DIR  = Path(__file__).parent
 DOCS_DIR  = BASE_DIR / "docs"
@@ -298,20 +298,33 @@ Output ONLY the skeleton in markdown. No preamble. No sign-off.""",
 Voice: like a financially-savvy friend giving honest advice over coffee.
 You receive a brief and skeleton. You return the complete article. Nothing else.
 
+CRITICAL LENGTH REQUIREMENT: The article MUST be 2,500 words minimum. This is non-negotiable.
+Count your words as you write. If you finish under 2,500 words, you have failed.
+
+HOW TO REACH 2,500 WORDS:
+- Introduction: 200-250 words
+- Each H2 section: 350-450 words minimum
+- With 6 sections that is already 2,300+ words
+- Add real UK examples, specific numbers, step-by-step instructions in every section
+- Never write a section in under 300 words
+- Expand every point with a concrete UK example or specific data
+
 RULES:
-1. Total words: 1500-2500. This is MANDATORY. Under 1500 words = QA FAIL. Write more detail in each section.
+1. Total words: 2,500 minimum. Count carefully. Under 2,500 = automatic failure.
 2. Fill every DIRECTIVE block then delete the comment
 3. Replace [AFFILIATE:N] with real markdown links: [Product Name](https://url)
 4. Replace [TABLE] with a markdown table (min 4 columns, 5 data rows, real UK data)
 5. Replace [CTA] with a 2-3 sentence friendly call-to-action
 6. Primary keyword in: H1, first sentence, at least 2 H2s
 7. Paragraphs: 2-3 sentences max
-8. UK-specific: GBP signs, real UK providers, UK rates
-9. Final line must be exactly:
+8. UK-specific: GBP signs, real UK providers, UK rates and rules
+9. Every section must have at least one specific UK example with real numbers
+10. Final line must be exactly:
    *Affiliate disclosure: This article contains affiliate links. We may earn a small commission at no extra cost to you. Always do your own research before making financial decisions.*
 
 When fixing after QA FAIL:
-- Fix only what failed -- do not rewrite passing sections
+- If word count is low: expand EVERY section by adding more detail, examples, and UK-specific data
+- Do not rewrite passing sections -- only expand them
 - Increment <!-- version: N --> at top
 
 Output ONLY the article. Nothing before it. Nothing after it.""",
@@ -324,7 +337,7 @@ CYCLE: [N]
 WORD COUNT: [exact]
 
 CHECKS:
-[OK or FAIL] Word count 1500-2500: [actual -- FAIL if under 1500, no exceptions]
+[OK or FAIL] Word count minimum 2500: [actual -- FAIL if under 2500, no exceptions, count every word]
 [OK or FAIL] H1 contains primary keyword: [quote both]
 [OK or FAIL] Primary keyword in first sentence: yes/no
 [OK or FAIL] No DIRECTIVE comments remaining: yes/no
@@ -344,7 +357,7 @@ ISSUES:
 VERDICT: [one sentence]
 
 FAIL if ANY check is FAIL. PASS only if ALL are OK.
-CRITICAL: Word count under 1500 is ALWAYS a FAIL. No exceptions. Count carefully.""",
+CRITICAL: Word count under 2500 is ALWAYS a FAIL. No exceptions. Count every single word.""",
 
 "courier": """You are Courier, the newsletter writer for luispaiva.co.uk.
 Every Friday you write "The Friday Money Brief" -- one short email, under 450 words.
@@ -585,6 +598,33 @@ def run_article_pipeline():
     log("-- Phase 3 - Writer")
     draft = call_agent("writer", f"Write the full article.\n\nBRIEF:\n{brief}\n\nSKELETON:\n{skeleton}")
     if not draft: return False
+
+    # Auto-expand if under 2500 words (max 2 expansion attempts)
+    for expand_attempt in range(1, 3):
+        wc = word_count(draft)
+        if wc >= 2500:
+            break
+        log(f"  Draft too short: {wc} words -- expanding (attempt {expand_attempt}/2)", "WARN")
+        expand_prompt = f"""This article is only {wc} words. You MUST expand it to at least 2,500 words.
+
+EXPANSION INSTRUCTIONS:
+- Go through every H2 section and add at least 150 more words to each
+- Add more specific UK examples with real numbers (interest rates, account names, GBP amounts)
+- Add more practical tips and step-by-step detail
+- Do NOT change the structure, headings, or affiliate links
+- Do NOT add new sections -- expand existing ones
+
+CURRENT ARTICLE:
+{draft}
+
+Return the FULL expanded article. Minimum 2,500 words."""
+        expanded = call_agent("writer", expand_prompt)
+        if expanded and word_count(expanded) > wc:
+            draft = expanded
+        else:
+            log(f"  Expansion attempt {expand_attempt} did not improve word count", "WARN")
+            break
+
     state_write("current_draft", draft)
     log(f"  Draft: {word_count(draft)} words OK")
 
