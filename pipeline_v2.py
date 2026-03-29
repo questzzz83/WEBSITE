@@ -836,8 +836,14 @@ Remember: copy the FULL URL exactly as given above into every link."""
             lambda m: "-> [" + m.group(1).strip() + "](" + lead_url + ")",
             content)
 
-    # Step 8: Remove empty bullet lines "- " or "-  "
-    content = _re.sub(r'^- \s*$', '', content, flags=_re.MULTILINE)
+    # Step 8: Remove empty/whitespace-only bullet lines
+    cleaned2 = []
+    for line in content.splitlines():
+        stripped = line.strip()
+        if stripped in ('-', '- ') or (stripped.startswith('- ') and len(stripped) <= 3):
+            continue
+        cleaned2.append(line)
+    content = "\n".join(cleaned2)
     # Remove consecutive blank lines
     content = _re.sub(r'\n{3,}', '\n\n', content).strip()
 
