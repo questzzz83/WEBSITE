@@ -808,16 +808,19 @@ def _send_beehiiv(subject, preview, body_md):
 
 # -- MAIN ----------------------------------------------------------------------
 
-def run():
+def run(force_newsletter=False):
     log("=" * 60)
     log(f"  BLOG PIPELINE  |  {SITE_DOMAIN}")
     log(f"  {date.today().strftime('%A %d %B %Y')}")
     log("=" * 60)
 
-    if is_friday():
+    if is_friday() or force_newsletter:
         run_newsletter_pipeline()
 
-    run_article_pipeline()
+    if not force_newsletter:
+        run_article_pipeline()
 
 if __name__ == "__main__":
-    run()
+    import sys as _sys
+    force_nl = "--newsletter" in _sys.argv
+    run(force_newsletter=force_nl)
