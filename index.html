@@ -264,39 +264,29 @@
 
   function initDropdowns() {
     var items = document.querySelectorAll('.cat-item');
-    var current = null;
 
+    // Use click to toggle — works on all devices and browsers reliably
     items.forEach(function(item){
       var drop = item.querySelector('.cat-dropdown');
 
-      item.addEventListener('mouseenter', function(){
-        if (current && current !== drop) current.style.display = 'none';
-        if (drop) { drop.style.display = 'block'; current = drop; }
-      });
-
-      item.addEventListener('mouseleave', function(e){
-        if (!e.relatedTarget || (!item.contains(e.relatedTarget) && drop && !drop.contains(e.relatedTarget))) {
-          if (drop) { drop.style.display = 'none'; current = null; }
-        }
-      });
-
-      if (drop) {
-        drop.addEventListener('mouseleave', function(e){
-          if (!item.contains(e.relatedTarget)) {
-            drop.style.display = 'none'; current = null;
-          }
-        });
-      }
-    });
-
-    document.addEventListener('click', function(e){
-      if (!e.target.closest('.cat-item')) {
-        items.forEach(function(item){
-          var d = item.querySelector('.cat-dropdown');
+      item.addEventListener('click', function(e){
+        e.stopPropagation();
+        var isOpen = drop && drop.style.display === 'block';
+        // Close all
+        items.forEach(function(i){
+          var d = i.querySelector('.cat-dropdown');
           if (d) d.style.display = 'none';
         });
-        current = null;
-      }
+        // Open this one if it was closed
+        if (!isOpen && drop) drop.style.display = 'block';
+      });
+    });
+
+    document.addEventListener('click', function(){
+      items.forEach(function(i){
+        var d = i.querySelector('.cat-dropdown');
+        if (d) d.style.display = 'none';
+      });
     });
   }
 
