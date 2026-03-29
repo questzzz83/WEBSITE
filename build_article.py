@@ -151,31 +151,29 @@ def add_utm_to_links(body_html, article_slug):
 def build_schema(title, description, article_slug, date_str):
     """Build JSON-LD schema markup for the article."""
     import json as _json
-    schema = {{
+    schema = {
         "@context": "https://schema.org",
         "@type": "Article",
         "headline": title,
         "description": description,
-        "author": {{
+        "author": {
             "@type": "Person",
             "name": "Luis Paiva",
             "url": "https://www.luispaiva.co.uk/about"
-        }},
-        "publisher": {{
+        },
+        "publisher": {
             "@type": "Organization",
             "name": "Luis Paiva",
             "url": "https://www.luispaiva.co.uk"
-        }},
+        },
         "datePublished": date_str,
         "dateModified": date_str,
-        "url": f"https://www.luispaiva.co.uk/{{article_slug}}/",
-        "mainEntityOfPage": {{
+        "url": "https://www.luispaiva.co.uk/" + article_slug + "/",
+        "mainEntityOfPage": {
             "@type": "WebPage",
-            "@id": f"https://www.luispaiva.co.uk/{{article_slug}}/"
-        }}
-    }}
-
-    # Check for FAQ section and add FAQPage schema
+            "@id": "https://www.luispaiva.co.uk/" + article_slug + "/"
+        }
+    }
     return _json.dumps(schema, indent=2)
 
 def build_faq_schema(body_html):
