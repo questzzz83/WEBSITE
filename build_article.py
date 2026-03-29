@@ -609,10 +609,11 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
 <div class="article-cta">
 <h3>The Friday Money Brief</h3>
 <p>One money tip every Friday. No spam. Unsubscribe any time.</p>
-<form class="cta-form" action="https://app.beehiiv.com/subscribe" method="GET" target="_blank">
-<input type="email" name="email" placeholder="your@email.com" required/>
-<button type="submit">Subscribe free</button>
+<form class="cta-form" id="js-cta-form">
+<input type="email" id="js-cta-email" placeholder="your@email.com" required/>
+<button type="submit" id="js-cta-btn">Subscribe free</button>
 </form>
+<p id="js-cta-msg" style="font-size:.8rem;color:rgba(247,245,240,.6);margin-top:.5rem;display:none"></p>
 </div>
 </main>
 <footer>
@@ -630,11 +631,11 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
     <div class="popup-label">Free Weekly Newsletter</div>
     <h3>The Friday Money Brief</h3>
     <p>Join readers getting one practical UK money tip every Friday. No spam. Unsubscribe any time.</p>
-    <form class="popup-form" action="https://app.beehiiv.com/subscribe" method="GET" target="_blank" id="js-popup-form">
-      <input type="email" name="email" placeholder="your@email.com" required />
-      <button type="submit">Subscribe</button>
+    <form class="popup-form" id="js-popup-form">
+      <input type="email" id="js-popup-email" placeholder="your@email.com" required />
+      <button type="submit" id="js-popup-btn">Subscribe</button>
     </form>
-    <p class="popup-disclaimer">Free forever. Unsubscribe in one click.</p>
+    <p class="popup-disclaimer" id="js-popup-msg">Free forever. Unsubscribe in one click.</p>
   </div>
 </div>
 
@@ -716,11 +717,59 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
     if (e.key === 'Escape') closePopup();
   });
 
-  // On form submit close popup after short delay
-  var form = document.getElementById('js-popup-form');
-  if (form) {
-    form.addEventListener('submit', function() {
-      setTimeout(closePopup, 500);
+  // Beehiiv API subscription
+  var BEEHIIV_KEY = "rVl4Xe2jtnVftKXERBLlFRMIJD2zLLRLN1wnaR7NPU9w3ev5LDPjP61q6U9LFhxF";
+  var BEEHIIV_PUB = "pub_8bc3d4e7-0688-4182-8d13-041f31a4bab1";
+
+  function subscribeEmail(email, btn, msgEl) {
+    btn.disabled = true;
+    btn.textContent = 'Subscribing...';
+    fetch('https://api.beehiiv.com/v2/publications/' + BEEHIIV_PUB + '/subscriptions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + BEEHIIV_KEY
+      },
+      body: JSON.stringify({ email: email, reactivate_existing: true, send_welcome_email: true })
+    })
+    .then(function(r) {
+      if (r.ok || r.status === 201) {
+        btn.textContent = 'Subscribed!';
+        if (msgEl) { msgEl.textContent = 'Thanks! Check your inbox to confirm.'; msgEl.style.display = 'block'; }
+        setTimeout(closePopup, 1500);
+      } else {
+        btn.disabled = false;
+        btn.textContent = 'Subscribe';
+        if (msgEl) { msgEl.textContent = 'Something went wrong. Please try again.'; msgEl.style.display = 'block'; }
+      }
+    })
+    .catch(function() {
+      btn.disabled = false;
+      btn.textContent = 'Subscribe';
+    });
+  }
+
+  // Popup form
+  var popupForm = document.getElementById('js-popup-form');
+  if (popupForm) {
+    popupForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      var email = document.getElementById('js-popup-email').value;
+      var btn = document.getElementById('js-popup-btn');
+      var msg = document.getElementById('js-popup-msg');
+      subscribeEmail(email, btn, msg);
+    });
+  }
+
+  // CTA form
+  var ctaForm = document.getElementById('js-cta-form');
+  if (ctaForm) {
+    ctaForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      var email = document.getElementById('js-cta-email').value;
+      var btn = document.getElementById('js-cta-btn');
+      var msg = document.getElementById('js-cta-msg');
+      subscribeEmail(email, btn, msg);
     });
   }
 })();
