@@ -65,17 +65,62 @@
     .masthead-nav a:hover { color: var(--accent); }
 
     /* RIBBON */
-    .ribbon { background: var(--ink); color: var(--paper); padding: 0 1.5rem; overflow-x: auto; scrollbar-width: none; }
+    .ribbon { background: var(--ink); color: var(--paper); padding: 0 1.5rem; overflow-x: auto; scrollbar-width: none; position: relative; z-index: 100; }
     .ribbon::-webkit-scrollbar { display: none; }
-    .ribbon-inner { max-width: var(--max); margin: 0 auto; display: flex; }
-    .ribbon a {
+    .ribbon-inner { max-width: 1140px; margin: 0 auto; display: flex; }
+    .ribbon-item {
+      position: relative;
       font-size: .72rem; letter-spacing: .1em; text-transform: uppercase;
-      color: rgba(247,245,240,.7); text-decoration: none;
-      padding: .6rem 1.1rem; white-space: nowrap;
-      border-right: 1px solid rgba(255,255,255,.1); transition: color .15s, background .15s;
+      color: rgba(247,245,240,.7);
+      padding: .65rem 1.1rem; white-space: nowrap;
+      border-right: 1px solid rgba(255,255,255,.1);
+      cursor: pointer; transition: color .15s, background .15s;
+      user-select: none;
     }
-    .ribbon a:first-child { padding-left: 0; }
-    .ribbon a:hover { color: var(--paper); background: rgba(255,255,255,.06); }
+    .ribbon-item:first-child { padding-left: 0; }
+    .ribbon-item:hover { color: var(--paper); background: rgba(255,255,255,.06); }
+    .ribbon-item:hover .ribbon-dropdown { display: block; }
+    .ribbon-item span { pointer-events: none; }
+
+    /* DROPDOWN */
+    .ribbon-dropdown {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      min-width: 280px;
+      max-height: 320px;
+      overflow-y: auto;
+      background: var(--paper);
+      border-top: 3px solid var(--accent);
+      box-shadow: 0 8px 24px rgba(0,0,0,.15);
+      z-index: 200;
+    }
+    .ribbon-dropdown::-webkit-scrollbar { width: 4px; }
+    .ribbon-dropdown::-webkit-scrollbar-thumb { background: var(--rule); }
+    .ribbon-dropdown a {
+      display: block;
+      padding: .65rem 1rem;
+      font-size: .82rem;
+      font-weight: 400;
+      letter-spacing: 0;
+      text-transform: none;
+      color: var(--ink-soft);
+      text-decoration: none;
+      border-bottom: 1px solid var(--rule);
+      transition: background .12s, color .12s;
+      line-height: 1.4;
+    }
+    .ribbon-dropdown a:last-child { border-bottom: none; }
+    .ribbon-dropdown a:hover { background: var(--cream); color: var(--accent); }
+    .ribbon-dropdown-empty {
+      padding: .75rem 1rem;
+      font-size: .8rem;
+      color: var(--ink-muted);
+      letter-spacing: 0;
+      text-transform: none;
+      font-weight: 400;
+    }
 
     /* HERO */
     .hero { border-bottom: 1px solid var(--rule); padding: 3.5rem 1.5rem 0; }
@@ -205,16 +250,43 @@
   </header>
 
   <nav class="ribbon">
-    <div class="ribbon-inner">
-      <a href="#savings">Savings</a>
-      <a href="#investing">Investing</a>
-      <a href="#isa">ISAs</a>
-      <a href="#credit">Credit Cards</a>
-      <a href="#mortgages">Mortgages</a>
-      <a href="#budgeting">Budgeting</a>
-      <a href="#pension">Pensions</a>
-      <a href="#tax">Tax</a>
-      <a href="#income">Side Income</a>
+    <div class="ribbon-inner" id="js-ribbon">
+      <div class="ribbon-item" data-cat="Savings"><span>Savings</span>
+        <div class="ribbon-dropdown" id="drop-Savings"></div>
+      </div>
+      <div class="ribbon-item" data-cat="Investing"><span>Investing</span>
+        <div class="ribbon-dropdown" id="drop-Investing"></div>
+      </div>
+      <div class="ribbon-item" data-cat="ISAs"><span>ISAs</span>
+        <div class="ribbon-dropdown" id="drop-ISAs"></div>
+      </div>
+      <div class="ribbon-item" data-cat="Credit"><span>Credit Cards</span>
+        <div class="ribbon-dropdown" id="drop-Credit"></div>
+      </div>
+      <div class="ribbon-item" data-cat="Mortgages"><span>Mortgages</span>
+        <div class="ribbon-dropdown" id="drop-Mortgages"></div>
+      </div>
+      <div class="ribbon-item" data-cat="Budgeting"><span>Budgeting</span>
+        <div class="ribbon-dropdown" id="drop-Budgeting"></div>
+      </div>
+      <div class="ribbon-item" data-cat="Pensions"><span>Pensions</span>
+        <div class="ribbon-dropdown" id="drop-Pensions"></div>
+      </div>
+      <div class="ribbon-item" data-cat="Tax"><span>Tax</span>
+        <div class="ribbon-dropdown" id="drop-Tax"></div>
+      </div>
+      <div class="ribbon-item" data-cat="Side Income"><span>Side Income</span>
+        <div class="ribbon-dropdown" id="drop-Side Income"></div>
+      </div>
+      <div class="ribbon-item" data-cat="Debt"><span>Debt</span>
+        <div class="ribbon-dropdown" id="drop-Debt"></div>
+      </div>
+      <div class="ribbon-item" data-cat="Banking"><span>Banking</span>
+        <div class="ribbon-dropdown" id="drop-Banking"></div>
+      </div>
+      <div class="ribbon-item" data-cat="Insurance"><span>Insurance</span>
+        <div class="ribbon-dropdown" id="drop-Insurance"></div>
+      </div>
     </div>
   </nav>
 
@@ -350,7 +422,32 @@
         </article>`).join('');
     }
 
-    if (ARTICLES.length) { renderHero(ARTICLES); renderGrid(ARTICLES); }
+    if (ARTICLES.length) { renderHero(ARTICLES); renderGrid(ARTICLES); renderDropdowns(ARTICLES); }
+
+    function renderDropdowns(articles) {
+      // Group articles by category
+      const groups = {};
+      articles.forEach(a => {
+        const cat = categoryFromSlug(a.slug);
+        if (!groups[cat]) groups[cat] = [];
+        groups[cat].push(a);
+      });
+
+      // Populate each dropdown
+      document.querySelectorAll('.ribbon-item').forEach(item => {
+        const cat = item.dataset.cat;
+        const drop = item.querySelector('.ribbon-dropdown');
+        if (!drop) return;
+        const arts = groups[cat] || [];
+        if (arts.length === 0) {
+          drop.innerHTML = '<div class="ribbon-dropdown-empty">No articles yet</div>';
+        } else {
+          drop.innerHTML = arts.map(a =>
+            '<a href="/' + a.slug + '/">' + a.title + '</a>'
+          ).join('');
+        }
+      });
+    }
   </script>
 </body>
 </html>
