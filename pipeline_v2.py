@@ -6,7 +6,17 @@ Agents: Scout -> Strategist -> Writer -> Gatekeeper -> Courier (Fridays)
 Run: python pipeline_v2.py
 """
 
-import os, re, json, time, subprocess, requests
+import os, re, json, time, subprocess, requests, sys as _sys
+from pathlib import Path as _Path
+try:
+    _notify_path = _Path(__file__).parent / "notify.py"
+    import importlib.util as _ilu
+    _spec = _ilu.spec_from_file_location("notify", _notify_path)
+    _nm = _ilu.module_from_spec(_spec)
+    _spec.loader.exec_module(_nm)
+    notify = _nm.notify
+except Exception:
+    def notify(msg): pass
 from datetime import datetime, date
 from pathlib import Path
 import sys
@@ -553,6 +563,20 @@ def pick_topic():
             return trending
         next_path.unlink()
 
+    # Check strategy room recommendations
+    strategy_path = STATE_DIR / "strategy_latest.md"
+    if strategy_path.exists():
+        strategy = strategy_path.read_text(encoding="utf-8")
+        # Extract recommended article titles
+        rec_titles = re.findall(r"### \d+\. (.+)", strategy)
+        for title in rec_titles:
+            title = title.strip()
+            if title not in done:
+                log(f"  Topic (strategy room): {title}")
+                with open(done_path, "a", encoding="utf-8") as f:
+                    f.write(title + "\n")
+                return title
+
     # Fall back to static list
     remaining = [t for t in TOPICS if t not in done]
     if not remaining:
@@ -875,6 +899,7 @@ Remember: copy the FULL URL exactly as given above into every link."""
 
     git_push("auto: add weekly newsletter")
     log("== NEWSLETTER COMPLETE ====================================")
+    notify("Newsletter ready - copy from newsletters/ folder to Beehiiv")
     return True
 
 def _send_beehiiv(subject, preview, body_md):
@@ -920,6 +945,7 @@ def run(force_newsletter=False):
         run_newsletter_pipeline()
 
     if not force_newsletter:
+        notify(f"Pipeline starting - {date.today().strftime('%A %d %B')}")
         run_article_pipeline()
 
 if __name__ == "__main__":
