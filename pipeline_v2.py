@@ -792,9 +792,16 @@ def _send_beehiiv(subject, preview, body_md):
     url = f"https://api.beehiiv.com/v2/publications/{BEEHIIV_PUBLICATION_ID}/posts"
     headers = {"Authorization": f"Bearer {BEEHIIV_API_KEY}", "Content-Type": "application/json"}
     payload = {
-        "publication_id": BEEHIIV_PUBLICATION_ID, "subject_line": subject,
-        "preview_text": preview, "content_html": html, "content_text": body_md,
-        "status": "confirmed", "web_enabled": True, "authors": [{"name": "Luis Paiva"}], "audience": "free",
+        "publication_id": BEEHIIV_PUBLICATION_ID,
+        "title": subject,
+        "subject_line": subject,
+        "preview_text": preview,
+        "content_html": html,
+        "content_text": body_md,
+        "status": "draft",
+        "web_enabled": True,
+        "authors": [{"name": "Luis Paiva"}],
+        "audience": "free",
     }
     try:
         r = requests.post(url, json=payload, headers=headers, timeout=30)
