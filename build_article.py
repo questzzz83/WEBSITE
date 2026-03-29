@@ -208,6 +208,44 @@ def category_from_slug(s):
     return 'Personal Finance'
 
 
+def build_og_image(title, cat, article_slug):
+    """Generate a simple SVG OG image for social sharing."""
+    import textwrap
+    # Wrap title to fit
+    words = title.split()
+    lines = []
+    current = []
+    for w in words:
+        current.append(w)
+        if len(' '.join(current)) > 28:
+            if len(current) > 1:
+                lines.append(' '.join(current[:-1]))
+                current = [current[-1]]
+            else:
+                lines.append(' '.join(current))
+                current = []
+    if current:
+        lines.append(' '.join(current))
+    lines = lines[:3]  # max 3 lines
+
+    # Build text elements
+    y_start = 160 - (len(lines) - 1) * 32
+    text_els = ''
+    for i, line in enumerate(lines):
+        y = y_start + i * 52
+        text_els += f'<text x="60" y="{y}" font-family="Georgia,serif" font-size="38" font-weight="bold" fill="#f7f5f0">{line}</text>'
+
+    svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#0f0f0d"/>
+  <rect x="0" y="0" width="6" height="630" fill="#c8502a"/>
+  <rect x="0" y="580" width="1200" height="50" fill="#1a1a18"/>
+  <text x="60" y="100" font-family="Georgia,serif" font-size="22" fill="#c8502a" letter-spacing="3">{cat.upper()}</text>
+  {text_els}
+  <text x="60" y="560" font-family="Arial,sans-serif" font-size="20" fill="rgba(247,245,240,0.5)">luispaiva.co.uk</text>
+  <text x="1140" y="560" font-family="Georgia,serif" font-size="28" font-weight="bold" fill="#f7f5f0" text-anchor="end">LP.</text>
+</svg>'''
+    return svg
+
 # Keyword → slug mapping for internal linking
 INTERNAL_LINK_MAP = [
     # ISAs
@@ -329,6 +367,9 @@ def build_article_html(topic, article_slug, md_content):
     faq_schema_tag = f'<script type="application/ld+json">\n{faq_schema_json}\n</script>' if faq_schema_json else ''
     article_schema_tag = f'<script type="application/ld+json">\n{schema_json}\n</script>'
 
+    # Generate OG image SVG
+    og_svg = build_og_image(title, cat, article_slug)
+
     # Related articles
     related = get_related_articles(article_slug)
     if related:
@@ -397,6 +438,32 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
 .related-card:hover{border-color:var(--accent);background:#fff}
 .related-cat{font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:.35rem}
 .related-title{font-size:.9rem;color:var(--ink);line-height:1.4;font-weight:500}
+/* EMAIL POPUP */
+.popup-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:10000;align-items:center;justify-content:center;padding:1rem}
+.popup-overlay.active{display:flex}
+.popup-box{background:var(--paper);max-width:480px;width:100%;padding:2.5rem;position:relative;animation:fadeUp .3s ease}
+.popup-close{position:absolute;top:1rem;right:1.25rem;background:none;border:none;font-size:1.4rem;color:var(--ink-muted);cursor:pointer;line-height:1}
+.popup-close:hover{color:var(--ink)}
+.popup-label{font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:.75rem;font-weight:500}
+.popup-box h3{font-family:var(--serif);font-size:1.75rem;line-height:1.15;letter-spacing:-.02em;margin-bottom:.6rem}
+.popup-box p{font-size:.9rem;color:var(--ink-soft);margin-bottom:1.5rem;line-height:1.6}
+.popup-form{display:flex;gap:.5rem}
+.popup-form input{flex:1;border:1.5px solid var(--rule);background:#fff;font-family:var(--sans);font-size:.9rem;padding:.65rem .9rem;color:var(--ink);outline:none;transition:border-color .15s}
+.popup-form input:focus{border-color:var(--accent)}
+.popup-form button{background:var(--ink);color:var(--paper);border:none;font-family:var(--sans);font-size:.75rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase;padding:.65rem 1.25rem;cursor:pointer;white-space:nowrap;transition:background .15s}
+.popup-form button:hover{background:var(--accent)}
+.popup-disclaimer{font-size:.72rem;color:var(--ink-muted);margin-top:.75rem}
+/* COOKIE BANNER */
+.cookie-banner{position:fixed;bottom:0;left:0;right:0;background:var(--ink);color:var(--paper);padding:1rem 1.5rem;z-index:9000;display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;transform:translateY(100%);transition:transform .3s ease}
+.cookie-banner.active{transform:translateY(0)}
+.cookie-text{flex:1;font-size:.82rem;color:rgba(247,245,240,.8);line-height:1.5;min-width:200px}
+.cookie-text a{color:rgba(247,245,240,.9);text-decoration:underline}
+.cookie-buttons{display:flex;gap:.5rem;flex-shrink:0}
+.cookie-accept{background:var(--accent);color:var(--paper);border:none;font-family:var(--sans);font-size:.75rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase;padding:.55rem 1.25rem;cursor:pointer;transition:background .15s}
+.cookie-accept:hover{background:#a83e1e}
+.cookie-decline{background:transparent;color:rgba(247,245,240,.6);border:1px solid rgba(247,245,240,.25);font-family:var(--sans);font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;padding:.55rem 1rem;cursor:pointer;transition:all .15s}
+.cookie-decline:hover{color:var(--paper);border-color:rgba(247,245,240,.5)}
+@media(max-width:600px){.popup-form{flex-direction:column}.cookie-buttons{width:100%}.cookie-accept,.cookie-decline{flex:1}}
 .internal-link{color:var(--accent-2);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:2px}
 @media(max-width:600px){.cta-form{flex-direction:column}}
 .reactions{text-align:center;margin:3rem 0 2rem;padding:2rem;background:var(--cream);border:1px solid var(--rule)}
@@ -555,6 +622,109 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
 <p class="footer-legal">This site contains affiliate links. We may earn a commission at no extra cost to you. Always do your own research. &copy; {year} Luis Paiva.</p>
 </div>
 </footer>
+
+<!-- EMAIL POPUP -->
+<div class="popup-overlay" id="js-popup" role="dialog" aria-modal="true" aria-label="Newsletter signup">
+  <div class="popup-box">
+    <button class="popup-close" id="js-popup-close" aria-label="Close">&times;</button>
+    <div class="popup-label">Free Weekly Newsletter</div>
+    <h3>The Friday Money Brief</h3>
+    <p>Join readers getting one practical UK money tip every Friday. No spam. Unsubscribe any time.</p>
+    <form class="popup-form" action="https://app.beehiiv.com/subscribe" method="GET" target="_blank" id="js-popup-form">
+      <input type="email" name="email" placeholder="your@email.com" required />
+      <button type="submit">Subscribe</button>
+    </form>
+    <p class="popup-disclaimer">Free forever. Unsubscribe in one click.</p>
+  </div>
+</div>
+
+<!-- COOKIE BANNER -->
+<div class="cookie-banner" id="js-cookie-banner" role="region" aria-label="Cookie consent">
+  <p class="cookie-text">
+    We use cookies to analyse site traffic and improve your experience.
+    See our <a href="/privacy">Privacy Policy</a> for details.
+  </p>
+  <div class="cookie-buttons">
+    <button class="cookie-accept" id="js-cookie-accept">Accept</button>
+    <button class="cookie-decline" id="js-cookie-decline">Decline</button>
+  </div>
+</div>
+
+<script>
+(function() {
+  // ── COOKIE BANNER ──
+  var COOKIE_KEY = 'lp_cookie_consent';
+  var consent = localStorage.getItem(COOKIE_KEY);
+  var banner = document.getElementById('js-cookie-banner');
+
+  if (!consent && banner) {
+    setTimeout(function() { banner.classList.add('active'); }, 800);
+    document.getElementById('js-cookie-accept').addEventListener('click', function() {
+      localStorage.setItem(COOKIE_KEY, 'accepted');
+      banner.classList.remove('active');
+    });
+    document.getElementById('js-cookie-decline').addEventListener('click', function() {
+      localStorage.setItem(COOKIE_KEY, 'declined');
+      banner.classList.remove('active');
+    });
+  }
+
+  // ── EMAIL POPUP ──
+  var POPUP_KEY = 'lp_popup_shown';
+  var popup = document.getElementById('js-popup');
+  var popupClose = document.getElementById('js-popup-close');
+  var popupShown = sessionStorage.getItem(POPUP_KEY);
+
+  function showPopup() {
+    if (!popup || popupShown) return;
+    popup.classList.add('active');
+    sessionStorage.setItem(POPUP_KEY, '1');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closePopup() {
+    if (!popup) return;
+    popup.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  if (!popupShown) {
+    // Show after 30 seconds
+    setTimeout(showPopup, 30000);
+
+    // Also show when user scrolls 60% of article
+    window.addEventListener('scroll', function onScroll() {
+      var scrolled = window.scrollY / (document.body.scrollHeight - window.innerHeight);
+      if (scrolled > 0.6) {
+        showPopup();
+        window.removeEventListener('scroll', onScroll);
+      }
+    }, { passive: true });
+  }
+
+  if (popupClose) popupClose.addEventListener('click', closePopup);
+
+  // Close on overlay click
+  if (popup) {
+    popup.addEventListener('click', function(e) {
+      if (e.target === popup) closePopup();
+    });
+  }
+
+  // Close on Escape
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closePopup();
+  });
+
+  // On form submit close popup after short delay
+  var form = document.getElementById('js-popup-form');
+  if (form) {
+    form.addEventListener('submit', function() {
+      setTimeout(closePopup, 500);
+    });
+  }
+})();
+</script>
 </body>
 </html>""".format(
         title=title,
@@ -575,14 +745,16 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
 
 
 if __name__ == "__main__":
-    # Test: convert an existing article
+    # Test: convert all existing articles
     from pathlib import Path
     docs = Path(__file__).parent / "docs"
-    for md_file in list(docs.glob("*.md"))[:1]:
+    for md_file in docs.glob("*.md"):
+        if md_file.name in {".gitkeep", "index.md"}:
+            continue
         slug = md_file.stem
         content = md_file.read_text(encoding="utf-8")
         html = build_article_html(slug.replace("-", " "), slug, content)
-        out = Path(__file__).parent / slug / "index.html"
-        out.parent.mkdir(exist_ok=True)
-        out.write_text(html, encoding="utf-8")
-        print("Built:", out)
+        out_dir = Path(__file__).parent / slug
+        out_dir.mkdir(exist_ok=True)
+        (out_dir / "index.html").write_text(html, encoding="utf-8")
+        print("Built:", out_dir / "index.html")
