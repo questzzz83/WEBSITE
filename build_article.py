@@ -715,36 +715,17 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
     if (e.key === 'Escape') closePopup();
   });
 
-  // Beehiiv API subscription
-  var BEEHIIV_KEY = "rVl4Xe2jtnVftKXERBLlFRMIJD2zLLRLN1wnaR7NPU9w3ev5LDPjP61q6U9LFhxF";
-  var BEEHIIV_PUB = "pub_8bc3d4e7-0688-4182-8d13-041f31a4bab1";
-
+  // Beehiiv subscription — opens hosted page (API is server-side only)
   function subscribeEmail(email, btn, msgEl) {
-    btn.disabled = true;
-    btn.textContent = 'Subscribing...';
-    fetch('https://api.beehiiv.com/v2/publications/' + BEEHIIV_PUB + '/subscriptions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + BEEHIIV_KEY
-      },
-      body: JSON.stringify({ email: email, reactivate_existing: true, send_welcome_email: true })
-    })
-    .then(function(r) {
-      if (r.ok || r.status === 201) {
-        btn.textContent = 'Subscribed!';
-        if (msgEl) { msgEl.textContent = 'Thanks! Check your inbox to confirm.'; msgEl.style.display = 'block'; }
-        setTimeout(closePopup, 1500);
-      } else {
-        btn.disabled = false;
-        btn.textContent = 'Subscribe';
-        if (msgEl) { msgEl.textContent = 'Something went wrong. Please try again.'; msgEl.style.display = 'block'; }
-      }
-    })
-    .catch(function() {
-      btn.disabled = false;
+    var url = 'https://luispaiva.beehiiv.com/subscribe?email=' + encodeURIComponent(email);
+    btn.textContent = 'Redirecting...';
+    window.open(url, '_blank');
+    setTimeout(function() {
       btn.textContent = 'Subscribe';
-    });
+      btn.disabled = false;
+      if (msgEl) { msgEl.textContent = 'A new tab has opened to complete your signup.'; msgEl.style.display = 'block'; }
+      setTimeout(closePopup, 2000);
+    }, 500);
   }
 
   // Popup form
