@@ -836,6 +836,17 @@ Remember: copy the FULL URL exactly as given above into every link."""
             lambda m: "-> [" + m.group(1).strip() + "](" + lead_url + ")",
             content)
 
+    # Step 8: Remove empty bullet lines "- " or "-  "
+    content = _re.sub(r'^- \s*$', '', content, flags=_re.MULTILINE)
+    # Remove consecutive blank lines
+    content = _re.sub(r'\n{3,}', '\n\n', content).strip()
+
+    # Step 9: Make lead article link bold if not already
+    content = _re.sub(
+        r'^(?!\*\*)(\[.+?\]\(https://www\.luispaiva\.co\.uk/.+?\))$',
+        lambda m: "**" + m.group(1) + "**",
+        content, flags=_re.MULTILINE)
+
     subject = "The Friday Money Brief"
     preview = "Your weekly personal finance roundup from luispaiva.co.uk"
     for line in content.splitlines():
