@@ -185,6 +185,7 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
 .footer-links a{font-size:.75rem;color:var(--ink-muted);text-decoration:none;margin-left:1.25rem}
 .footer-links a:hover{color:var(--accent)}
 .footer-legal{font-size:.7rem;color:var(--ink-muted);width:100%;margin-top:.5rem}
+.article-meta{font-size:.8rem;color:var(--ink-muted);margin-bottom:1.75rem}
 @media(max-width:600px){.cta-form{flex-direction:column}}
 .reactions{text-align:center;margin:3rem 0 2rem;padding:2rem;background:var(--cream);border:1px solid var(--rule)}
 .reactions-label{font-size:.85rem;color:var(--ink-muted);margin-bottom:1.25rem;text-transform:uppercase;letter-spacing:.08em}
@@ -221,6 +222,7 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
 </header>
 <main class="article-wrap">
 <div class="article-label">{cat}</div>
+<div class="article-meta">Published {date_str}</div>
 {body}
 {disclaimer}
 
@@ -345,7 +347,8 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
         cat=cat,
         body=body_html,
         disclaimer=disclaimer_html,
-        year=year
+        year=year,
+        date_str=date.today().strftime("%d %B %Y")
     )
 
 

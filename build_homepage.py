@@ -44,7 +44,9 @@ def build_articles():
         title   = extract_title(text, sl)
         excerpt = extract_excerpt(text)
         if not excerpt: continue
-        articles.append({"title": title, "slug": sl, "excerpt": excerpt})
+        from datetime import datetime as _dt
+        mdate = _dt.fromtimestamp(md.stat().st_mtime).strftime("%d %b %Y")
+        articles.append({"title": title, "slug": sl, "excerpt": excerpt, "date": mdate})
     return articles
 
 def inject(articles):

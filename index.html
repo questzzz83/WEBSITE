@@ -173,6 +173,7 @@
       .newsletter-form { flex-direction: column; }
     }
 
+    .article-date,.side-date,.card-date{font-size:.72rem;color:var(--ink-muted);letter-spacing:.04em;margin-bottom:.5rem}
     @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
     .lead, .side-stack-item, .card { animation: fadeUp .45s ease both; }
     .side-stack-item:nth-child(1) { animation-delay:.05s; }
@@ -275,12 +276,14 @@
   {
     "title": "Can I withdraw my LISA savings at 60 in the UK?",
     "slug": "can-i-withdraw-my-lisa-savings-at-60-uk",
-    "excerpt": "A Lifetime ISA (LISA) is a type of savings account designed specifically for first-time homebuyers or those aged 18-39. It's a government-backed scheme that allows you to save up to £4,000 per year, with the government adding a 25% bonus..."
+    "excerpt": "A Lifetime ISA (LISA) is a type of savings account designed specifically for first-time homebuyers or those aged 18-39. It's a government-backed scheme that allows you to save up to £4,000 per year, with the government adding a 25% bonus...",
+    "date": "29 Mar 2026"
   },
   {
     "title": "Saving Money in the UK",
     "slug": "how-to-save-10000-pounds-in-one-year-uk",
-    "excerpt": "<meta name=\"description\" content=\"Learn how to save £10,000 in one year using UK-specific savings tools and budgeting techniques.\"> Setting clear financial goals is like planting a seed – it requires intention and planning for growth. For example, Sarah, who had less..."
+    "excerpt": "<meta name=\"description\" content=\"Learn how to save £10,000 in one year using UK-specific savings tools and budgeting techniques.\"> Setting clear financial goals is like planting a seed – it requires intention and planning for growth. For example, Sarah, who had less...",
+    "date": "28 Mar 2026"
   }
 ];
     const ARTICLES = window.SITE_ARTICLES || [];
@@ -319,6 +322,7 @@
           <div class="lead-label">${categoryFromSlug(lead.slug)}</div>
           <h2><a href="/${lead.slug}/">${lead.title}</a></h2>
           <p class="lead-deck">${truncate(lead.excerpt, 35)}</p>
+          <div class="article-date">${lead.date || ''}</div>
           <a class="read-more" href="/${lead.slug}/">Read the guide →</a>
         </article>
         <aside class="side-stack">
@@ -326,6 +330,7 @@
             <div class="side-stack-item">
               <div class="side-label">${categoryFromSlug(a.slug)}</div>
               <h3><a href="/${a.slug}/">${a.title}</a></h3>
+              <div class="side-date">${a.date || ''}</div>
               <p>${truncate(a.excerpt, 18)}</p>
             </div>
           `).join('')}
@@ -340,6 +345,7 @@
         <article class="card">
           <div class="card-tag">${categoryFromSlug(a.slug)}</div>
           <h3><a href="/${a.slug}/">${a.title}</a></h3>
+          <div class="card-date">${a.date || ''}</div>
           <p>${truncate(a.excerpt, 22)}</p>
         </article>`).join('');
     }
