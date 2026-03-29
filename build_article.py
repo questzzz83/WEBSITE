@@ -609,10 +609,11 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
 <div class="article-cta">
 <h3>The Friday Money Brief</h3>
 <p>One money tip every Friday. No spam. Unsubscribe any time.</p>
-<form class="cta-form" action="https://luispaiva.beehiiv.com/subscribe" method="GET" target="_blank">
-<input type="email" name="email" placeholder="your@email.com" required/>
-<button type="submit">Subscribe free</button>
+<form class="cta-form" id="js-cta-form">
+<input type="email" id="js-cta-email" placeholder="your@email.com" required/>
+<button type="submit" id="js-cta-btn">Subscribe free</button>
 </form>
+<p id="js-cta-msg" style="font-size:.8rem;color:rgba(247,245,240,.7);margin-top:.5rem;min-height:1.2em"></p>
 </div>
 </main>
 <footer>
@@ -630,9 +631,10 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
     <div class="popup-label">Free Weekly Newsletter</div>
     <h3>The Friday Money Brief</h3>
     <p>Join readers getting one practical UK money tip every Friday. No spam. Unsubscribe any time.</p>
-    <a class="popup-subscribe-btn" href="https://luispaiva.beehiiv.com/subscribe" target="_blank" rel="noopener">
-      Subscribe free &rarr;
-    </a>
+    <form class="popup-form" id="js-popup-form">
+      <input type="email" id="js-popup-email" placeholder="your@email.com" required />
+      <button type="submit" id="js-popup-btn">Subscribe free</button>
+    </form>
     <p class="popup-disclaimer">Free forever. Unsubscribe in one click.</p>
   </div>
 </div>
@@ -715,7 +717,40 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
     if (e.key === 'Escape') closePopup();
   }});
 
-  // Subscribe button just opens Beehiiv directly
+  // Subscribe via Beehiiv magic link - pre-fills email, one click confirm
+  function subscribeEmail(email, btn, msgEl) {{
+    var url = 'https://magic.beehiiv.com/v1/8bc3d4e7-0688-4182-8d13-041f31a4bab1?email=' + encodeURIComponent(email) + '&utm_source=luispaiva&utm_medium=website';
+    btn.textContent = 'Opening...';
+    var win = window.open(url, '_blank');
+    if (!win) {{ window.location.href = url; return; }}
+    setTimeout(function() {{
+      btn.textContent = 'Subscribe free';
+      btn.disabled = false;
+      if (msgEl) {{ msgEl.textContent = 'Check the new tab to confirm your subscription!'; }}
+      setTimeout(closePopup, 2500);
+    }}, 800);
+  }}
+
+  // Popup form
+  var popupForm = document.getElementById('js-popup-form');
+  if (popupForm) {{
+    popupForm.addEventListener('submit', function(e) {{
+      e.preventDefault();
+      var email = document.getElementById('js-popup-email').value;
+      subscribeEmail(email, document.getElementById('js-popup-btn'), null);
+    }});
+  }}
+
+  // CTA form
+  var ctaForm = document.getElementById('js-cta-form');
+  if (ctaForm) {{
+    ctaForm.addEventListener('submit', function(e) {{
+      e.preventDefault();
+      var email = document.getElementById('js-cta-email').value;
+      var msg = document.getElementById('js-cta-msg');
+      subscribeEmail(email, document.getElementById('js-cta-btn'), msg);
+    }});
+  }}
 }})();
 </script>
 </body>
