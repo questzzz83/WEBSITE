@@ -821,6 +821,21 @@ Remember: copy the FULL URL exactly as given above into every link."""
         cleaned.append(line)
     content = "\n".join(cleaned)
 
+    # Step 6: Fix bare "Title (url)" -> "[Title](url)"
+    def fix_bare_url(m):
+        return "[" + m.group(1).strip() + "](" + m.group(2) + ")"
+    content = _re.sub(
+        r'\*?\*?([A-Z][^(\n]{5,60}?)\s+\((https://www\.luispaiva\.co\.uk/[^)]+)\)\*?\*?',
+        fix_bare_url, content)
+
+    # Step 7: Fix "-> Read the full guide" with no link
+    if articles:
+        lead_url = articles[0]["url"]
+        content = _re.sub(
+            r'-> (Read the full guide[^(\[<\n]*)',
+            lambda m: "-> [" + m.group(1).strip() + "](" + lead_url + ")",
+            content)
+
     subject = "The Friday Money Brief"
     preview = "Your weekly personal finance roundup from luispaiva.co.uk"
     for line in content.splitlines():
