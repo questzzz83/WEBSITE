@@ -522,7 +522,7 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
 </div>
 
 <script>
-(function() {{
+(function() {{{{
   var SUPABASE_URL = "https://ypvjjmeuocdntwgagyqd.supabase.co";
   var SUPABASE_KEY = "sb_publishable_UcS1DYjeWuTiFKduCwlwag_6f4grHGI";
   var SLUG = "{slug}";
@@ -531,77 +531,77 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
 
   // Get or create a stable session ID for this browser
   var sessionId = localStorage.getItem(SESSION_KEY);
-  if (!sessionId) {{
+  if (!sessionId) {{{{
     sessionId = "s_" + Math.random().toString(36).slice(2) + Date.now().toString(36);
     localStorage.setItem(SESSION_KEY, sessionId);
-  }}
+  }}}}
 
   var voted = localStorage.getItem(VOTED_KEY);
 
-  function applyVoted(reaction) {{
+  function applyVoted(reaction) {{{{
     var btnLike = document.getElementById("btn-like");
     var btnDislike = document.getElementById("btn-dislike");
     if (!btnLike || !btnDislike) return;
     btnLike.classList.remove("active", "dimmed");
     btnDislike.classList.remove("active", "dimmed");
-    if (reaction === "like") {{
+    if (reaction === "like") {{{{
       btnLike.classList.add("active");
       btnDislike.classList.add("dimmed");
-    }} else if (reaction === "dislike") {{
+    }}}} else if (reaction === "dislike") {{{{
       btnDislike.classList.add("active");
       btnLike.classList.add("dimmed");
-    }}
-  }}
+    }}}}
+  }}}}
 
-  function loadCounts() {{
-    fetch(SUPABASE_URL + "/rest/v1/article_reactions?slug=eq." + SLUG + "&select=reaction", {{
-      headers: {{ "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY }}
-    }})
-    .then(function(r) {{ return r.json(); }})
-    .then(function(rows) {{
-      var likes = rows.filter(function(r) {{ return r.reaction === "like"; }}).length;
-      var dislikes = rows.filter(function(r) {{ return r.reaction === "dislike"; }}).length;
+  function loadCounts() {{{{
+    fetch(SUPABASE_URL + "/rest/v1/article_reactions?slug=eq." + SLUG + "&select=reaction", {{{{
+      headers: {{{{ "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY }}}}
+    }}}})
+    .then(function(r) {{{{ return r.json(); }}}})
+    .then(function(rows) {{{{
+      var likes = rows.filter(function(r) {{{{ return r.reaction === "like"; }}}}).length;
+      var dislikes = rows.filter(function(r) {{{{ return r.reaction === "dislike"; }}}}).length;
       var el1 = document.getElementById("count-like");
       var el2 = document.getElementById("count-dislike");
       if (el1) el1.textContent = likes;
       if (el2) el2.textContent = dislikes;
-    }})
-    .catch(function() {{}});
-  }}
+    }}}})
+    .catch(function() {{{{}}}});
+  }}}}
 
-  window.react = function(reaction) {{
+  window.react = function(reaction) {{{{
     // Clicking same button again does nothing
     if (voted === reaction) return;
 
     // Upsert on slug+session_id conflict — updates reaction if row exists
-    fetch(SUPABASE_URL + "/rest/v1/article_reactions?on_conflict=slug,session_id", {{
+    fetch(SUPABASE_URL + "/rest/v1/article_reactions?on_conflict=slug,session_id", {{{{
       method: "POST",
-      headers: {{
+      headers: {{{{
         "apikey": SUPABASE_KEY,
         "Authorization": "Bearer " + SUPABASE_KEY,
         "Content-Type": "application/json",
         "Prefer": "resolution=merge-duplicates,return=minimal"
-      }},
-      body: JSON.stringify({{
+      }}}},
+      body: JSON.stringify({{{{
         slug: SLUG,
         session_id: sessionId,
         reaction: reaction
-      }})
-    }})
-    .then(function(r) {{
-      if (r.ok || r.status === 201) {{
+      }}}})
+    }}}})
+    .then(function(r) {{{{
+      if (r.ok || r.status === 201) {{{{
         voted = reaction;
         localStorage.setItem(VOTED_KEY, reaction);
         applyVoted(reaction);
         loadCounts();
-      }}
-    }})
-    .catch(function() {{}});
-  }};
+      }}}}
+    }}}})
+    .catch(function() {{{{}}}});
+  }}}};
 
   loadCounts();
   if (voted) applyVoted(voted);
-}})();
+}}}})();
 </script>
 {related_html}
 <div class="article-cta">
@@ -650,23 +650,23 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
 </div>
 
 <script>
-(function() {
+(function() {{
   // ── COOKIE BANNER ──
   var COOKIE_KEY = 'lp_cookie_consent';
   var consent = localStorage.getItem(COOKIE_KEY);
   var banner = document.getElementById('js-cookie-banner');
 
-  if (!consent && banner) {
-    setTimeout(function() { banner.classList.add('active'); }, 800);
-    document.getElementById('js-cookie-accept').addEventListener('click', function() {
+  if (!consent && banner) {{
+    setTimeout(function() {{ banner.classList.add('active'); }}, 800);
+    document.getElementById('js-cookie-accept').addEventListener('click', function() {{
       localStorage.setItem(COOKIE_KEY, 'accepted');
       banner.classList.remove('active');
-    });
-    document.getElementById('js-cookie-decline').addEventListener('click', function() {
+    }});
+    document.getElementById('js-cookie-decline').addEventListener('click', function() {{
       localStorage.setItem(COOKIE_KEY, 'declined');
       banner.classList.remove('active');
-    });
-  }
+    }});
+  }}
 
   // ── EMAIL POPUP ──
   var POPUP_KEY = 'lp_popup_shown';
@@ -674,84 +674,84 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
   var popupClose = document.getElementById('js-popup-close');
   var popupShown = sessionStorage.getItem(POPUP_KEY);
 
-  function showPopup() {
+  function showPopup() {{
     if (!popup || popupShown) return;
     popup.classList.add('active');
     sessionStorage.setItem(POPUP_KEY, '1');
     document.body.style.overflow = 'hidden';
-  }
+  }}
 
-  function closePopup() {
+  function closePopup() {{
     if (!popup) return;
     popup.classList.remove('active');
     document.body.style.overflow = '';
-  }
+  }}
 
-  if (!popupShown) {
+  if (!popupShown) {{
     // Show after 30 seconds
     setTimeout(showPopup, 30000);
 
     // Also show when user scrolls 60% of article
-    window.addEventListener('scroll', function onScroll() {
+    window.addEventListener('scroll', function onScroll() {{
       var scrolled = window.scrollY / (document.body.scrollHeight - window.innerHeight);
-      if (scrolled > 0.6) {
+      if (scrolled > 0.6) {{
         showPopup();
         window.removeEventListener('scroll', onScroll);
-      }
-    }, { passive: true });
-  }
+      }}
+    }}, {{ passive: true }});
+  }}
 
   if (popupClose) popupClose.addEventListener('click', closePopup);
 
   // Close on overlay click
-  if (popup) {
-    popup.addEventListener('click', function(e) {
+  if (popup) {{
+    popup.addEventListener('click', function(e) {{
       if (e.target === popup) closePopup();
-    });
-  }
+    }});
+  }}
 
   // Close on Escape
-  document.addEventListener('keydown', function(e) {
+  document.addEventListener('keydown', function(e) {{
     if (e.key === 'Escape') closePopup();
-  });
+  }});
 
   // Beehiiv subscription — opens hosted page (API is server-side only)
-  function subscribeEmail(email, btn, msgEl) {
+  function subscribeEmail(email, btn, msgEl) {{
     var url = 'https://luispaiva.beehiiv.com/subscribe?email=' + encodeURIComponent(email);
     btn.textContent = 'Redirecting...';
     window.open(url, '_blank');
-    setTimeout(function() {
+    setTimeout(function() {{
       btn.textContent = 'Subscribe';
       btn.disabled = false;
-      if (msgEl) { msgEl.textContent = 'A new tab has opened to complete your signup.'; msgEl.style.display = 'block'; }
+      if (msgEl) {{ msgEl.textContent = 'A new tab has opened to complete your signup.'; msgEl.style.display = 'block'; }}
       setTimeout(closePopup, 2000);
-    }, 500);
-  }
+    }}, 500);
+  }}
 
   // Popup form
   var popupForm = document.getElementById('js-popup-form');
-  if (popupForm) {
-    popupForm.addEventListener('submit', function(e) {
+  if (popupForm) {{
+    popupForm.addEventListener('submit', function(e) {{
       e.preventDefault();
       var email = document.getElementById('js-popup-email').value;
       var btn = document.getElementById('js-popup-btn');
       var msg = document.getElementById('js-popup-msg');
       subscribeEmail(email, btn, msg);
-    });
-  }
+    }});
+  }}
 
   // CTA form
   var ctaForm = document.getElementById('js-cta-form');
-  if (ctaForm) {
-    ctaForm.addEventListener('submit', function(e) {
+  if (ctaForm) {{
+    ctaForm.addEventListener('submit', function(e) {{
       e.preventDefault();
       var email = document.getElementById('js-cta-email').value;
       var btn = document.getElementById('js-cta-btn');
       var msg = document.getElementById('js-cta-msg');
       subscribeEmail(email, btn, msg);
-    });
-  }
-})();
+    }});
+  }}
+}})();
 </script>
 </body>
 </html>""".format(
