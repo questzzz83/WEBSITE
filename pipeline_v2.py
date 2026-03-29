@@ -759,9 +759,19 @@ def run_newsletter_pipeline():
     for i, a in enumerate(articles, 1):
         path = DOCS_DIR / a["filename"]
         summary = " ".join(path.read_text(encoding="utf-8").split()[:200]) if path.exists() else ""
-        article_list += f"\nArticle {i}:\nTitle: {a['topic'].title()}\nURL: {a['url']}\nSummary: {summary}\n"
+        real_url = a["url"]
+        article_list += f"\nArticle {i}:\nTitle: {a['topic'].title()}\nFULL URL (use exactly): {real_url}\nSummary: {summary}\n"
 
-    result = call_agent("courier", f"Write this week's Friday newsletter:\n{article_list}")
+    prompt = f"""Write this week's Friday Money Brief newsletter.
+
+IMPORTANT: Use the EXACT URLs provided below. Never write [URL] as a placeholder.
+Replace every link with the actual full URL from the article list.
+
+{article_list}
+
+Remember: copy the FULL URL exactly as given above into every link."""
+
+    result = call_agent("courier", prompt)
     if not result: return False
 
     match   = re.search(r"---BRIEF START---(.*?)---BRIEF END---", result, re.DOTALL)
