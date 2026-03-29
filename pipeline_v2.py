@@ -767,6 +767,21 @@ def run_newsletter_pipeline():
     match   = re.search(r"---BRIEF START---(.*?)---BRIEF END---", result, re.DOTALL)
     content = match.group(1).strip() if match else result.strip()
 
+    # Fix double-bracketed URLs: ([url]) -> (url)
+    content = re.sub(r'\(\[([^\]]+)\]\(([^)]+)\)\)', r'()', content)
+    # Fix [text]([url]) -> [text](url)
+    content = re.sub(r'\[([^\]]+)\]\(\[([^\]]+)\]\(([^)]+)\)\)', r'[]()', content)
+
+    # Remove links to articles that don't exist in docs/
+    existing_slugs = {p.stem for p in DOCS_DIR.glob("*.md")}
+    def remove_dead_links(m):
+        url = m.group(2)
+        slug = url.rstrip("/").split("/")[-1]
+        if slug in existing_slugs or "luispaiva.co.uk" not in url:
+            return m.group(0)
+        return m.group(1)  # keep text, remove link
+    content = re.sub(r'\[([^\]]+)\]\((https://www\.luispaiva\.co\.uk/[^)]+)\)', remove_dead_links, content)
+
     subject = "The Friday Money Brief"
     preview = "Your weekly personal finance roundup from luispaiva.co.uk"
     for line in content.splitlines():
