@@ -319,8 +319,15 @@ RULES:
 7. Paragraphs: 2-3 sentences max
 8. UK-specific: GBP signs, real UK providers, UK rates and rules
 9. Every section must have at least one specific UK example with real numbers
-10. Final line must be exactly:
-   *Affiliate disclosure: This article contains affiliate links. We may earn a small commission at no extra cost to you. Always do your own research before making financial decisions.*
+10. Add a META DESCRIPTION on line 2 of the article (after the version comment):
+    META_DESCRIPTION: [exactly 150-155 characters, contains primary keyword, describes what reader will learn]
+11. Add a FAQ section near the end with exactly 5 questions and answers:
+    ## Frequently Asked Questions
+    **Q: [common question about the topic]**
+    A: [2-3 sentence answer with specific UK details]
+    (repeat for 5 questions)
+12. Final line must be exactly:
+    *Affiliate disclosure: This article contains affiliate links. We may earn a small commission at no extra cost to you. Always do your own research before making financial decisions.*
 
 When fixing after QA FAIL:
 - If word count is low: expand EVERY section by adding more detail, examples, and UK-specific data

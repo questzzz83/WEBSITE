@@ -102,6 +102,95 @@ def md_to_html(md):
     return h
 
 
+def reading_time(md_content):
+    """Estimate reading time based on word count (200 wpm average)."""
+    words = len(md_content.split())
+    minutes = max(1, round(words / 200))
+    return f"{minutes} min read"
+
+def extract_toc(body_html):
+    """Extract H2 headings for table of contents."""
+    import re as _re
+    headings = _re.findall(r'<h2>(.*?)</h2>', body_html)
+    if len(headings) < 3:
+        return ''
+    items = ''
+    for h in headings:
+        # Skip FAQ heading in TOC
+        if 'FAQ' in h or 'Frequently' in h or 'Disclaimer' in h:
+            continue
+        slug = _re.sub(r'[^a-z0-9]+', '-', h.lower()).strip('-')
+        items += f'<li><a href="#{slug}">{h}</a></li>'
+    if not items:
+        return ''
+    return f'<div class="toc"><div class="toc-label">In this article</div><ul>{items}</ul></div>'
+
+def add_heading_ids(body_html):
+    """Add id attributes to H2 tags for TOC anchor links."""
+    import re as _re
+    def add_id(m):
+        heading = m.group(1)
+        slug = _re.sub(r'[^a-z0-9]+', '-', heading.lower()).strip('-')
+        return f'<h2 id="{slug}">{heading}</h2>'
+    return _re.sub(r'<h2>(.*?)</h2>', add_id, body_html)
+
+def add_utm_to_links(body_html, article_slug):
+    """Add UTM tracking parameters to affiliate links."""
+    import re as _re
+    def add_utm(m):
+        url = m.group(1)
+        text = m.group(2)
+        # Skip internal links and anchors
+        if url.startswith('/') or url.startswith('#') or 'luispaiva' in url:
+            return m.group(0)
+        sep = '&' if '?' in url else '?'
+        utm = f"{sep}utm_source=luispaiva&utm_medium=affiliate&utm_campaign={article_slug}"
+        return f'<a href="{url}{utm}" rel="noopener sponsored">{text}</a>'
+    return _re.sub(r'<a href="([^"]+)"[^>]*>([^<]+)</a>', add_utm, body_html)
+
+def build_schema(title, description, article_slug, date_str):
+    """Build JSON-LD schema markup for the article."""
+    import json as _json
+    schema = {{
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": title,
+        "description": description,
+        "author": {{
+            "@type": "Person",
+            "name": "Luis Paiva",
+            "url": "https://www.luispaiva.co.uk/about"
+        }},
+        "publisher": {{
+            "@type": "Organization",
+            "name": "Luis Paiva",
+            "url": "https://www.luispaiva.co.uk"
+        }},
+        "datePublished": date_str,
+        "dateModified": date_str,
+        "url": f"https://www.luispaiva.co.uk/{{article_slug}}/",
+        "mainEntityOfPage": {{
+            "@type": "WebPage",
+            "@id": f"https://www.luispaiva.co.uk/{{article_slug}}/"
+        }}
+    }}
+
+    # Check for FAQ section and add FAQPage schema
+    return _json.dumps(schema, indent=2)
+
+def build_faq_schema(body_html):
+    """Extract FAQ pairs and build FAQPage schema."""
+    import re as _re, json as _json
+    pairs = _re.findall(r'<strong>Q:\s*(.*?)</strong>\s*</p>\s*<p>A:\s*(.*?)</p>', body_html, _re.DOTALL)
+    if not pairs:
+        # Try alternate format
+        pairs = _re.findall(r'\*\*Q:\s*(.*?)\*\*\s*A:\s*(.*?)(?=\*\*Q:|$)', body_html, _re.DOTALL)
+    if not pairs:
+        return ''
+    entities = [{{"@type": "Question", "name": q.strip(), "acceptedAnswer": {{"@type": "Answer", "text": a.strip()}}}} for q, a in pairs[:5]]
+    schema = {{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": entities}}
+    return _json.dumps(schema, indent=2)
+
 def category_from_slug(s):
     if 'lisa' in s or ('isa' in s and 'saving' not in s): return 'ISAs'
     if 'saving' in s or 'premium-bond' in s: return 'Savings'
@@ -119,18 +208,52 @@ def category_from_slug(s):
     return 'Personal Finance'
 
 
+def get_related_articles(article_slug, all_articles, n=3):
+    """Get n related articles from same category."""
+    from pathlib import Path as _Path
+    docs = _Path(__file__).parent / "docs"
+    cat = category_from_slug(article_slug)
+    related = []
+    for md in sorted(docs.glob("*.md"), key=lambda p: p.stat().st_mtime, reverse=True):
+        slug = md.stem
+        if slug == article_slug:
+            continue
+        if category_from_slug(slug) == cat:
+            import re as _re
+            content = md.read_text(encoding="utf-8")
+            m = _re.search(r'^#\s+(.+)$', content, _re.MULTILINE)
+            title = m.group(1).strip() if m else slug.replace('-', ' ').title()
+            related.append({"slug": slug, "title": title, "cat": cat})
+        if len(related) >= n:
+            break
+    return related
+
 def build_article_html(topic, article_slug, md_content):
     """Build a complete standalone HTML page from article markdown."""
 
     body_html = md_to_html(md_content)
 
+    # Add IDs to headings for TOC
+    body_html = add_heading_ids(body_html)
+
+    # Add UTM tracking to affiliate links
+    body_html = add_utm_to_links(body_html, article_slug)
+
     # Extract title
     m = re.search(r'<h1>(.*?)</h1>', body_html)
     title = re.sub(r'<!--.*?-->', '', m.group(1)).strip() if m else topic.title()
 
-    # Extract meta description from markdown
-    m2 = re.search(r'content="([^"]{20,})"', md_content)
-    description = m2.group(1)[:155] if m2 else title
+    # Extract META_DESCRIPTION line written by Writer
+    m2 = re.search(r'META_DESCRIPTION:\s*(.+)', md_content)
+    if m2:
+        description = m2.group(1).strip()[:155]
+    else:
+        # Fallback: try old meta tag format
+        m2b = re.search(r'content="([^"]{20,})"', md_content)
+        description = m2b.group(1)[:155] if m2b else title
+    # Remove META_DESCRIPTION line from body
+    body_html = re.sub(r'<p>META_DESCRIPTION:.*?</p>', '', body_html)
+    body_html = re.sub(r'META_DESCRIPTION:.*?\n', '', body_html)
 
     # Separate disclaimer
     m3 = re.search(r'<p><em>(Affiliate disclosure.*?)</em></p>', body_html, re.DOTALL)
@@ -141,6 +264,22 @@ def build_article_html(topic, article_slug, md_content):
 
     cat = category_from_slug(article_slug)
     year = date.today().year
+    read_time = reading_time(md_content)
+    toc_html = extract_toc(body_html)
+    schema_json = build_schema(title, description, article_slug, date.today().strftime("%Y-%m-%d"))
+    faq_schema_json = build_faq_schema(body_html)
+    faq_schema_tag = f'<script type="application/ld+json">\n{faq_schema_json}\n</script>' if faq_schema_json else ''
+    article_schema_tag = f'<script type="application/ld+json">\n{schema_json}\n</script>'
+
+    # Related articles
+    related = get_related_articles(article_slug)
+    if related:
+        cards = ''
+        for r in related:
+            cards += f'<a class="related-card" href="/{r["slug"]}/">'                      f'<div class="related-cat">{r["cat"]}</div>'                      f'<div class="related-title">{r["title"]}</div>'                      f'</a>'
+        related_html = f'<div class="related-articles"><div class="related-label">Related Articles</div><div class="related-grid">{cards}</div></div>'
+    else:
+        related_html = '' 
 
     css = """
 :root{--ink:#0f0f0d;--ink-soft:#3a3a35;--ink-muted:#7a7a72;--paper:#f7f5f0;--cream:#eeebe3;--rule:#d8d4c8;--accent:#c8502a;--serif:'DM Serif Display',Georgia,serif;--sans:'DM Sans',system-ui,sans-serif;--max:740px}
@@ -187,6 +326,19 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
 .footer-links a:hover{color:var(--accent)}
 .footer-legal{font-size:.7rem;color:var(--ink-muted);width:100%;margin-top:.5rem}
 .article-meta{font-size:.8rem;color:var(--ink-muted);margin-bottom:1.75rem}
+.toc{background:var(--cream);border-left:3px solid var(--accent);padding:1.25rem 1.5rem;margin:1.75rem 0 2rem}
+.toc-label{font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:.75rem;font-weight:500}
+.toc ul{list-style:none;padding:0;margin:0}
+.toc li{margin-bottom:.4rem}
+.toc a{color:var(--ink-soft);text-decoration:none;font-size:.9rem;border-bottom:1px solid transparent;transition:color .15s,border-color .15s}
+.toc a:hover{color:var(--accent);border-bottom-color:var(--accent)}
+.related-articles{margin:3rem 0 2rem;padding-top:2rem;border-top:2px solid var(--rule)}
+.related-label{font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:1rem;font-weight:500}
+.related-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem}
+.related-card{display:block;padding:1rem;background:var(--cream);text-decoration:none;border:1px solid var(--rule);transition:border-color .15s,background .15s}
+.related-card:hover{border-color:var(--accent);background:#fff}
+.related-cat{font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:.35rem}
+.related-title{font-size:.9rem;color:var(--ink);line-height:1.4;font-weight:500}
 @media(max-width:600px){.cta-form{flex-direction:column}}
 .reactions{text-align:center;margin:3rem 0 2rem;padding:2rem;background:var(--cream);border:1px solid var(--rule)}
 .reactions-label{font-size:.85rem;color:var(--ink-muted);margin-bottom:1.25rem;text-transform:uppercase;letter-spacing:.08em}
@@ -209,6 +361,8 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
 <title>{title} - Luis Paiva</title>
 <meta name="description" content="{description}"/>
 <link rel="canonical" href="https://www.luispaiva.co.uk/{slug}/"/>
+{article_schema_tag}
+{faq_schema_tag}
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet"/>
@@ -223,7 +377,8 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
 </header>
 <main class="article-wrap">
 <div class="article-label">{cat}</div>
-<div class="article-meta">Published {date_str}</div>
+<div class="article-meta">Published {date_str} &middot; {read_time}</div>
+{toc_html}
 {body}
 {disclaimer}
 
@@ -323,6 +478,7 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
   if (voted) applyVoted(voted);
 }})();
 </script>
+{related_html}
 <div class="article-cta">
 <h3>The Friday Money Brief</h3>
 <p>One money tip every Friday. No spam. Unsubscribe any time.</p>
@@ -349,7 +505,12 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
         body=body_html,
         disclaimer=disclaimer_html,
         year=year,
-        date_str=date.today().strftime("%d %B %Y")
+        date_str=date.today().strftime("%d %B %Y"),
+        read_time=read_time,
+        toc_html=toc_html,
+        article_schema_tag=article_schema_tag,
+        faq_schema_tag=faq_schema_tag,
+        related_html=related_html
     )
 
 
