@@ -79,7 +79,7 @@
     }
     .ribbon-item:first-child { padding-left: 0; }
     .ribbon-item:hover { color: var(--paper); background: rgba(255,255,255,.06); }
-    .ribbon-item:hover .ribbon-dropdown { display: block; }
+    .ribbon-item.open .ribbon-dropdown { display: block; }
     .ribbon-item span { pointer-events: none; }
 
     /* DROPDOWN */
@@ -344,20 +344,6 @@
     document.getElementById('js-year').textContent = now.getFullYear();
 
     // Articles injected by build_homepage.py after each publish
-    window.SITE_ARTICLES = [
-  {
-    "title": "Can I withdraw my LISA savings at 60 in the UK?",
-    "slug": "can-i-withdraw-my-lisa-savings-at-60-uk",
-    "excerpt": "A Lifetime ISA (LISA) is a type of savings account designed specifically for first-time homebuyers or those aged 18-39. It's a government-backed scheme that allows you to save up to £4,000 per year, with the government adding a 25% bonus...",
-    "date": "29 Mar 2026"
-  },
-  {
-    "title": "Saving Money in the UK",
-    "slug": "how-to-save-10000-pounds-in-one-year-uk",
-    "excerpt": "<meta name=\"description\" content=\"Learn how to save £10,000 in one year using UK-specific savings tools and budgeting techniques.\"> Setting clear financial goals is like planting a seed – it requires intention and planning for growth. For example, Sarah, who had less...",
-    "date": "28 Mar 2026"
-  }
-];
     const ARTICLES = window.SITE_ARTICLES || [];
 
     function categoryFromSlug(slug) {
@@ -423,6 +409,32 @@
     }
 
     if (ARTICLES.length) { renderHero(ARTICLES); renderGrid(ARTICLES); renderDropdowns(ARTICLES); }
+
+    // Handle dropdown open/close with JS for reliability
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.ribbon-item').forEach(function(item) {
+        item.addEventListener('mouseenter', function() {
+          document.querySelectorAll('.ribbon-item').forEach(function(i) { i.classList.remove('open'); });
+          item.classList.add('open');
+        });
+        item.addEventListener('mouseleave', function(e) {
+          var drop = item.querySelector('.ribbon-dropdown');
+          if (drop && drop.contains(e.relatedTarget)) return;
+          item.classList.remove('open');
+        });
+        var drop = item.querySelector('.ribbon-dropdown');
+        if (drop) {
+          drop.addEventListener('mouseleave', function() {
+            item.classList.remove('open');
+          });
+        }
+      });
+      document.addEventListener('click', function(e) {
+        if (!e.target.closest('.ribbon-item')) {
+          document.querySelectorAll('.ribbon-item').forEach(function(i) { i.classList.remove('open'); });
+        }
+      });
+    });
 
     function renderDropdowns(articles) {
       // Group articles by category
