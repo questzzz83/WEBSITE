@@ -451,6 +451,8 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
 .popup-form button{background:var(--ink);color:var(--paper);border:none;font-family:var(--sans);font-size:.75rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase;padding:.65rem 1.25rem;cursor:pointer;white-space:nowrap;transition:background .15s}
 .popup-form button:hover{background:var(--accent)}
 .popup-disclaimer{font-size:.72rem;color:var(--ink-muted);margin-top:.75rem}
+.popup-subscribe-btn{display:block;text-align:center;background:var(--ink);color:#f7f5f0;text-decoration:none;font-family:var(--sans);font-size:.9rem;font-weight:500;letter-spacing:.04em;padding:.85rem 1.5rem;margin-bottom:.75rem;transition:background .15s}
+.popup-subscribe-btn:hover{background:var(--accent)}
 /* COOKIE BANNER */
 .cookie-banner{position:fixed;bottom:0;left:0;right:0;background:var(--ink);color:var(--paper);padding:1rem 1.5rem;z-index:9000;display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;transform:translateY(100%);transition:transform .3s ease}
 .cookie-banner.active{transform:translateY(0)}
@@ -607,11 +609,10 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
 <div class="article-cta">
 <h3>The Friday Money Brief</h3>
 <p>One money tip every Friday. No spam. Unsubscribe any time.</p>
-<form class="cta-form" id="js-cta-form">
-<input type="email" id="js-cta-email" placeholder="your@email.com" required/>
-<button type="submit" id="js-cta-btn">Subscribe free</button>
+<form class="cta-form" action="https://luispaiva.beehiiv.com/subscribe" method="GET" target="_blank">
+<input type="email" name="email" placeholder="your@email.com" required/>
+<button type="submit">Subscribe free</button>
 </form>
-<p id="js-cta-msg" style="font-size:.8rem;color:rgba(247,245,240,.6);margin-top:.5rem;display:none"></p>
 </div>
 </main>
 <footer>
@@ -629,11 +630,10 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
     <div class="popup-label">Free Weekly Newsletter</div>
     <h3>The Friday Money Brief</h3>
     <p>Join readers getting one practical UK money tip every Friday. No spam. Unsubscribe any time.</p>
-    <form class="popup-form" id="js-popup-form">
-      <input type="email" id="js-popup-email" placeholder="your@email.com" required />
-      <button type="submit" id="js-popup-btn">Subscribe</button>
-    </form>
-    <p class="popup-disclaimer" id="js-popup-msg">Free forever. Unsubscribe in one click.</p>
+    <a class="popup-subscribe-btn" href="https://luispaiva.beehiiv.com/subscribe" target="_blank" rel="noopener">
+      Subscribe free &rarr;
+    </a>
+    <p class="popup-disclaimer">Free forever. Unsubscribe in one click.</p>
   </div>
 </div>
 
@@ -715,42 +715,7 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
     if (e.key === 'Escape') closePopup();
   }});
 
-  // Beehiiv subscription — opens hosted page (API is server-side only)
-  function subscribeEmail(email, btn, msgEl) {{
-    var url = 'https://luispaiva.beehiiv.com/subscribe?email=' + encodeURIComponent(email);
-    btn.textContent = 'Redirecting...';
-    window.open(url, '_blank');
-    setTimeout(function() {{
-      btn.textContent = 'Subscribe';
-      btn.disabled = false;
-      if (msgEl) {{ msgEl.textContent = 'A new tab has opened to complete your signup.'; msgEl.style.display = 'block'; }}
-      setTimeout(closePopup, 2000);
-    }}, 500);
-  }}
-
-  // Popup form
-  var popupForm = document.getElementById('js-popup-form');
-  if (popupForm) {{
-    popupForm.addEventListener('submit', function(e) {{
-      e.preventDefault();
-      var email = document.getElementById('js-popup-email').value;
-      var btn = document.getElementById('js-popup-btn');
-      var msg = document.getElementById('js-popup-msg');
-      subscribeEmail(email, btn, msg);
-    }});
-  }}
-
-  // CTA form
-  var ctaForm = document.getElementById('js-cta-form');
-  if (ctaForm) {{
-    ctaForm.addEventListener('submit', function(e) {{
-      e.preventDefault();
-      var email = document.getElementById('js-cta-email').value;
-      var btn = document.getElementById('js-cta-btn');
-      var msg = document.getElementById('js-cta-msg');
-      subscribeEmail(email, btn, msg);
-    }});
-  }}
+  // Subscribe button just opens Beehiiv directly
 }})();
 </script>
 </body>
