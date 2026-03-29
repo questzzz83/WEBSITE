@@ -29,12 +29,12 @@
     .masthead-nav a{font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);text-decoration:none;margin-left:1.5rem;transition:color .15s}
     .masthead-nav a:hover{color:var(--accent)}
     /* RIBBON */
-    .ribbon{background:var(--ink);color:var(--paper);padding:0 1.5rem;overflow-x:auto;scrollbar-width:none;position:relative;z-index:200}
+    .ribbon{background:var(--ink);color:var(--paper);padding:0 1.5rem;position:relative;z-index:200}
     .ribbon::-webkit-scrollbar{display:none}
-    .ribbon-inner{max-width:var(--max);margin:0 auto;display:flex}
+    .ribbon-inner{max-width:var(--max);margin:0 auto;display:flex;overflow-x:auto;scrollbar-width:none}
     .cat-item{position:relative;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(247,245,240,.7);padding:.65rem 1.1rem;white-space:nowrap;border-right:1px solid rgba(255,255,255,.1);cursor:pointer;user-select:none;transition:color .15s,background .15s}
     .cat-item:hover,.cat-item.is-open{color:var(--paper);background:rgba(255,255,255,.08)}
-    .cat-dropdown{display:none;position:absolute;top:100%;left:0;min-width:260px;max-height:300px;overflow-y:auto;background:var(--paper);border-top:3px solid var(--accent);box-shadow:0 8px 32px rgba(0,0,0,.18);z-index:300}
+    .cat-dropdown{display:none;position:absolute;top:100%;left:0;min-width:260px;max-height:300px;overflow-y:auto;background:var(--paper);border-top:3px solid var(--accent);box-shadow:0 8px 32px rgba(0,0,0,.18);z-index:9999}
     /* dropdown shown via JS */
     .cat-dropdown a{display:block;padding:.6rem 1rem;font-size:.84rem;font-weight:400;letter-spacing:0;text-transform:none;color:var(--ink-soft);text-decoration:none;border-bottom:1px solid var(--rule);transition:background .12s,color .12s;line-height:1.4}
     .cat-dropdown a:last-child{border-bottom:none}
@@ -265,27 +265,39 @@
   function initDropdowns() {
     var items = document.querySelectorAll('.cat-item');
 
-    // Use click to toggle — works on all devices and browsers reliably
+    // Move all dropdowns to body to escape overflow clipping
     items.forEach(function(item){
       var drop = item.querySelector('.cat-dropdown');
+      if (!drop) return;
+
+      // Move dropdown to body level
+      drop.style.cssText = 'display:none;position:fixed;min-width:260px;max-height:300px;overflow-y:auto;background:#f7f5f0;border-top:3px solid #c8502a;box-shadow:0 8px 32px rgba(0,0,0,.18);z-index:9999;';
+      document.body.appendChild(drop);
 
       item.addEventListener('click', function(e){
         e.stopPropagation();
-        var isOpen = drop && drop.style.display === 'block';
+        var isOpen = drop.style.display === 'block';
+
         // Close all
         items.forEach(function(i){
-          var d = i.querySelector('.cat-dropdown');
+          var d = i._drop;
           if (d) d.style.display = 'none';
         });
-        // Open this one if it was closed
-        if (!isOpen && drop) drop.style.display = 'block';
+
+        if (!isOpen) {
+          var rect = item.getBoundingClientRect();
+          drop.style.top = (rect.bottom) + 'px';
+          drop.style.left = rect.left + 'px';
+          drop.style.display = 'block';
+        }
       });
+
+      item._drop = drop;
     });
 
     document.addEventListener('click', function(){
       items.forEach(function(i){
-        var d = i.querySelector('.cat-dropdown');
-        if (d) d.style.display = 'none';
+        if (i._drop) i._drop.style.display = 'none';
       });
     });
   }
