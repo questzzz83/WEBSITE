@@ -60,8 +60,8 @@ def inject(articles):
         html = re.sub(pattern, replacement, html)
     else:
         html = html.replace(
-            'const ARTICLES = window.SITE_ARTICLES || [];',
-            f'{replacement}\n    const ARTICLES = window.SITE_ARTICLES || [];'
+            'var ARTICLES = window.SITE_ARTICLES || [];',
+            f'{replacement}\n  var ARTICLES = window.SITE_ARTICLES || [];'
         )
     INDEX_HTML.write_text(html, encoding="utf-8")
     print(f"  build_homepage: injected {len(articles)} articles OK")
