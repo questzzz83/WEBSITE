@@ -208,6 +208,61 @@ def category_from_slug(s):
     return 'Personal Finance'
 
 
+# Keyword → slug mapping for internal linking
+INTERNAL_LINK_MAP = [
+    # ISAs
+    (r'\bLifetime ISA\b', 'can-i-withdraw-my-lisa-savings-at-60-uk', 'Lifetime ISA'),
+    (r'\bLISA\b', 'can-i-withdraw-my-lisa-savings-at-60-uk', 'LISA'),
+    (r'\bstocks and shares ISA\b', None, None),
+    (r'\bcash ISA\b', None, None),
+    # Savings
+    (r'\bsave [^a-z]?10,?000\b', 'how-to-save-10000-pounds-in-one-year-uk', 'save £10,000'),
+    (r'\bemergency fund\b', None, None),
+    (r'\bpremium bonds\b', None, None),
+]
+
+def add_internal_links(body_html, current_slug):
+    """Auto-link keywords to internal articles."""
+    import re as _re
+    from pathlib import Path as _Path
+
+    # Build slug->title map from docs folder
+    docs = _Path(__file__).parent / "docs"
+    slug_titles = {}
+    for md in docs.glob("*.md"):
+        content = md.read_text(encoding="utf-8")
+        m = _re.search(r'^#\s+(.+)$', content, _re.MULTILINE)
+        if m:
+            slug_titles[md.stem] = m.group(1).strip()
+
+    # Strip HTML tags for matching, then reinsert
+    # Only link first occurrence of each keyword
+    linked = set()
+
+    for pattern, slug, label in INTERNAL_LINK_MAP:
+        if slug is None or slug == current_slug or slug in linked:
+            continue
+        if slug not in slug_titles:
+            continue
+
+        def replace_first(m, slug=slug, label=label):
+            if slug in linked:
+                return m.group(0)
+            linked.add(slug)
+            return f'<a href="/{slug}/" class="internal-link">{m.group(0)}</a>'
+
+        # Only link inside <p> tags, not headings or existing links
+        new_html = _re.sub(
+            pattern,
+            replace_first,
+            body_html,
+            count=1,
+            flags=_re.IGNORECASE
+        )
+        body_html = new_html
+
+    return body_html
+
 def get_related_articles(article_slug, all_articles, n=3):
     """Get n related articles from same category."""
     from pathlib import Path as _Path
@@ -238,6 +293,9 @@ def build_article_html(topic, article_slug, md_content):
 
     # Add UTM tracking to affiliate links
     body_html = add_utm_to_links(body_html, article_slug)
+
+    # Add internal links
+    body_html = add_internal_links(body_html, article_slug)
 
     # Extract title
     m = re.search(r'<h1>(.*?)</h1>', body_html)
@@ -339,6 +397,7 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
 .related-card:hover{border-color:var(--accent);background:#fff}
 .related-cat{font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:.35rem}
 .related-title{font-size:.9rem;color:var(--ink);line-height:1.4;font-weight:500}
+.internal-link{color:var(--accent-2);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:2px}
 @media(max-width:600px){.cta-form{flex-direction:column}}
 .reactions{text-align:center;margin:3rem 0 2rem;padding:2rem;background:var(--cream);border:1px solid var(--rule)}
 .reactions-label{font-size:.85rem;color:var(--ink-muted);margin-bottom:1.25rem;text-transform:uppercase;letter-spacing:.08em}
@@ -364,6 +423,7 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
 {article_schema_tag}
 {faq_schema_tag}
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
+<meta name="theme-color" content="#0f0f0d"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet"/>
 <style>{css}</style>

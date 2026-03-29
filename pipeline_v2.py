@@ -691,6 +691,22 @@ Return the FULL expanded article. Minimum 2,500 words."""
         if r.returncode == 0: log("  Sitemap rebuilt OK")
         else: log(f"  Sitemap rebuild warning: {r.stderr.strip()}", "WARN")
 
+    # Rebuild all article HTML pages to update internal links and related articles
+    for md_file in DOCS_DIR.glob("*.md"):
+        if md_file.name in {".gitkeep", "index.md"}:
+            continue
+        try:
+            from build_article import build_article_html
+            sl = md_file.stem
+            content = md_file.read_text(encoding="utf-8")
+            html = build_article_html(sl.replace("-", " "), sl, content)
+            slug_dir = BASE_DIR / sl
+            slug_dir.mkdir(parents=True, exist_ok=True)
+            (slug_dir / "index.html").write_text(html, encoding="utf-8")
+        except Exception as e:
+            log(f"  Rebuild {md_file.name}: {e}", "WARN")
+    log("  All article pages rebuilt OK")
+
     # Record delivery
     delivery = {
         "topic"    : topic,

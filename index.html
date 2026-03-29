@@ -6,6 +6,9 @@
   <title>Luis Paiva — Personal Finance for Real Life</title>
   <meta name="description" content="Honest, practical money advice for UK adults. Savings, investing, ISAs, credit cards and more — no jargon, no fluff." />
   <link rel="canonical" href="https://www.luispaiva.co.uk/" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="icon" href="/favicon.svg" sizes="any" />
+  <meta property="og:image" content="https://www.luispaiva.co.uk/og-default.png" />
   <meta property="og:title" content="Luis Paiva — Personal Finance for Real Life" />
   <meta property="og:description" content="Honest, practical money advice for UK adults." />
   <meta property="og:url" content="https://www.luispaiva.co.uk/" />
@@ -98,6 +101,21 @@
     .empty-state h3{font-family:var(--serif);font-size:1.5rem;color:var(--ink);margin-bottom:.5rem}
     @media(max-width:900px){.hero-inner{grid-template-columns:1fr}.lead{border-right:none;padding-right:0;border-bottom:1px solid var(--rule);padding-bottom:2rem;margin-bottom:2rem}.article-grid{grid-template-columns:repeat(2,1fr)}.newsletter-inner{grid-template-columns:1fr}.newsletter-form{min-width:0}.masthead-inner{grid-template-columns:1fr;text-align:center}.masthead-date,.masthead-nav{text-align:center}.masthead-nav a:first-child{margin-left:0}}
     @media(max-width:600px){.article-grid{grid-template-columns:1fr}.footer-inner{flex-direction:column;align-items:flex-start}.newsletter-form{flex-direction:column}}
+    /* SEARCH */
+    .search-bar{background:var(--cream);border-bottom:1px solid var(--rule);padding:.6rem 1.5rem}
+    .search-inner{max-width:var(--max);margin:0 auto;position:relative}
+    .search-inner input{width:100%;background:#fff;border:1px solid var(--rule);font-family:var(--sans);font-size:.9rem;padding:.55rem 2.5rem .55rem .9rem;color:var(--ink);outline:none;transition:border-color .15s}
+    .search-inner input:focus{border-color:var(--accent)}
+    .search-inner input::placeholder{color:var(--ink-muted)}
+    .search-icon{position:absolute;right:.75rem;top:50%;transform:translateY(-50%);color:var(--ink-muted);pointer-events:none;font-size:.9rem}
+    .search-results{position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid var(--rule);border-top:none;box-shadow:0 8px 24px rgba(0,0,0,.1);z-index:500;max-height:320px;overflow-y:auto;display:none}
+    .search-results.active{display:block}
+    .search-result-item{display:block;padding:.65rem 1rem;border-bottom:1px solid var(--rule);text-decoration:none;transition:background .12s}
+    .search-result-item:hover{background:var(--cream)}
+    .search-result-item:last-child{border-bottom:none}
+    .search-result-title{font-size:.88rem;color:var(--ink);font-weight:500;line-height:1.3}
+    .search-result-cat{font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.15rem}
+    .search-no-results{padding:.75rem 1rem;font-size:.85rem;color:var(--ink-muted)}
     @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
     .lead,.side-stack-item,.card{animation:fadeUp .45s ease both}
     .side-stack-item:nth-child(1){animation-delay:.05s}.side-stack-item:nth-child(2){animation-delay:.1s}.side-stack-item:nth-child(3){animation-delay:.15s}
@@ -120,6 +138,14 @@
     </nav>
   </div>
 </header>
+
+<div class="search-bar">
+  <div class="search-inner">
+    <input type="text" id="js-search" placeholder="Search articles..." autocomplete="off"/>
+    <span class="search-icon">&#128269;</span>
+    <div class="search-results" id="js-search-results"></div>
+  </div>
+</div>
 
 <nav class="ribbon">
   <div class="ribbon-inner">
@@ -304,6 +330,44 @@
 
   if (ARTICLES.length) { renderHero(ARTICLES); renderGrid(ARTICLES); renderDropdowns(ARTICLES); }
   initDropdowns();
+  initSearch();
+
+  function initSearch() {
+    var input = document.getElementById('js-search');
+    var results = document.getElementById('js-search-results');
+    if (!input || !results) return;
+
+    input.addEventListener('input', function() {
+      var q = input.value.trim().toLowerCase();
+      if (q.length < 2) { results.classList.remove('active'); results.innerHTML = ''; return; }
+
+      var matches = ARTICLES.filter(function(a) {
+        return a.title.toLowerCase().indexOf(q) > -1 || (a.excerpt && a.excerpt.toLowerCase().indexOf(q) > -1);
+      }).slice(0, 6);
+
+      if (!matches.length) {
+        results.innerHTML = '<div class="search-no-results">No articles found for "' + q + '"</div>';
+      } else {
+        results.innerHTML = matches.map(function(a) {
+          return '<a class="search-result-item" href="/' + a.slug + '/">' +
+            '<div class="search-result-cat">' + cat(a.slug) + '</div>' +
+            '<div class="search-result-title">' + a.title + '</div>' +
+            '</a>';
+        }).join('');
+      }
+      results.classList.add('active');
+    });
+
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.search-inner')) {
+        results.classList.remove('active');
+      }
+    });
+
+    input.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') { results.classList.remove('active'); input.value = ''; }
+    });
+  }
 </script>
 </body>
 </html>
