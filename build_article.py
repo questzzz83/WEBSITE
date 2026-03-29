@@ -103,6 +103,7 @@ def md_to_html(md):
 
 
 def category_from_slug(s):
+    if 'lisa' in s or ('isa' in s and 'saving' not in s): return 'ISAs'
     if 'saving' in s or 'premium-bond' in s: return 'Savings'
     if 'invest' in s or 'etf' in s or 'index-fund' in s: return 'Investing'
     if 'isa' in s: return 'ISAs'

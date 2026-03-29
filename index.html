@@ -205,9 +205,10 @@
   function cat(slug) {
     if (!slug) return 'Finance';
     var s = slug.toLowerCase();
+    if (s.indexOf('lisa') > -1 || (s.indexOf('isa') > -1 && s.indexOf('saving') === -1)) return 'ISAs';
     if (s.indexOf('saving') > -1 || s.indexOf('premium-bond') > -1) return 'Savings';
     if (s.indexOf('invest') > -1 || s.indexOf('etf') > -1 || s.indexOf('index-fund') > -1) return 'Investing';
-    if (s.indexOf('isa') > -1 || s.indexOf('lisa') > -1) return 'ISAs';
+    if (s.indexOf('isa') > -1) return 'ISAs';
     if (s.indexOf('credit') > -1) return 'Credit';
     if (s.indexOf('mortgage') > -1 || s.indexOf('stamp-duty') > -1) return 'Mortgages';
     if (s.indexOf('budget') > -1 || s.indexOf('spend') > -1 || s.indexOf('groceries') > -1 || s.indexOf('bill') > -1) return 'Budgeting';
@@ -263,32 +264,39 @@
 
   function initDropdowns() {
     var items = document.querySelectorAll('.cat-item');
-    function closeAll() {
-      items.forEach(function(i){
-        var d = i.querySelector('.cat-dropdown');
-        if (d) d.style.display = 'none';
-      });
-    }
+    var current = null;
+
     items.forEach(function(item){
       var drop = item.querySelector('.cat-dropdown');
-      if (drop) drop.style.display = 'none';
+
       item.addEventListener('mouseenter', function(){
-        closeAll();
-        if (drop) drop.style.display = 'block';
+        if (current && current !== drop) current.style.display = 'none';
+        if (drop) { drop.style.display = 'block'; current = drop; }
       });
+
       item.addEventListener('mouseleave', function(e){
-        if (drop && drop.contains(e.relatedTarget)) return;
-        if (drop) drop.style.display = 'none';
+        if (!e.relatedTarget || (!item.contains(e.relatedTarget) && drop && !drop.contains(e.relatedTarget))) {
+          if (drop) { drop.style.display = 'none'; current = null; }
+        }
       });
+
       if (drop) {
         drop.addEventListener('mouseleave', function(e){
-          if (item.contains(e.relatedTarget)) return;
-          drop.style.display = 'none';
+          if (!item.contains(e.relatedTarget)) {
+            drop.style.display = 'none'; current = null;
+          }
         });
       }
     });
+
     document.addEventListener('click', function(e){
-      if (!e.target.closest('.cat-item')) closeAll();
+      if (!e.target.closest('.cat-item')) {
+        items.forEach(function(item){
+          var d = item.querySelector('.cat-dropdown');
+          if (d) d.style.display = 'none';
+        });
+        current = null;
+      }
     });
   }
 
