@@ -299,7 +299,7 @@ def add_internal_links(body_html, current_slug):
 
     return body_html
 
-def get_related_articles(article_slug, all_articles, n=3):
+def get_related_articles(article_slug, all_articles=None, n=3):
     """Get n related articles from same category."""
     from pathlib import Path as _Path
     docs = _Path(__file__).parent / "docs"
