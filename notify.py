@@ -8,7 +8,7 @@ Import and call: notify("your message")
 
 import requests, sys
 
-BOT_TOKEN = "8756748955:AAF5VgEkmrUKHwrKnpFAYczu9tmTdtnG4fs"
+BOT_TOKEN = ""
 CHAT_ID   = "5523349075"
 
 def notify(message):
