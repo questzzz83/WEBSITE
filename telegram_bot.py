@@ -28,7 +28,7 @@ except ImportError:
 
 # ── Config ─────────────────────────────────────────────────────────────────────
 
-BOT_TOKEN   = "8756748955:AAF5VgEkmrUKHwrKnpFAYczu9tmTdtnG4fs"
+BOT_TOKEN   = ""
 WEBSITE_DIR = Path("D:/Website")
 DOCS_DIR    = WEBSITE_DIR / "docs"
 STATE_DIR   = WEBSITE_DIR / ".pipeline"
