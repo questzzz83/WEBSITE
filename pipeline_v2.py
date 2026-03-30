@@ -60,6 +60,7 @@ for _d in [DOCS_DIR, STATE_DIR, LOGS_DIR, NL_DIR]:
 # -- TOPICS -------------------------------------------------------------------
 
 TOPICS = [
+    "pension at 39 should i stop working",  # trending 2026-03-30
     # SAVINGS 2026
     "best high yield savings accounts UK 2026",
     "best easy access savings accounts UK 2026",
