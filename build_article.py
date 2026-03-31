@@ -464,9 +464,9 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
 .cookie-accept:hover{background:#a83e1e}
 .cookie-decline{background:transparent;color:rgba(247,245,240,.6);border:1px solid rgba(247,245,240,.25);font-family:var(--sans);font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;padding:.55rem 1rem;cursor:pointer;transition:all .15s}
 .cookie-decline:hover{color:var(--paper);border-color:rgba(247,245,240,.5)}
-@media(max-width:600px){.popup-form{flex-direction:column}.cookie-buttons{width:100%}.cookie-accept,.cookie-decline{flex:1}}
+@media(max-width:600px){.popup-form{flex-direction:column}.cookie-buttons{width:100%}.cookie-accept,.cookie-decline{flex:1}
 .internal-link{color:var(--accent-2);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:2px}
-@media(max-width:600px){.cta-form{flex-direction:column}}
+@media(max-width:600px){.cta-form{flex-direction:column}
 .reactions{text-align:center;margin:3rem 0 2rem;padding:2rem;background:var(--cream);border:1px solid var(--rule)}
 .reactions-label{font-size:.85rem;color:var(--ink-muted);margin-bottom:1.25rem;text-transform:uppercase;letter-spacing:.08em}
 .reactions-buttons{display:flex;justify-content:center;gap:1.5rem}
@@ -479,51 +479,51 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
 .reaction-count{font-size:.88rem;font-weight:500;color:var(--ink-muted)}
 
 /* READING PROGRESS BAR */
-.progress-bar{{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0%;z-index:9999;transition:width .1s linear}}
+.progress-bar{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0%;z-index:9999;transition:width .1s linear}
 
 /* POST-REACTION NUDGE */
-.reaction-nudge{{display:none;margin-top:1rem;padding:1rem 1.25rem;background:var(--cream);border:1px solid var(--rule);animation:fadeUp .3s ease}}
-.reaction-nudge p{{font-size:.88rem;color:var(--ink-soft);margin-bottom:.75rem}}
-.nudge-form{{display:flex;gap:.5rem}}
-.nudge-form input{{flex:1;border:1.5px solid var(--rule);background:#fff;font-family:var(--sans);font-size:.88rem;padding:.55rem .75rem;color:var(--ink);outline:none;transition:border-color .15s}}
-.nudge-form input:focus{{border-color:var(--accent)}}
-.nudge-form button{{background:var(--accent);color:#f7f5f0;border:none;font-family:var(--sans);font-size:.75rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase;padding:.55rem 1rem;cursor:pointer;white-space:nowrap}}
-.nudge-msg{{font-size:.78rem;color:var(--accent);margin-top:.5rem;min-height:1em}}
+.reaction-nudge{display:none;margin-top:1rem;padding:1rem 1.25rem;background:var(--cream);border:1px solid var(--rule);animation:fadeUp .3s ease}
+.reaction-nudge p{font-size:.88rem;color:var(--ink-soft);margin-bottom:.75rem}
+.nudge-form{display:flex;gap:.5rem}
+.nudge-form input{flex:1;border:1.5px solid var(--rule);background:#fff;font-family:var(--sans);font-size:.88rem;padding:.55rem .75rem;color:var(--ink);outline:none;transition:border-color .15s}
+.nudge-form input:focus{border-color:var(--accent)}
+.nudge-form button{background:var(--accent);color:#f7f5f0;border:none;font-family:var(--sans);font-size:.75rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase;padding:.55rem 1rem;cursor:pointer;white-space:nowrap}
+.nudge-msg{font-size:.78rem;color:var(--accent);margin-top:.5rem;min-height:1em}
 
 /* SHARE BUTTON */
-.share-row{{display:flex;align-items:center;gap:.75rem;margin:2rem 0 0;padding-top:1.5rem;border-top:1px solid var(--rule)}}
-.share-label{{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-muted);font-weight:500}}
-.share-btn{{display:inline-flex;align-items:center;gap:.35rem;font-family:var(--sans);font-size:.78rem;font-weight:500;color:var(--ink-soft);background:var(--cream);border:1px solid var(--rule);padding:.4rem .85rem;cursor:pointer;transition:all .15s;text-decoration:none}}
-.share-btn:hover{{background:var(--ink);color:#f7f5f0;border-color:var(--ink)}}
-.share-btn.copied{{background:var(--accent-2);color:#fff;border-color:var(--accent-2)}}
+.share-row{display:flex;align-items:center;gap:.75rem;margin:2rem 0 0;padding-top:1.5rem;border-top:1px solid var(--rule)}
+.share-label{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-muted);font-weight:500}
+.share-btn{display:inline-flex;align-items:center;gap:.35rem;font-family:var(--sans);font-size:.78rem;font-weight:500;color:var(--ink-soft);background:var(--cream);border:1px solid var(--rule);padding:.4rem .85rem;cursor:pointer;transition:all .15s;text-decoration:none}
+.share-btn:hover{background:var(--ink);color:#f7f5f0;border-color:var(--ink)}
+.share-btn.copied{background:var(--accent-2);color:#fff;border-color:var(--accent-2)}
 
 /* COMMENTS */
-.comments-section{{margin:3rem 0 2rem;padding-top:2rem;border-top:2px solid var(--rule)}}
-.comments-header{{display:flex;align-items:baseline;gap:.75rem;margin-bottom:1.5rem}}
-.comments-header h2{{font-family:var(--serif);font-size:1.3rem;letter-spacing:-.01em}}
-.comment-count{{font-size:.78rem;color:var(--ink-muted);background:var(--cream);padding:.2rem .6rem;border-radius:2px}}
-.comment-list{{margin-bottom:2rem}}
-.comment{{padding:1.1rem 0;border-bottom:1px solid var(--rule)}}
-.comment:last-child{{border-bottom:none}}
-.comment-meta{{display:flex;align-items:center;gap:.6rem;margin-bottom:.4rem}}
-.comment-name{{font-size:.85rem;font-weight:500;color:var(--ink)}}
-.comment-date{{font-size:.75rem;color:var(--ink-muted)}}
-.comment-body{{font-size:.9rem;color:var(--ink-soft);line-height:1.6}}
-.no-comments{{font-size:.88rem;color:var(--ink-muted);padding:.75rem 0}}
-.comment-form-wrap{{background:var(--cream);padding:1.25rem}}
-.comment-form-title{{font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);font-weight:500;margin-bottom:1rem}}
-.comment-form{{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}}
-.comment-form .field-full{{grid-column:1/-1}}
-.comment-field label{{display:block;font-size:.72rem;font-weight:500;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:.3rem}}
-.comment-field input,.comment-field textarea{{width:100%;border:1.5px solid var(--rule);background:#fff;font-family:var(--sans);font-size:.9rem;padding:.6rem .8rem;color:var(--ink);outline:none;resize:vertical;transition:border-color .15s}}
-.comment-field input:focus,.comment-field textarea:focus{{border-color:var(--ink)}}
-.comment-submit{{background:var(--ink);color:#f7f5f0;border:none;font-family:var(--sans);font-size:.78rem;font-weight:500;letter-spacing:.07em;text-transform:uppercase;padding:.7rem 1.5rem;cursor:pointer;transition:background .15s;margin-top:.25rem}}
-.comment-submit:hover{{background:var(--accent)}}
-.comment-submit:disabled{{opacity:.5;cursor:not-allowed}}
-.comment-notice{{font-size:.75rem;color:var(--ink-muted);margin-top:.75rem}}
-.comment-form-msg{{font-size:.82rem;margin-top:.75rem;min-height:1.2em;grid-column:1/-1}}
-.comment-form-msg.ok{{color:var(--accent-2)}}
-.comment-form-msg.err{{color:#c0392b}}
+.comments-section{margin:3rem 0 2rem;padding-top:2rem;border-top:2px solid var(--rule)}
+.comments-header{display:flex;align-items:baseline;gap:.75rem;margin-bottom:1.5rem}
+.comments-header h2{font-family:var(--serif);font-size:1.3rem;letter-spacing:-.01em}
+.comment-count{font-size:.78rem;color:var(--ink-muted);background:var(--cream);padding:.2rem .6rem;border-radius:2px}
+.comment-list{margin-bottom:2rem}
+.comment{padding:1.1rem 0;border-bottom:1px solid var(--rule)}
+.comment:last-child{border-bottom:none}
+.comment-meta{display:flex;align-items:center;gap:.6rem;margin-bottom:.4rem}
+.comment-name{font-size:.85rem;font-weight:500;color:var(--ink)}
+.comment-date{font-size:.75rem;color:var(--ink-muted)}
+.comment-body{font-size:.9rem;color:var(--ink-soft);line-height:1.6}
+.no-comments{font-size:.88rem;color:var(--ink-muted);padding:.75rem 0}
+.comment-form-wrap{background:var(--cream);padding:1.25rem}
+.comment-form-title{font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);font-weight:500;margin-bottom:1rem}
+.comment-form{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.comment-form .field-full{grid-column:1/-1}
+.comment-field label{display:block;font-size:.72rem;font-weight:500;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:.3rem}
+.comment-field input,.comment-field textarea{width:100%;border:1.5px solid var(--rule);background:#fff;font-family:var(--sans);font-size:.9rem;padding:.6rem .8rem;color:var(--ink);outline:none;resize:vertical;transition:border-color .15s}
+.comment-field input:focus,.comment-field textarea:focus{border-color:var(--ink)}
+.comment-submit{background:var(--ink);color:#f7f5f0;border:none;font-family:var(--sans);font-size:.78rem;font-weight:500;letter-spacing:.07em;text-transform:uppercase;padding:.7rem 1.5rem;cursor:pointer;transition:background .15s;margin-top:.25rem}
+.comment-submit:hover{background:var(--accent)}
+.comment-submit:disabled{opacity:.5;cursor:not-allowed}
+.comment-notice{font-size:.75rem;color:var(--ink-muted);margin-top:.75rem}
+.comment-form-msg{font-size:.82rem;margin-top:.75rem;min-height:1.2em;grid-column:1/-1}
+.comment-form-msg.ok{color:var(--accent-2)}
+.comment-form-msg.err{color:#c0392b}
 
 """
 
@@ -561,6 +561,11 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
 <main class="article-wrap">
 <div class="article-label">{cat}</div>
 <div class="article-meta">Published {date_str} &middot; {read_time}</div>
+<div class="share-row">
+  <span class="share-label">Share</span>
+  <button class="share-btn" id="js-share-copy" onclick="copyLink()">&#128279; Copy link</button>
+  <a class="share-btn" href="https://twitter.com/intent/tweet?text={title}&url=https://www.luispaiva.co.uk/{slug}/" target="_blank" rel="noopener">&#120143; Post on X</a>
+</div>
 {toc_html}
 {body}
 {disclaimer}
@@ -576,6 +581,14 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
       <span class="reaction-icon">👎</span>
       <span class="reaction-count" id="count-dislike">--</span>
     </button>
+  </div>
+  <div class="reaction-nudge" id="reaction-nudge">
+    <p>Glad it helped! Get one UK money tip every Friday &mdash; free.</p>
+    <div class="nudge-form">
+      <input type="email" id="nudge-email" placeholder="your@email.com" autocomplete="email"/>
+      <button onclick="nudgeSubscribe()">Subscribe free</button>
+    </div>
+    <div class="nudge-msg" id="nudge-msg"></div>
   </div>
 </div>
 
@@ -670,6 +683,39 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
 <button type="submit" id="js-cta-btn">Subscribe free</button>
 </form>
 <p id="js-cta-msg" style="font-size:.8rem;color:rgba(247,245,240,.7);margin-top:.5rem;min-height:1.2em"></p>
+</div>
+
+<!-- COMMENTS -->
+<div class="comments-section" id="comments">
+  <div class="comments-header">
+    <h2>Comments</h2>
+    <span class="comment-count" id="comment-count">0</span>
+  </div>
+  <div class="comment-list" id="comment-list">
+    <div class="no-comments" id="no-comments">No comments yet &mdash; be the first.</div>
+  </div>
+  <div class="comment-form-wrap">
+    <div class="comment-form-title">Leave a comment</div>
+    <div class="comment-form" id="comment-form">
+      <div class="comment-field">
+        <label>Name</label>
+        <input type="text" id="c-name" placeholder="Your name" maxlength="60"/>
+      </div>
+      <div class="comment-field">
+        <label>Email <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink-muted)">(never published)</span></label>
+        <input type="email" id="c-email" placeholder="Optional &mdash; kept private"/>
+      </div>
+      <div class="comment-field field-full">
+        <label>Comment</label>
+        <textarea id="c-body" rows="4" placeholder="Share your thoughts, questions, or experience..." maxlength="1000"></textarea>
+      </div>
+      <div style="grid-column:1/-1;display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
+        <button class="comment-submit" id="c-submit" onclick="submitComment()">Post comment</button>
+        <div class="comment-form-msg" id="c-msg"></div>
+      </div>
+    </div>
+    <p class="comment-notice">Comments are moderated. Please keep it respectful and on-topic. Not financial advice &mdash; see a qualified adviser for personal situations.</p>
+  </div>
 </div>
 </main>
 <footer>
