@@ -47,7 +47,7 @@ def extract_excerpt(text, words=40):
 
 def build_articles():
     articles = []
-    for md in sorted(DOCS_DIR.glob("*.md"), key=lambda p: p.stat().st_mtime, reverse=True):
+    for md in DOCS_DIR.glob("*.md"):
         if md.name in SKIP: continue
         text    = md.read_text(encoding="utf-8")
         sl      = md.stem
@@ -58,7 +58,11 @@ def build_articles():
         if pub is None:
             pub = datetime.fromtimestamp(md.stat().st_mtime).date()
         mdate = pub.strftime("%d %b %Y")
-        articles.append({"title": title, "slug": sl, "excerpt": excerpt, "date": mdate})
+        articles.append({"title": title, "slug": sl, "excerpt": excerpt, "date": mdate, "_pub": pub})
+    # Newest first — hero slot [0], sidebar [1-3], grid [4+]
+    articles.sort(key=lambda a: a["_pub"], reverse=True)
+    for a in articles:
+        del a["_pub"]
     return articles
 
 def inject(articles):
@@ -79,9 +83,10 @@ def inject(articles):
     print(f"  build_homepage: injected {len(articles)} articles OK")
 
 if __name__ == "__main__":
-    from datetime import datetime
     print(f"[{datetime.now().strftime('%H:%M:%S')}] Building homepage...")
     arts = build_articles()
     print(f"  Found {len(arts)} articles")
+    for a in arts:
+        print(f"    [{a['date']}] {a['slug']}")
     inject(arts)
     print("  Done.")
