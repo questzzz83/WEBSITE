@@ -18,15 +18,26 @@ DOCS_DIR   = BASE_DIR / "docs"
 INDEX_HTML = BASE_DIR / "index.html"
 SKIP       = {"CNAME", ".gitkeep", "index.md", "privacy.md", "about.md"}
 
-# Explicit publish dates per slug.
-# Falls back to file mtime for any slug not listed here.
-# Add new slugs here when pipeline publishes future articles.
+# Fallback dates for articles that predate the PUB_DATE system.
+# New articles written by the pipeline will have PUB_DATE in the .md file
+# and won't need an entry here.
 DATE_OVERRIDES = {
     "pension-at-39-should-i-stop-working":        _date(2026, 3, 28),
     "can-i-withdraw-my-lisa-savings-at-60-uk":    _date(2026, 3, 29),
     "how-to-save-10000-pounds-in-one-year-uk":    _date(2026, 3, 30),
     "end-of-tax-year-checklist-uk-2026":          _date(2026, 3, 31),
 }
+
+def get_pub_date(md_path):
+    """Read PUB_DATE from md file, fall back to DATE_OVERRIDES, then mtime."""
+    slug = md_path.stem
+    text = md_path.read_text(encoding="utf-8")
+    m = re.search(r'^PUB_DATE:\s*(\d{4}-\d{2}-\d{2})', text, re.MULTILINE)
+    if m:
+        return _date.fromisoformat(m.group(1))
+    if slug in DATE_OVERRIDES:
+        return DATE_OVERRIDES[slug]
+    return datetime.fromtimestamp(md_path.stat().st_mtime).date()
 
 def extract_title(text, fallback):
     m = re.search(r'^#\s+(.+)$', text, re.MULTILINE)
@@ -35,9 +46,11 @@ def extract_title(text, fallback):
     return fallback.replace('-', ' ').title()
 
 def extract_excerpt(text, words=40):
+    text = re.sub(r'^PUB_DATE:.*\n', '', text)
     text = re.sub(r'^---.*?---\s*', '', text, flags=re.DOTALL)
     text = re.sub(r'^#{1,}\s+.+\n', '', text, flags=re.MULTILINE)
     text = re.sub(r'<!--.*?-->', '', text, flags=re.DOTALL)
+    text = re.sub(r'META_DESCRIPTION:.*\n', '', text)
     text = re.sub(r'\[([^\]]+)\]\([^\)]+\)', r'\1', text)
     text = re.sub(r'\*{1,2}(.+?)\*{1,2}', r'\1', text)
     text = re.sub(r'`[^`]+`', '', text)
@@ -54,9 +67,7 @@ def build_articles():
         title   = extract_title(text, sl)
         excerpt = extract_excerpt(text)
         if not excerpt: continue
-        pub = DATE_OVERRIDES.get(sl)
-        if pub is None:
-            pub = datetime.fromtimestamp(md.stat().st_mtime).date()
+        pub   = get_pub_date(md)
         mdate = pub.strftime("%d %b %Y")
         articles.append({"title": title, "slug": sl, "excerpt": excerpt, "date": mdate, "_pub": pub})
     # Newest first — hero slot [0], sidebar [1-3], grid [4+]

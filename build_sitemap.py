@@ -7,7 +7,7 @@ Run automatically by pipeline_v2.py after each publish.
 Can also be run manually: python build_sitemap.py
 """
 
-import sys
+import sys, re
 from pathlib import Path
 from datetime import date, datetime
 
@@ -20,12 +20,32 @@ SITEMAP   = BASE_DIR / "sitemap.xml"
 DOMAIN    = "https://www.luispaiva.co.uk"
 SKIP      = {".gitkeep", "index.md", "privacy.md", "about.md"}
 
+# Must match DATE_OVERRIDES in build_homepage.py
+from datetime import date as _date
+DATE_OVERRIDES = {
+    "pension-at-39-should-i-stop-working":        _date(2026, 3, 28),
+    "can-i-withdraw-my-lisa-savings-at-60-uk":    _date(2026, 3, 29),
+    "how-to-save-10000-pounds-in-one-year-uk":    _date(2026, 3, 30),
+    "end-of-tax-year-checklist-uk-2026":          _date(2026, 3, 31),
+}
+
+def get_pub_date(md_path):
+    """Read PUB_DATE from md file, fall back to DATE_OVERRIDES, then mtime."""
+    slug = md_path.stem
+    text = md_path.read_text(encoding="utf-8")
+    m = re.search(r'^PUB_DATE:\s*(\d{4}-\d{2}-\d{2})', text, re.MULTILINE)
+    if m:
+        return m.group(1)
+    if slug in DATE_OVERRIDES:
+        return DATE_OVERRIDES[slug].isoformat()
+    return datetime.fromtimestamp(md_path.stat().st_mtime).strftime("%Y-%m-%d")
+
 def build_sitemap():
     today = date.today().isoformat()
 
-    # Static pages
+    # Static pages — use today as lastmod (they change with each deploy)
     static = [
-        {"url": "/",            "priority": "1.0", "changefreq": "daily"},
+        {"url": "",             "priority": "1.0", "changefreq": "daily"},
         {"url": "/about",       "priority": "0.5", "changefreq": "monthly"},
         {"url": "/newsletter",  "priority": "0.6", "changefreq": "weekly"},
         {"url": "/privacy",     "priority": "0.3", "changefreq": "yearly"},
@@ -37,7 +57,7 @@ def build_sitemap():
         if md.name in SKIP:
             continue
         slug    = md.stem
-        lastmod = datetime.fromtimestamp(md.stat().st_mtime).strftime("%Y-%m-%d")
+        lastmod = get_pub_date(md)
         articles.append({"slug": slug, "lastmod": lastmod})
 
     # Build XML
@@ -46,7 +66,7 @@ def build_sitemap():
 
     for page in static:
         lines.append("  <url>")
-        lines.append(f"    <loc>{DOMAIN}{page['url']}/</loc>")
+        lines.append(f"    <loc>{DOMAIN}{page['url']}/</loc>")  # no double slash
         lines.append(f"    <lastmod>{today}</lastmod>")
         lines.append(f"    <changefreq>{page['changefreq']}</changefreq>")
         lines.append(f"    <priority>{page['priority']}</priority>")

@@ -1,3 +1,4 @@
+PUB_DATE: 2026-03-31
 <!-- version: 1 -->
 META_DESCRIPTION: The UK tax year ends 5 April 2026. Use this checklist to max your ISA, pension and CGT allowance before midnight — and pay less tax legally.
 
