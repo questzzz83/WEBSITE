@@ -697,6 +697,10 @@ Return the FULL expanded article. Minimum 2,500 words."""
     article_slug = slug(topic)
     filename = article_slug + ".md"
     dest = DOCS_DIR / filename
+    # Embed publish date so build scripts never rely on file mtime
+    pub_line = f"PUB_DATE: {today_iso()}\n"
+    if not current.startswith("PUB_DATE:"):
+        current = pub_line + current
     dest.write_text(current, encoding="utf-8")
     log(f"  Saved: docs/{filename}")
 
@@ -705,7 +709,7 @@ Return the FULL expanded article. Minimum 2,500 words."""
         from build_article import build_article_html
         slug_dir = BASE_DIR / article_slug
         slug_dir.mkdir(parents=True, exist_ok=True)
-        html = build_article_html(topic, article_slug, current)
+        html = build_article_html(topic, article_slug, current, pub_date=date.today())
         (slug_dir / "index.html").write_text(html, encoding="utf-8")
         log(f"  Saved: {article_slug}/index.html")
     except Exception as e:
@@ -731,9 +735,12 @@ Return the FULL expanded article. Minimum 2,500 words."""
             continue
         try:
             from build_article import build_article_html
+            import re as _re
             sl = md_file.stem
             content = md_file.read_text(encoding="utf-8")
-            html = build_article_html(sl.replace("-", " "), sl, content)
+            _dm = _re.search(r'^PUB_DATE:\s*(\d{4}-\d{2}-\d{2})', content, _re.MULTILINE)
+            _pd = date.fromisoformat(_dm.group(1)) if _dm else date.today()
+            html = build_article_html(sl.replace("-", " "), sl, content, pub_date=_pd)
             slug_dir = BASE_DIR / sl
             slug_dir.mkdir(parents=True, exist_ok=True)
             (slug_dir / "index.html").write_text(html, encoding="utf-8")
