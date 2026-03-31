@@ -128,9 +128,9 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
 .cookie-accept:hover{background:#a83e1e}
 .cookie-decline{background:transparent;color:rgba(247,245,240,.6);border:1px solid rgba(247,245,240,.25);font-family:var(--sans);font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;padding:.55rem 1rem;cursor:pointer;transition:all .15s}
 .cookie-decline:hover{color:var(--paper);border-color:rgba(247,245,240,.5)}
-@media(max-width:600px){.popup-form{flex-direction:column}.cookie-buttons{width:100%}.cookie-accept,.cookie-decline{flex:1}
+@media(max-width:600px){.popup-form{flex-direction:column}.cookie-buttons{width:100%}.cookie-accept,.cookie-decline{flex:1}}
 .internal-link{color:var(--accent-2);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:2px}
-@media(max-width:600px){.cta-form{flex-direction:column}
+@media(max-width:600px){.cta-form{flex-direction:column}}
 .reactions{text-align:center;margin:3rem 0 2rem;padding:2rem;background:var(--cream);border:1px solid var(--rule)}
 .reactions-label{font-size:.85rem;color:var(--ink-muted);margin-bottom:1.25rem;text-transform:uppercase;letter-spacing:.08em}
 .reactions-buttons{display:flex;justify-content:center;gap:1.5rem}
@@ -660,19 +660,19 @@ function copyLink() {
     .then(function(r) {
       if (r.ok || r.status === 201) {
         msg.textContent = 'Comment posted — thank you!';
-        msg.className = 'comment-form-msg ok';
+        msg.className = 'cf-msg ok';
         document.getElementById('c-name').value = '';
         document.getElementById('c-email').value = '';
         document.getElementById('c-body').value = '';
         loadComments();
       } else {
         msg.textContent = 'Something went wrong. Please try again.';
-        msg.className = 'comment-form-msg err';
+        msg.className = 'cf-msg err';
       }
     })
     .catch(function() {
       msg.textContent = 'Could not post comment. Check your connection.';
-      msg.className = 'comment-form-msg err';
+      msg.className = 'cf-msg err';
     })
     .finally(function() {
       btn.disabled = false;

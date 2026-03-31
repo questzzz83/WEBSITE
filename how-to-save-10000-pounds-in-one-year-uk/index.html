@@ -128,9 +128,9 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
 .cookie-accept:hover{background:#a83e1e}
 .cookie-decline{background:transparent;color:rgba(247,245,240,.6);border:1px solid rgba(247,245,240,.25);font-family:var(--sans);font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;padding:.55rem 1rem;cursor:pointer;transition:all .15s}
 .cookie-decline:hover{color:var(--paper);border-color:rgba(247,245,240,.5)}
-@media(max-width:600px){.popup-form{flex-direction:column}.cookie-buttons{width:100%}.cookie-accept,.cookie-decline{flex:1}
+@media(max-width:600px){.popup-form{flex-direction:column}.cookie-buttons{width:100%}.cookie-accept,.cookie-decline{flex:1}}
 .internal-link{color:var(--accent-2);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:2px}
-@media(max-width:600px){.cta-form{flex-direction:column}
+@media(max-width:600px){.cta-form{flex-direction:column}}
 .reactions{text-align:center;margin:3rem 0 2rem;padding:2rem;background:var(--cream);border:1px solid var(--rule)}
 .reactions-label{font-size:.85rem;color:var(--ink-muted);margin-bottom:1.25rem;text-transform:uppercase;letter-spacing:.08em}
 .reactions-buttons{display:flex;justify-content:center;gap:1.5rem}
@@ -159,18 +159,18 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
 .no-comments{font-size:.9rem;color:var(--ink-muted);padding:.5rem 0 1.5rem;border-bottom:1px solid var(--rule)}
 .comment-form-wrap{padding-top:1.5rem}
 .comment-form-title{font-family:var(--serif);font-size:1.05rem;color:var(--ink);margin-bottom:1.25rem}
-.cf-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
-.cf-field{display:flex;flex-direction:column;gap:.3rem}
+.cf-row{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.25rem}
+.cf-field{display:flex;flex-direction:column;gap:.35rem}
 .cf-label{font-size:.72rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft)}
 .cf-label-note{font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink-muted)}
-.cf-input{border:none;border-bottom:1.5px solid var(--rule);background:transparent;font-family:var(--sans);font-size:.95rem;padding:.5rem 0;color:var(--ink);outline:none;transition:border-color .15s;width:100%}
-.cf-input:focus{border-bottom-color:var(--ink)}
-.cf-textarea{border:none;border-bottom:1.5px solid var(--rule);background:transparent;font-family:var(--sans);font-size:.95rem;padding:.5rem 0;color:var(--ink);outline:none;resize:none;width:100%;min-height:80px;line-height:1.6;transition:border-color .15s;overflow:hidden}
-.cf-textarea:focus{border-bottom-color:var(--ink)}
-.comment-submit{background:var(--ink);color:#f7f5f0;border:none;font-family:var(--sans);font-size:.78rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase;padding:.75rem 2rem;cursor:pointer;transition:background .15s;margin-top:1.25rem}
-.comment-submit:hover{background:var(--accent)}
+.cf-input{border:1.5px solid var(--rule);background:#fff;font-family:var(--sans);font-size:.95rem;padding:.65rem .9rem;color:var(--ink);outline:none;transition:border-color .15s;width:100%;-webkit-appearance:none}
+.cf-input:focus{border-color:var(--ink)}
+.cf-textarea{border:1.5px solid var(--rule);background:#fff;font-family:var(--sans);font-size:.95rem;padding:.65rem .9rem;color:var(--ink);outline:none;resize:vertical;width:100%;min-height:120px;line-height:1.65;transition:border-color .15s;display:block}
+.cf-textarea:focus{border-color:var(--ink)}
+.comment-submit{background:var(--accent);color:#f7f5f0;border:none;font-family:var(--sans);font-size:.75rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase;padding:.65rem 1.25rem;cursor:pointer;white-space:nowrap;margin-top:1.25rem;transition:background .15s}
+.comment-submit:hover{background:#a83e1e}
 .comment-submit:disabled{opacity:.4;cursor:not-allowed}
-.cf-msg{font-size:.82rem;margin-top:.6rem;min-height:1.2em;display:block}
+.cf-msg{font-size:.82rem;margin-top:.75rem;min-height:1.2em;display:block}
 .cf-msg.ok{color:var(--accent-2)}
 .cf-msg.err{color:#c0392b}
 @media(max-width:540px){.cf-row{grid-template-columns:1fr}}
@@ -661,19 +661,19 @@ function copyLink() {
     .then(function(r) {
       if (r.ok || r.status === 201) {
         msg.textContent = 'Comment posted — thank you!';
-        msg.className = 'comment-form-msg ok';
+        msg.className = 'cf-msg ok';
         document.getElementById('c-name').value = '';
         document.getElementById('c-email').value = '';
         document.getElementById('c-body').value = '';
         loadComments();
       } else {
         msg.textContent = 'Something went wrong. Please try again.';
-        msg.className = 'comment-form-msg err';
+        msg.className = 'cf-msg err';
       }
     })
     .catch(function() {
       msg.textContent = 'Could not post comment. Check your connection.';
-      msg.className = 'comment-form-msg err';
+      msg.className = 'cf-msg err';
     })
     .finally(function() {
       btn.disabled = false;
@@ -692,8 +692,6 @@ function copyLink() {
     });
   }
 })();
-</script>
-
 </script>
 </body>
 </html>
