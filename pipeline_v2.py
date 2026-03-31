@@ -704,12 +704,24 @@ Return the FULL expanded article. Minimum 2,500 words."""
     dest.write_text(current, encoding="utf-8")
     log(f"  Saved: docs/{filename}")
 
+    # Fetch hero image from Unsplash / Pexels
+    image_meta = None
+    try:
+        from fetch_article_image import get_article_image
+        image_meta = get_article_image(topic, article_slug)
+        if image_meta:
+            log(f"  Image: {image_meta['source']} — {image_meta.get('query','')}")
+        else:
+            log("  Image: none found — publishing without hero image", "WARN")
+    except Exception as e:
+        log(f"  Image fetch skipped: {e}", "WARN")
+
     # Build standalone HTML page in a slug/index.html folder
     try:
         from build_article import build_article_html
         slug_dir = BASE_DIR / article_slug
         slug_dir.mkdir(parents=True, exist_ok=True)
-        html = build_article_html(topic, article_slug, current, pub_date=date.today())
+        html = build_article_html(topic, article_slug, current, pub_date=date.today(), image_meta=image_meta)
         (slug_dir / "index.html").write_text(html, encoding="utf-8")
         log(f"  Saved: {article_slug}/index.html")
     except Exception as e:
@@ -735,12 +747,15 @@ Return the FULL expanded article. Minimum 2,500 words."""
             continue
         try:
             from build_article import build_article_html
-            import re as _re
+            import re as _re, json as _json
             sl = md_file.stem
             content = md_file.read_text(encoding="utf-8")
             _dm = _re.search(r'^PUB_DATE:\s*(\d{4}-\d{2}-\d{2})', content, _re.MULTILINE)
             _pd = date.fromisoformat(_dm.group(1)) if _dm else date.today()
-            html = build_article_html(sl.replace("-", " "), sl, content, pub_date=_pd)
+            # Load cached image metadata if available
+            _img_meta_path = BASE_DIR / "images" / (sl + ".json")
+            _img_meta = _json.loads(_img_meta_path.read_text(encoding="utf-8")) if _img_meta_path.exists() else None
+            html = build_article_html(sl.replace("-", " "), sl, content, pub_date=_pd, image_meta=_img_meta)
             slug_dir = BASE_DIR / sl
             slug_dir.mkdir(parents=True, exist_ok=True)
             (slug_dir / "index.html").write_text(html, encoding="utf-8")

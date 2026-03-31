@@ -60,6 +60,8 @@ def extract_excerpt(text, words=40):
     return (' '.join(tokens[:words]) + '...') if len(tokens) > words else ' '.join(tokens)
 
 def build_articles():
+    import json as _json
+    images_dir = BASE_DIR / "images"
     articles = []
     for md in DOCS_DIR.glob("*.md"):
         if md.name in SKIP: continue
@@ -70,7 +72,15 @@ def build_articles():
         if not excerpt: continue
         pub   = get_pub_date(md)
         mdate = pub.strftime("%d %b %Y")
-        articles.append({"title": title, "slug": sl, "excerpt": excerpt, "date": mdate, "_pub": pub})
+        # Include image path if available
+        img_path = ""
+        meta_file = images_dir / f"{sl}.json"
+        if meta_file.exists():
+            try:
+                img_path = "/images/" + sl + ".jpg"
+            except Exception:
+                pass
+        articles.append({"title": title, "slug": sl, "excerpt": excerpt, "date": mdate, "img": img_path, "_pub": pub})
     # Newest first — hero slot [0], sidebar [1-3], grid [4+]
     articles.sort(key=lambda a: a["_pub"], reverse=True)
     for a in articles:

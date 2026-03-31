@@ -319,7 +319,7 @@ def get_related_articles(article_slug, all_articles=None, n=3):
             break
     return related
 
-def build_article_html(topic, article_slug, md_content, pub_date=None):
+def build_article_html(topic, article_slug, md_content, pub_date=None, image_meta=None):
     """Build a complete standalone HTML page from article markdown."""
 
     body_html = md_to_html(md_content)
@@ -358,6 +358,21 @@ def build_article_html(topic, article_slug, md_content, pub_date=None):
 
     cat = category_from_slug(article_slug)
     _pub = pub_date if pub_date else date.today()
+
+    # Build hero image HTML
+    hero_html = ''
+    if image_meta and image_meta.get('path'):
+        img_path = image_meta['path']
+        # Use web path: images/<slug>.jpg served from repo root
+        img_web  = '/images/' + article_slug + '.jpg'
+        credit   = image_meta.get('credit_name', '')
+        cred_url = image_meta.get('credit_url', '')
+        source   = image_meta.get('source', '')
+        cred_html = ''
+        if credit:
+            cred_link = f'<a href="{cred_url}" target="_blank" rel="noopener">{credit}</a>' if cred_url else credit
+            cred_html = f'<p class="image-credit">Photo by {cred_link} on {source}</p>'
+        hero_html = f'<div class="article-hero-wrap"><img src="{img_web}" alt="{title}" loading="eager"/></div>{cred_html}'
     year = _pub.year
     read_time = reading_time(md_content)
     toc_html = extract_toc(body_html)
@@ -511,6 +526,13 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
 .cf-msg.err{color:#c0392b}
 @media(max-width:540px){.cf-row{grid-template-columns:1fr}}
 
+/* HERO IMAGE */
+.article-hero{width:100%;max-height:420px;object-fit:cover;display:block;margin-bottom:2rem}
+.article-hero-wrap{margin:-1rem -1.5rem 2rem;overflow:hidden;max-height:420px}
+.article-hero-wrap img{width:100%;height:420px;object-fit:cover;display:block}
+.image-credit{font-size:.68rem;color:var(--ink-muted);margin-top:.35rem;text-align:right}
+.image-credit a{color:var(--ink-muted);text-decoration:none}
+.image-credit a:hover{color:var(--ink)}
 """
 
     return """<!DOCTYPE html>
@@ -547,6 +569,7 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
 <main class="article-wrap">
 <div class="article-label">{cat}</div>
 <div class="article-meta">Published {date_str} &middot; {read_time}</div>
+{hero_html}
 {toc_html}
 {body}
 {disclaimer}
@@ -996,7 +1019,8 @@ function copyLink() {{
         toc_html=toc_html,
         article_schema_tag=article_schema_tag,
         faq_schema_tag=faq_schema_tag,
-        related_html=related_html
+        related_html=related_html,
+        hero_html=hero_html
     )
 
 

@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
 """
 rebuild_all.py
-Rebuilds all article HTML pages.
-Reads PUB_DATE from each .md file (line: PUB_DATE: YYYY-MM-DD).
-Falls back to file mtime if not present.
+Rebuilds all article HTML pages with correct dates and images.
 """
-import re
+import re, json
 from pathlib import Path
 from datetime import datetime, date
 import sys
@@ -13,8 +11,9 @@ import sys
 sys.path.insert(0, str(Path(__file__).parent))
 from build_article import build_article_html
 
-BASE_DIR = Path(__file__).parent
-DOCS_DIR = BASE_DIR / "docs"
+BASE_DIR   = Path(__file__).parent
+DOCS_DIR   = BASE_DIR / "docs"
+IMAGES_DIR = BASE_DIR / "images"
 SKIP = {".gitkeep", "index.md", "privacy.md", "about.md"}
 
 def get_pub_date(md_path):
@@ -24,14 +23,26 @@ def get_pub_date(md_path):
         return date.fromisoformat(m.group(1))
     return datetime.fromtimestamp(md_path.stat().st_mtime).date()
 
+def get_image_meta(slug):
+    meta_path = IMAGES_DIR / f"{slug}.json"
+    if meta_path.exists():
+        try:
+            return json.loads(meta_path.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+    return None
+
 for md_file in DOCS_DIR.glob("*.md"):
     if md_file.name in SKIP:
         continue
-    slug = md_file.stem
-    content = md_file.read_text(encoding="utf-8")
-    pub_date = get_pub_date(md_file)
-    html = build_article_html(slug.replace("-", " "), slug, content, pub_date=pub_date)
+    slug       = md_file.stem
+    content    = md_file.read_text(encoding="utf-8")
+    pub_date   = get_pub_date(md_file)
+    image_meta = get_image_meta(slug)
+    html = build_article_html(slug.replace("-", " "), slug, content,
+                              pub_date=pub_date, image_meta=image_meta)
     out_dir = BASE_DIR / slug
     out_dir.mkdir(exist_ok=True)
     (out_dir / "index.html").write_text(html, encoding="utf-8")
-    print(f"Built: {slug}  [{pub_date}]")
+    img_note = f" + image ({image_meta['source']})" if image_meta else ""
+    print(f"Built: {slug}  [{pub_date}]{img_note}")
