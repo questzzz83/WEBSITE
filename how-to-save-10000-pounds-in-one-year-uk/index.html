@@ -142,9 +142,57 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
 .reaction-icon{font-size:1.6rem;line-height:1}
 .reaction-count{font-size:.88rem;font-weight:500;color:var(--ink-muted)}
 
+/* READING PROGRESS BAR */
+.progress-bar{{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0%;z-index:9999;transition:width .1s linear}}
+
+/* POST-REACTION NUDGE */
+.reaction-nudge{{display:none;margin-top:1rem;padding:1rem 1.25rem;background:var(--cream);border:1px solid var(--rule);animation:fadeUp .3s ease}}
+.reaction-nudge p{{font-size:.88rem;color:var(--ink-soft);margin-bottom:.75rem}}
+.nudge-form{{display:flex;gap:.5rem}}
+.nudge-form input{{flex:1;border:1.5px solid var(--rule);background:#fff;font-family:var(--sans);font-size:.88rem;padding:.55rem .75rem;color:var(--ink);outline:none;transition:border-color .15s}}
+.nudge-form input:focus{{border-color:var(--accent)}}
+.nudge-form button{{background:var(--accent);color:#f7f5f0;border:none;font-family:var(--sans);font-size:.75rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase;padding:.55rem 1rem;cursor:pointer;white-space:nowrap}}
+.nudge-msg{{font-size:.78rem;color:var(--accent);margin-top:.5rem;min-height:1em}}
+
+/* SHARE BUTTON */
+.share-row{{display:flex;align-items:center;gap:.75rem;margin:2rem 0 0;padding-top:1.5rem;border-top:1px solid var(--rule)}}
+.share-label{{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-muted);font-weight:500}}
+.share-btn{{display:inline-flex;align-items:center;gap:.35rem;font-family:var(--sans);font-size:.78rem;font-weight:500;color:var(--ink-soft);background:var(--cream);border:1px solid var(--rule);padding:.4rem .85rem;cursor:pointer;transition:all .15s;text-decoration:none}}
+.share-btn:hover{{background:var(--ink);color:#f7f5f0;border-color:var(--ink)}}
+.share-btn.copied{{background:var(--accent-2);color:#fff;border-color:var(--accent-2)}}
+
+/* COMMENTS */
+.comments-section{{margin:3rem 0 2rem;padding-top:2rem;border-top:2px solid var(--rule)}}
+.comments-header{{display:flex;align-items:baseline;gap:.75rem;margin-bottom:1.5rem}}
+.comments-header h2{{font-family:var(--serif);font-size:1.3rem;letter-spacing:-.01em}}
+.comment-count{{font-size:.78rem;color:var(--ink-muted);background:var(--cream);padding:.2rem .6rem;border-radius:2px}}
+.comment-list{{margin-bottom:2rem}}
+.comment{{padding:1.1rem 0;border-bottom:1px solid var(--rule)}}
+.comment:last-child{{border-bottom:none}}
+.comment-meta{{display:flex;align-items:center;gap:.6rem;margin-bottom:.4rem}}
+.comment-name{{font-size:.85rem;font-weight:500;color:var(--ink)}}
+.comment-date{{font-size:.75rem;color:var(--ink-muted)}}
+.comment-body{{font-size:.9rem;color:var(--ink-soft);line-height:1.6}}
+.no-comments{{font-size:.88rem;color:var(--ink-muted);padding:.75rem 0}}
+.comment-form-wrap{{background:var(--cream);padding:1.25rem}}
+.comment-form-title{{font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);font-weight:500;margin-bottom:1rem}}
+.comment-form{{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}}
+.comment-form .field-full{{grid-column:1/-1}}
+.comment-field label{{display:block;font-size:.72rem;font-weight:500;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:.3rem}}
+.comment-field input,.comment-field textarea{{width:100%;border:1.5px solid var(--rule);background:#fff;font-family:var(--sans);font-size:.9rem;padding:.6rem .8rem;color:var(--ink);outline:none;resize:vertical;transition:border-color .15s}}
+.comment-field input:focus,.comment-field textarea:focus{{border-color:var(--ink)}}
+.comment-submit{{background:var(--ink);color:#f7f5f0;border:none;font-family:var(--sans);font-size:.78rem;font-weight:500;letter-spacing:.07em;text-transform:uppercase;padding:.7rem 1.5rem;cursor:pointer;transition:background .15s;margin-top:.25rem}}
+.comment-submit:hover{{background:var(--accent)}}
+.comment-submit:disabled{{opacity:.5;cursor:not-allowed}}
+.comment-notice{{font-size:.75rem;color:var(--ink-muted);margin-top:.75rem}}
+.comment-form-msg{{font-size:.82rem;margin-top:.75rem;min-height:1.2em;grid-column:1/-1}}
+.comment-form-msg.ok{{color:var(--accent-2)}}
+.comment-form-msg.err{{color:#c0392b}}
+
 </style>
 </head>
 <body>
+<div class="progress-bar" id="js-progress"></div>
 <header class="masthead">
 <div class="masthead-inner">
 <div class="masthead-logo"><a href="/">Luis Paiva<span class="dot">.</span></a></div>
@@ -472,6 +520,174 @@ Twelve months of disciplined saving is genuinely within reach for most UK househ
     });
   }
 })();
+<script>
+// ── READING PROGRESS BAR ──────────────────────────────────────────
+(function() {
+  var bar = document.getElementById('js-progress');
+  if (!bar) return;
+  window.addEventListener('scroll', function() {
+    var doc = document.documentElement;
+    var scrollTop = doc.scrollTop || document.body.scrollTop;
+    var scrollHeight = doc.scrollHeight - doc.clientHeight;
+    bar.style.width = scrollHeight > 0 ? (scrollTop / scrollHeight * 100) + '%' : '0%';
+  }, {passive: true});
+})();
+
+// ── COPY LINK ────────────────────────────────────────────────────
+function copyLink() {
+  var btn = document.getElementById('js-share-copy');
+  navigator.clipboard.writeText(window.location.href).then(function() {
+    btn.textContent = '✓ Copied!';
+    btn.classList.add('copied');
+    setTimeout(function() {
+      btn.innerHTML = '&#128279; Copy link';
+      btn.classList.remove('copied');
+    }, 2000);
+  }).catch(function() {
+    // Fallback for older browsers
+    var ta = document.createElement('textarea');
+    ta.value = window.location.href;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    btn.textContent = '✓ Copied!';
+    setTimeout(function() { btn.innerHTML = '&#128279; Copy link'; }, 2000);
+  });
+}
+
+// ── POST-REACTION EMAIL NUDGE ────────────────────────────────────
+// Show nudge only when user clicks 👍 (not 👎)
+// Hooks into the existing react() function via a wrapper
+(function() {
+  var origReact = window.react;
+  window.react = function(reaction) {
+    origReact(reaction);
+    if (reaction === 'like') {
+      var nudge = document.getElementById('reaction-nudge');
+      if (nudge && !localStorage.getItem('nudge_dismissed_how-to-save-10000-pounds-in-one-year-uk')) {
+        nudge.style.display = 'block';
+        nudge.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+      }
+    }
+  };
+})();
+
+function nudgeSubscribe() {
+  var email = document.getElementById('nudge-email').value.trim();
+  var msg   = document.getElementById('nudge-msg');
+  if (!email || !email.includes('@')) { msg.textContent = 'Please enter a valid email.'; return; }
+  var url = 'https://magic.beehiiv.com/v1/8bc3d4e7-0688-4182-8d13-041f31a4bab1?email=' + encodeURIComponent(email) + '&utm_source=luispaiva&utm_medium=reaction-nudge&utm_campaign=how-to-save-10000-pounds-in-one-year-uk';
+  var win = window.open(url, '_blank');
+  if (!win) { window.location.href = url; return; }
+  msg.textContent = 'Check the new tab to confirm — thanks! 🎉';
+  localStorage.setItem('nudge_dismissed_how-to-save-10000-pounds-in-one-year-uk', '1');
+}
+
+// ── COMMENTS ─────────────────────────────────────────────────────
+(function() {
+  var SUPABASE_URL = "https://ypvjjmeuocdntwgagyqd.supabase.co";
+  var SUPABASE_KEY = "sb_publishable_UcS1DYjeWuTiFKduCwlwag_6f4grHGI";
+  var SLUG = "how-to-save-10000-pounds-in-one-year-uk";
+
+  function timeAgo(dateStr) {
+    var d = new Date(dateStr), now = new Date();
+    var diff = Math.floor((now - d) / 1000);
+    if (diff < 60)   return 'just now';
+    if (diff < 3600) return Math.floor(diff/60) + 'm ago';
+    if (diff < 86400) return Math.floor(diff/3600) + 'h ago';
+    if (diff < 604800) return Math.floor(diff/86400) + 'd ago';
+    return d.toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'});
+  }
+
+  function loadComments() {
+    fetch(SUPABASE_URL + '/rest/v1/article_comments?slug=eq.' + SLUG + '&approved=eq.true&order=created_at.asc&select=name,body,created_at', {
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY
+      }
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(rows) {
+      var list = document.getElementById('comment-list');
+      var noC  = document.getElementById('no-comments');
+      var cnt  = document.getElementById('comment-count');
+      if (!list) return;
+      cnt.textContent = rows.length;
+      if (!rows.length) { noC.style.display = 'block'; return; }
+      noC.style.display = 'none';
+      list.innerHTML = rows.map(function(c) {
+        return '<div class="comment">' +
+          '<div class="comment-meta">' +
+          '<span class="comment-name">' + escHtml(c.name) + '</span>' +
+          '<span class="comment-date">' + timeAgo(c.created_at) + '</span>' +
+          '</div>' +
+          '<div class="comment-body">' + escHtml(c.body) + '</div>' +
+          '</div>';
+      }).join('');
+    })
+    .catch(function() {});
+  }
+
+  function escHtml(s) {
+    return String(s)
+      .replace(/&/g,'&amp;')
+      .replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;')
+      .replace(/'/g,'&#39;');
+  }
+
+  window.submitComment = function() {
+    var name   = (document.getElementById('c-name').value || '').trim();
+    var body   = (document.getElementById('c-body').value || '').trim();
+    var msg    = document.getElementById('c-msg');
+    var btn    = document.getElementById('c-submit');
+
+    if (!name) { msg.textContent = 'Please enter your name.'; msg.className='comment-form-msg err'; return; }
+    if (body.length < 5) { msg.textContent = 'Comment is too short.'; msg.className='comment-form-msg err'; return; }
+
+    btn.disabled = true;
+    btn.textContent = 'Posting...';
+    msg.textContent = '';
+
+    fetch(SUPABASE_URL + '/rest/v1/article_comments', {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({ slug: SLUG, name: name, body: body })
+    })
+    .then(function(r) {
+      if (r.ok || r.status === 201) {
+        msg.textContent = 'Comment posted — thank you!';
+        msg.className = 'comment-form-msg ok';
+        document.getElementById('c-name').value = '';
+        document.getElementById('c-email').value = '';
+        document.getElementById('c-body').value = '';
+        loadComments();
+      } else {
+        msg.textContent = 'Something went wrong. Please try again.';
+        msg.className = 'comment-form-msg err';
+      }
+    })
+    .catch(function() {
+      msg.textContent = 'Could not post comment. Check your connection.';
+      msg.className = 'comment-form-msg err';
+    })
+    .finally(function() {
+      btn.disabled = false;
+      btn.textContent = 'Post comment';
+    });
+  };
+
+  loadComments();
+})();
+</script>
+
 </script>
 </body>
 </html>
