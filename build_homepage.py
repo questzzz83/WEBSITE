@@ -11,12 +11,22 @@ from pathlib import Path
 import sys
 if sys.stdout.encoding and sys.stdout.encoding.lower() not in ("utf-8","utf8"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-from datetime import datetime
+from datetime import datetime, date as _date
 
 BASE_DIR   = Path(__file__).parent
 DOCS_DIR   = BASE_DIR / "docs"
 INDEX_HTML = BASE_DIR / "index.html"
 SKIP       = {"CNAME", ".gitkeep", "index.md", "privacy.md", "about.md"}
+
+# Explicit publish dates per slug.
+# Falls back to file mtime for any slug not listed here.
+# Add new slugs here when pipeline publishes future articles.
+DATE_OVERRIDES = {
+    "pension-at-39-should-i-stop-working":        _date(2026, 3, 28),
+    "can-i-withdraw-my-lisa-savings-at-60-uk":    _date(2026, 3, 29),
+    "how-to-save-10000-pounds-in-one-year-uk":    _date(2026, 3, 30),
+    "end-of-tax-year-checklist-uk-2026":          _date(2026, 3, 31),
+}
 
 def extract_title(text, fallback):
     m = re.search(r'^#\s+(.+)$', text, re.MULTILINE)
@@ -44,8 +54,10 @@ def build_articles():
         title   = extract_title(text, sl)
         excerpt = extract_excerpt(text)
         if not excerpt: continue
-        from datetime import datetime as _dt
-        mdate = _dt.fromtimestamp(md.stat().st_mtime).strftime("%d %b %Y")
+        pub = DATE_OVERRIDES.get(sl)
+        if pub is None:
+            pub = datetime.fromtimestamp(md.stat().st_mtime).date()
+        mdate = pub.strftime("%d %b %Y")
         articles.append({"title": title, "slug": sl, "excerpt": excerpt, "date": mdate})
     return articles
 
@@ -67,6 +79,7 @@ def inject(articles):
     print(f"  build_homepage: injected {len(articles)} articles OK")
 
 if __name__ == "__main__":
+    from datetime import datetime
     print(f"[{datetime.now().strftime('%H:%M:%S')}] Building homepage...")
     arts = build_articles()
     print(f"  Found {len(arts)} articles")
