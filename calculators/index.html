@@ -323,6 +323,11 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem}
         <label>Expected annual return <span id="fire-return-val">7%</span></label>
         <input type="range" id="fire-return" min="2" max="12" value="7" step="0.5"/>
       </div>
+      <div class="field">
+        <label>Your current age</label>
+        <div class="field-row"><input type="number" id="fire-current-age" value="30" min="18" max="64"/></div>
+        <div class="field-hint">Used to calculate years until retirement and monthly saving needed</div>
+      </div>
       <button class="calc-btn" onclick="calcFIRE()">Calculate ›</button>
     </div>
     <div class="results-col">
@@ -523,13 +528,14 @@ function calcFIRE(){
   var fireNum=fireNoSP;
   var fireWithSP=Math.max(spend*0.1,spend-sp)/swr;
   document.getElementById('fire-number').textContent=fmt(fireNum);
-  document.getElementById('fire-sub').textContent='at '+(swr*100).toFixed(1)+'% SWR on £'+Math.round(spend).toLocaleString('en-GB')+'/yr spend (gap to state pension: '+gap+' yrs)';
+  document.getElementById('fire-sub').textContent='at '+(swr*100).toFixed(1)+'% SWR · '+yearsLeft+' years to go · state pension gap: '+gap+' yrs';
   document.getElementById('fire-no-sp').textContent=fmt(fireNoSP);
   document.getElementById('fire-have').textContent=fmt(cur);
   document.getElementById('fire-gap').textContent=cur<fireNum?fmt(fireNum-cur):'£0 — already there!';
   // Monthly saving needed via PMT
   var mr=r/12;
-  var yearsLeft=Math.max(1,retAge-new Date().getFullYear()+25);
+  var currentAge=+document.getElementById('fire-current-age').value||30;
+  var yearsLeft=Math.max(1,retAge-currentAge);
   var n=yearsLeft*12;
   var need=0;
   if(cur<fireNum&&mr>0){
