@@ -319,7 +319,7 @@ def get_related_articles(article_slug, all_articles=None, n=3):
             break
     return related
 
-def build_article_html(topic, article_slug, md_content):
+def build_article_html(topic, article_slug, md_content, pub_date=None):
     """Build a complete standalone HTML page from article markdown."""
 
     body_html = md_to_html(md_content)
@@ -357,10 +357,11 @@ def build_article_html(topic, article_slug, md_content):
         body_html = body_html.replace(m3.group(0), '')
 
     cat = category_from_slug(article_slug)
-    year = date.today().year
+    _pub = pub_date if pub_date else date.today()
+    year = _pub.year
     read_time = reading_time(md_content)
     toc_html = extract_toc(body_html)
-    schema_json = build_schema(title, description, article_slug, date.today().strftime("%Y-%m-%d"))
+    schema_json = build_schema(title, description, article_slug, _pub.strftime("%Y-%m-%d"))
     faq_schema_json = build_faq_schema(body_html)
     faq_schema_tag = f'<script type="application/ld+json">\n{faq_schema_json}\n</script>' if faq_schema_json else ''
     article_schema_tag = f'<script type="application/ld+json">\n{schema_json}\n</script>'
@@ -763,7 +764,7 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
         body=body_html,
         disclaimer=disclaimer_html,
         year=year,
-        date_str=date.today().strftime("%d %B %Y"),
+        date_str=_pub.strftime("%d %B %Y"),
         read_time=read_time,
         toc_html=toc_html,
         article_schema_tag=article_schema_tag,
