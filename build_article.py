@@ -479,51 +479,34 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
 .reaction-count{font-size:.88rem;font-weight:500;color:var(--ink-muted)}
 
 /* READING PROGRESS BAR */
-.progress-bar{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0%;z-index:9999;transition:width .1s linear}
-
-/* POST-REACTION NUDGE */
-.reaction-nudge{display:none;margin-top:1rem;padding:1rem 1.25rem;background:var(--cream);border:1px solid var(--rule);animation:fadeUp .3s ease}
-.reaction-nudge p{font-size:.88rem;color:var(--ink-soft);margin-bottom:.75rem}
-.nudge-form{display:flex;gap:.5rem}
-.nudge-form input{flex:1;border:1.5px solid var(--rule);background:#fff;font-family:var(--sans);font-size:.88rem;padding:.55rem .75rem;color:var(--ink);outline:none;transition:border-color .15s}
-.nudge-form input:focus{border-color:var(--accent)}
-.nudge-form button{background:var(--accent);color:#f7f5f0;border:none;font-family:var(--sans);font-size:.75rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase;padding:.55rem 1rem;cursor:pointer;white-space:nowrap}
-.nudge-msg{font-size:.78rem;color:var(--accent);margin-top:.5rem;min-height:1em}
-
-/* SHARE BUTTON */
-.share-row{display:flex;align-items:center;gap:.75rem;margin:2rem 0 0;padding-top:1.5rem;border-top:1px solid var(--rule)}
-.share-label{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-muted);font-weight:500}
-.share-btn{display:inline-flex;align-items:center;gap:.35rem;font-family:var(--sans);font-size:.78rem;font-weight:500;color:var(--ink-soft);background:var(--cream);border:1px solid var(--rule);padding:.4rem .85rem;cursor:pointer;transition:all .15s;text-decoration:none}
-.share-btn:hover{background:var(--ink);color:#f7f5f0;border-color:var(--ink)}
-.share-btn.copied{background:var(--accent-2);color:#fff;border-color:var(--accent-2)}
-
-/* COMMENTS */
-.comments-section{margin:3rem 0 2rem;padding-top:2rem;border-top:2px solid var(--rule)}
-.comments-header{display:flex;align-items:baseline;gap:.75rem;margin-bottom:1.5rem}
-.comments-header h2{font-family:var(--serif);font-size:1.3rem;letter-spacing:-.01em}
-.comment-count{font-size:.78rem;color:var(--ink-muted);background:var(--cream);padding:.2rem .6rem;border-radius:2px}
-.comment-list{margin-bottom:2rem}
-.comment{padding:1.1rem 0;border-bottom:1px solid var(--rule)}
-.comment:last-child{border-bottom:none}
-.comment-meta{display:flex;align-items:center;gap:.6rem;margin-bottom:.4rem}
+.progress-bar{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0%;z-index:9999;transition:width .1s linear}/* COMMENTS */
+.comments-section{margin:3rem 0 0;padding-top:2.5rem;border-top:2px solid var(--rule)}
+.comments-header{font-family:var(--serif);font-size:1.3rem;letter-spacing:-.01em;margin-bottom:.25rem;display:flex;align-items:baseline;gap:.6rem}
+.comment-count{font-size:.78rem;color:var(--ink-muted);font-family:var(--sans);font-weight:400;letter-spacing:0}
+.comment-list{margin:1.5rem 0 2rem}
+.comment{padding:1.25rem 0;border-bottom:1px solid var(--rule)}
+.comment:first-child{border-top:1px solid var(--rule)}
+.comment-meta{display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem}
+.comment-avatar{width:32px;height:32px;background:var(--ink);color:#f7f5f0;font-family:var(--serif);font-size:.9rem;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .comment-name{font-size:.85rem;font-weight:500;color:var(--ink)}
 .comment-date{font-size:.75rem;color:var(--ink-muted)}
-.comment-body{font-size:.9rem;color:var(--ink-soft);line-height:1.6}
-.no-comments{font-size:.88rem;color:var(--ink-muted);padding:.75rem 0}
-.comment-form-wrap{background:var(--cream);padding:1.25rem}
-.comment-form-title{font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);font-weight:500;margin-bottom:1rem}
-.comment-form{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
-.comment-form .field-full{grid-column:1/-1}
-.comment-field label{display:block;font-size:.72rem;font-weight:500;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:.3rem}
-.comment-field input,.comment-field textarea{width:100%;border:1.5px solid var(--rule);background:#fff;font-family:var(--sans);font-size:.9rem;padding:.6rem .8rem;color:var(--ink);outline:none;resize:vertical;transition:border-color .15s}
-.comment-field input:focus,.comment-field textarea:focus{border-color:var(--ink)}
-.comment-submit{background:var(--ink);color:#f7f5f0;border:none;font-family:var(--sans);font-size:.78rem;font-weight:500;letter-spacing:.07em;text-transform:uppercase;padding:.7rem 1.5rem;cursor:pointer;transition:background .15s;margin-top:.25rem}
+.comment-body{font-size:.9rem;color:var(--ink-soft);line-height:1.65;padding-left:calc(32px + .6rem)}
+.no-comments{font-size:.88rem;color:var(--ink-muted);font-style:italic;padding:.5rem 0 1rem}
+.comment-form-section{background:var(--cream);border:1px solid var(--rule);padding:1.5rem}
+.comment-form-label{font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-muted);font-weight:500;margin-bottom:1.25rem}
+.comment-form{display:grid;grid-template-columns:1fr 1fr;gap:.85rem}
+.comment-form .cf-full{grid-column:1/-1}
+.cf-field label{display:block;font-size:.72rem;font-weight:500;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:.35rem}
+.cf-field input,.cf-field textarea{width:100%;border:1.5px solid var(--rule);background:#fff;font-family:var(--sans);font-size:.9rem;padding:.6rem .8rem;color:var(--ink);outline:none;resize:vertical;transition:border-color .15s;-webkit-appearance:none}
+.cf-field input:focus,.cf-field textarea:focus{border-color:var(--ink)}
+.cf-field textarea{min-height:100px}
+.comment-submit{background:var(--ink);color:#f7f5f0;border:none;font-family:var(--sans);font-size:.78rem;font-weight:500;letter-spacing:.07em;text-transform:uppercase;padding:.75rem 1.75rem;cursor:pointer;transition:background .15s}
 .comment-submit:hover{background:var(--accent)}
-.comment-submit:disabled{opacity:.5;cursor:not-allowed}
-.comment-notice{font-size:.75rem;color:var(--ink-muted);margin-top:.75rem}
-.comment-form-msg{font-size:.82rem;margin-top:.75rem;min-height:1.2em;grid-column:1/-1}
-.comment-form-msg.ok{color:var(--accent-2)}
-.comment-form-msg.err{color:#c0392b}
+.comment-submit:disabled{opacity:.45;cursor:not-allowed}
+.cf-msg{font-size:.82rem;margin-top:.1rem}
+.cf-msg.ok{color:var(--accent-2)}
+.cf-msg.err{color:#c0392b}
+.cf-note{font-size:.72rem;color:var(--ink-muted);margin-top:1rem;line-height:1.5;grid-column:1/-1}
 
 """
 
@@ -561,11 +544,6 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
 <main class="article-wrap">
 <div class="article-label">{cat}</div>
 <div class="article-meta">Published {date_str} &middot; {read_time}</div>
-<div class="share-row">
-  <span class="share-label">Share</span>
-  <button class="share-btn" id="js-share-copy" onclick="copyLink()">&#128279; Copy link</button>
-  <a class="share-btn" href="https://twitter.com/intent/tweet?text={title}&url=https://www.luispaiva.co.uk/{slug}/" target="_blank" rel="noopener">&#120143; Post on X</a>
-</div>
 {toc_html}
 {body}
 {disclaimer}
@@ -581,14 +559,6 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
       <span class="reaction-icon">👎</span>
       <span class="reaction-count" id="count-dislike">--</span>
     </button>
-  </div>
-  <div class="reaction-nudge" id="reaction-nudge">
-    <p>Glad it helped! Get one UK money tip every Friday &mdash; free.</p>
-    <div class="nudge-form">
-      <input type="email" id="nudge-email" placeholder="your@email.com" autocomplete="email"/>
-      <button onclick="nudgeSubscribe()">Subscribe free</button>
-    </div>
-    <div class="nudge-msg" id="nudge-msg"></div>
   </div>
 </div>
 
@@ -684,37 +654,33 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
 </form>
 <p id="js-cta-msg" style="font-size:.8rem;color:rgba(247,245,240,.7);margin-top:.5rem;min-height:1.2em"></p>
 </div>
-
 <!-- COMMENTS -->
 <div class="comments-section" id="comments">
-  <div class="comments-header">
-    <h2>Comments</h2>
-    <span class="comment-count" id="comment-count">0</span>
-  </div>
+  <h2 class="comments-header">Comments <span class="comment-count" id="comment-count"></span></h2>
   <div class="comment-list" id="comment-list">
-    <div class="no-comments" id="no-comments">No comments yet &mdash; be the first.</div>
+    <p class="no-comments" id="no-comments">No comments yet — be the first.</p>
   </div>
-  <div class="comment-form-wrap">
-    <div class="comment-form-title">Leave a comment</div>
-    <div class="comment-form" id="comment-form">
-      <div class="comment-field">
+  <div class="comment-form-section">
+    <div class="comment-form-label">Leave a comment</div>
+    <div class="comment-form">
+      <div class="cf-field">
         <label>Name</label>
-        <input type="text" id="c-name" placeholder="Your name" maxlength="60"/>
+        <input type="text" id="c-name" placeholder="Your name" maxlength="60" autocomplete="name"/>
       </div>
-      <div class="comment-field">
-        <label>Email <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink-muted)">(never published)</span></label>
-        <input type="email" id="c-email" placeholder="Optional &mdash; kept private"/>
+      <div class="cf-field">
+        <label>Email <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink-muted)">(never shown)</span></label>
+        <input type="email" id="c-email" placeholder="Optional — kept private" autocomplete="email"/>
       </div>
-      <div class="comment-field field-full">
+      <div class="cf-field cf-full">
         <label>Comment</label>
-        <textarea id="c-body" rows="4" placeholder="Share your thoughts, questions, or experience..." maxlength="1000"></textarea>
+        <textarea id="c-body" placeholder="Share your thoughts or questions..." maxlength="1000"></textarea>
       </div>
-      <div style="grid-column:1/-1;display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
+      <div class="cf-full" style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
         <button class="comment-submit" id="c-submit" onclick="submitComment()">Post comment</button>
-        <div class="comment-form-msg" id="c-msg"></div>
+        <span class="cf-msg" id="c-msg"></span>
       </div>
+      <p class="cf-note">Be respectful and on-topic. This is not a place for financial advice — please see a qualified adviser for personal situations.</p>
     </div>
-    <p class="comment-notice">Comments are moderated. Please keep it respectful and on-topic. Not financial advice &mdash; see a qualified adviser for personal situations.</p>
   </div>
 </div>
 </main>
@@ -854,6 +820,7 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
     }});
   }}
 }})();
+</script>
 <script>
 // ── READING PROGRESS BAR ──────────────────────────────────────────
 (function() {{
@@ -893,30 +860,7 @@ function copyLink() {{
 // ── POST-REACTION EMAIL NUDGE ────────────────────────────────────
 // Show nudge only when user clicks 👍 (not 👎)
 // Hooks into the existing react() function via a wrapper
-(function() {{
-  var origReact = window.react;
-  window.react = function(reaction) {{
-    origReact(reaction);
-    if (reaction === 'like') {{
-      var nudge = document.getElementById('reaction-nudge');
-      if (nudge && !localStorage.getItem('nudge_dismissed_{slug}')) {{
-        nudge.style.display = 'block';
-        nudge.scrollIntoView({{behavior: 'smooth', block: 'nearest'}});
-      }}
-    }}
-  }};
-}})();
 
-function nudgeSubscribe() {{
-  var email = document.getElementById('nudge-email').value.trim();
-  var msg   = document.getElementById('nudge-msg');
-  if (!email || !email.includes('@')) {{ msg.textContent = 'Please enter a valid email.'; return; }}
-  var url = 'https://magic.beehiiv.com/v1/8bc3d4e7-0688-4182-8d13-041f31a4bab1?email=' + encodeURIComponent(email) + '&utm_source=luispaiva&utm_medium=reaction-nudge&utm_campaign={slug}';
-  var win = window.open(url, '_blank');
-  if (!win) {{ window.location.href = url; return; }}
-  msg.textContent = 'Check the new tab to confirm — thanks! 🎉';
-  localStorage.setItem('nudge_dismissed_{slug}', '1');
-}}
 
 // ── COMMENTS ─────────────────────────────────────────────────────
 (function() {{
@@ -947,12 +891,14 @@ function nudgeSubscribe() {{
       var noC  = document.getElementById('no-comments');
       var cnt  = document.getElementById('comment-count');
       if (!list) return;
-      cnt.textContent = rows.length;
+      cnt.textContent = rows.length ? '(' + rows.length + ')' : '';
       if (!rows.length) {{ noC.style.display = 'block'; return; }}
       noC.style.display = 'none';
       list.innerHTML = rows.map(function(c) {{
+        var initial = escHtml(c.name.charAt(0).toUpperCase());
         return '<div class="comment">' +
           '<div class="comment-meta">' +
+          '<div class="comment-avatar">' + initial + '</div>' +
           '<span class="comment-name">' + escHtml(c.name) + '</span>' +
           '<span class="comment-date">' + timeAgo(c.created_at) + '</span>' +
           '</div>' +
@@ -978,8 +924,8 @@ function nudgeSubscribe() {{
     var msg    = document.getElementById('c-msg');
     var btn    = document.getElementById('c-submit');
 
-    if (!name) {{ msg.textContent = 'Please enter your name.'; msg.className='comment-form-msg err'; return; }}
-    if (body.length < 5) {{ msg.textContent = 'Comment is too short.'; msg.className='comment-form-msg err'; return; }}
+    if (!name) {{ msg.textContent = 'Please enter your name.'; msg.className='cf-msg err'; return; }}
+    if (body.length < 5) {{ msg.textContent = 'Comment is too short.'; msg.className='cf-msg err'; return; }}
 
     btn.disabled = true;
     btn.textContent = 'Posting...';
