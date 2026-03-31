@@ -488,12 +488,19 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
 <title>{title} - Luis Paiva</title>
 <meta name="description" content="{description}"/>
 <link rel="canonical" href="https://www.luispaiva.co.uk/{slug}/"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="{{title}} - Luis Paiva"/>
+<meta name="twitter:description" content="{{description}}"/>
 {article_schema_tag}
 {faq_schema_tag}
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <meta name="theme-color" content="#0f0f0d"/>
+<link rel="apple-touch-icon" href="/favicon.svg"/>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet"/>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet" media="print" onload="this.media='all'"/>
+<noscript><link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet"/></noscript>
 <style>{css}</style>
 </head>
 <body>

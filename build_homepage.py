@@ -46,11 +46,12 @@ def extract_title(text, fallback):
     return fallback.replace('-', ' ').title()
 
 def extract_excerpt(text, words=40):
-    text = re.sub(r'^PUB_DATE:.*\n', '', text)
+    text = re.sub(r'^PUB_DATE:.*', '', text, flags=re.MULTILINE)
+    text = re.sub(r'^META_DESCRIPTION:.*', '', text, flags=re.MULTILINE)
+    text = re.sub(r'^<!--.*?-->\s*', '', text, flags=re.DOTALL|re.MULTILINE)
     text = re.sub(r'^---.*?---\s*', '', text, flags=re.DOTALL)
     text = re.sub(r'^#{1,}\s+.+\n', '', text, flags=re.MULTILINE)
     text = re.sub(r'<!--.*?-->', '', text, flags=re.DOTALL)
-    text = re.sub(r'META_DESCRIPTION:.*\n', '', text)
     text = re.sub(r'\[([^\]]+)\]\([^\)]+\)', r'\1', text)
     text = re.sub(r'\*{1,2}(.+?)\*{1,2}', r'\1', text)
     text = re.sub(r'`[^`]+`', '', text)
