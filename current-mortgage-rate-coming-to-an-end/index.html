@@ -1,400 +1,49 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-build_article.py
-Converts a published article markdown file into a standalone HTML page.
-Called by pipeline_v2.py after each article publish.
-"""
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Fixed Rate Mortgage Ending? Here's Exactly What to Do in 2026 - Luis Paiva</title>
+<meta name="description" content="Your fixed-rate mortgage is ending? Here's exactly what to do — remortgage, switch lenders, or let it roll. UK 2026 rates, real numbers, no jargon."/>
+<link rel="canonical" href="https://www.luispaiva.co.uk/current-mortgage-rate-coming-to-an-end/"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="{title} - Luis Paiva"/>
+<meta name="twitter:description" content="{description}"/>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Fixed Rate Mortgage Ending? Here's Exactly What to Do in 2026",
+  "description": "Your fixed-rate mortgage is ending? Here's exactly what to do \u2014 remortgage, switch lenders, or let it roll. UK 2026 rates, real numbers, no jargon.",
+  "author": {
+    "@type": "Person",
+    "name": "Luis Paiva",
+    "url": "https://www.luispaiva.co.uk/about"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Luis Paiva",
+    "url": "https://www.luispaiva.co.uk"
+  },
+  "datePublished": "2026-04-01",
+  "dateModified": "2026-04-01",
+  "url": "https://www.luispaiva.co.uk/current-mortgage-rate-coming-to-an-end/",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.luispaiva.co.uk/current-mortgage-rate-coming-to-an-end/"
+  }
+}
+</script>
 
-import re, sys
-from datetime import date
-
-if sys.stdout.encoding and sys.stdout.encoding.lower() not in ("utf-8", "utf8"):
-    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-
-
-def md_to_html(md):
-    """Minimal markdown to HTML converter."""
-    h = md
-
-    # Remove meta tags
-    h = re.sub(r'<meta[^>]+>', '', h)
-
-    # Tables - must run before other replacements
-    def render_table(m):
-        rows = m.group(0).strip().split('\n')
-        hcells = ''.join(
-            '<th>{}</th>'.format(c.strip())
-            for c in rows[0].split('|') if c.strip()
-        )
-        body = ''
-        for row in rows[2:]:
-            cells = ''.join(
-                '<td>{}</td>'.format(c.strip())
-                for c in row.split('|') if c.strip()
-            )
-            if cells:
-                body += '<tr>{}</tr>'.format(cells)
-        return '<div class="table-wrap"><table><thead><tr>{}</tr></thead><tbody>{}</tbody></table></div>'.format(
-            hcells, body
-        )
-    h = re.sub(r'(\|.+\|\n)+', render_table, h)
-
-    # Headings
-    h = re.sub(r'^#### (.+)$', r'<h4>\1</h4>', h, flags=re.MULTILINE)
-    h = re.sub(r'^### (.+)$',  r'<h3>\1</h3>', h, flags=re.MULTILINE)
-    h = re.sub(r'^## (.+)$',   r'<h2>\1</h2>', h, flags=re.MULTILINE)
-    h = re.sub(r'^# (.+)$',    r'<h1>\1</h1>', h, flags=re.MULTILINE)
-
-    # Inline formatting
-    h = re.sub(r'\*\*\*(.+?)\*\*\*', r'<strong><em>\1</em></strong>', h)
-    h = re.sub(r'\*\*(.+?)\*\*',     r'<strong>\1</strong>', h)
-    h = re.sub(r'\*(.+?)\*',         r'<em>\1</em>', h)
-    h = re.sub(r'`(.+?)`',           r'<code>\1</code>', h)
-
-    # Links
-    h = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', r'<a href="\2" rel="noopener">\1</a>', h)
-
-    # Blockquotes
-    h = re.sub(r'^> (.+)$', r'<blockquote>\1</blockquote>', h, flags=re.MULTILINE)
-
-    # Unordered lists
-    def render_ul(m):
-        items = ''.join(
-            '<li>{}</li>'.format(l[2:])
-            for l in m.group(0).strip().split('\n')
-            if l.startswith('- ')
-        )
-        return '<ul>{}</ul>'.format(items)
-    h = re.sub(r'(^- .+$\n?)+', render_ul, h, flags=re.MULTILINE)
-
-    # Ordered lists
-    def render_ol(m):
-        items = ''.join(
-            '<li>{}</li>'.format(re.sub(r'^\d+\. ', '', l))
-            for l in m.group(0).strip().split('\n')
-            if re.match(r'^\d+\.', l)
-        )
-        return '<ol>{}</ol>'.format(items)
-    h = re.sub(r'(^\d+\. .+$\n?)+', render_ol, h, flags=re.MULTILINE)
-
-    # Horizontal rules
-    h = re.sub(r'^---+$', '<hr>', h, flags=re.MULTILINE)
-
-    # HTML comments (DIRECTIVE blocks)
-    h = re.sub(r'<!--.*?-->', '', h, flags=re.DOTALL)
-
-    # Paragraphs
-    blocks = []
-    for block in h.split('\n\n'):
-        block = block.strip()
-        if not block:
-            continue
-        if re.match(r'^<(h[1-6]|ul|ol|table|div|blockquote|hr|p)', block):
-            blocks.append(block)
-        else:
-            # Clean internal newlines
-            block = re.sub(r'\n', ' ', block)
-            blocks.append('<p>{}</p>'.format(block))
-    h = '\n'.join(blocks)
-    h = re.sub(r'<p>\s*</p>', '', h)
-
-    return h
-
-
-def reading_time(md_content):
-    """Estimate reading time based on word count (200 wpm average)."""
-    words = len(md_content.split())
-    minutes = max(1, round(words / 200))
-    return f"{minutes} min read"
-
-def extract_toc(body_html):
-    """Extract H2 headings for table of contents."""
-    import re as _re
-    headings = _re.findall(r'<h2>(.*?)</h2>', body_html)
-    if len(headings) < 3:
-        return ''
-    items = ''
-    for h in headings:
-        # Skip FAQ heading in TOC
-        if 'FAQ' in h or 'Frequently' in h or 'Disclaimer' in h:
-            continue
-        slug = _re.sub(r'[^a-z0-9]+', '-', h.lower()).strip('-')
-        items += f'<li><a href="#{slug}">{h}</a></li>'
-    if not items:
-        return ''
-    return f'<div class="toc"><div class="toc-label">In this article</div><ul>{items}</ul></div>'
-
-def add_heading_ids(body_html):
-    """Add id attributes to H2 tags for TOC anchor links."""
-    import re as _re
-    def add_id(m):
-        heading = m.group(1)
-        slug = _re.sub(r'[^a-z0-9]+', '-', heading.lower()).strip('-')
-        return f'<h2 id="{slug}">{heading}</h2>'
-    return _re.sub(r'<h2>(.*?)</h2>', add_id, body_html)
-
-def add_utm_to_links(body_html, article_slug):
-    """Add UTM tracking parameters to affiliate links."""
-    import re as _re
-    def add_utm(m):
-        url = m.group(1)
-        text = m.group(2)
-        # Skip internal links and anchors
-        if url.startswith('/') or url.startswith('#') or 'luispaiva' in url:
-            return m.group(0)
-        sep = '&' if '?' in url else '?'
-        utm = f"{sep}utm_source=luispaiva&utm_medium=affiliate&utm_campaign={article_slug}"
-        return f'<a href="{url}{utm}" rel="noopener sponsored">{text}</a>'
-    return _re.sub(r'<a href="([^"]+)"[^>]*>([^<]+)</a>', add_utm, body_html)
-
-def build_schema(title, description, article_slug, date_str):
-    """Build JSON-LD schema markup for the article."""
-    import json as _json
-    schema = {
-        "@context": "https://schema.org",
-        "@type": "Article",
-        "headline": title,
-        "description": description,
-        "author": {
-            "@type": "Person",
-            "name": "Luis Paiva",
-            "url": "https://www.luispaiva.co.uk/about"
-        },
-        "publisher": {
-            "@type": "Organization",
-            "name": "Luis Paiva",
-            "url": "https://www.luispaiva.co.uk"
-        },
-        "datePublished": date_str,
-        "dateModified": date_str,
-        "url": "https://www.luispaiva.co.uk/" + article_slug + "/",
-        "mainEntityOfPage": {
-            "@type": "WebPage",
-            "@id": "https://www.luispaiva.co.uk/" + article_slug + "/"
-        }
-    }
-    return _json.dumps(schema, indent=2)
-
-def build_faq_schema(body_html):
-    """Extract FAQ pairs and build FAQPage schema."""
-    import re as _re, json as _json
-    pairs = _re.findall(r'<strong>Q:\s*(.*?)</strong>\s*</p>\s*<p>A:\s*(.*?)</p>', body_html, _re.DOTALL)
-    if not pairs:
-        # Try alternate format
-        pairs = _re.findall(r'\*\*Q:\s*(.*?)\*\*\s*A:\s*(.*?)(?=\*\*Q:|$)', body_html, _re.DOTALL)
-    if not pairs:
-        return ''
-    entities = [{"@type": "Question", "name": q.strip(), "acceptedAnswer": {"@type": "Answer", "text": a.strip()}} for q, a in pairs[:5]]
-    schema = {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": entities}
-    return _json.dumps(schema, indent=2)
-
-def category_from_slug(s):
-    if 'lisa' in s or ('isa' in s and 'saving' not in s): return 'ISAs'
-    if 'saving' in s or 'premium-bond' in s: return 'Savings'
-    if 'invest' in s or 'etf' in s or 'index-fund' in s: return 'Investing'
-    if 'isa' in s: return 'ISAs'
-    if 'credit' in s: return 'Credit'
-    if 'mortgage' in s or 'stamp-duty' in s: return 'Mortgages'
-    if 'budget' in s or 'bill' in s or 'groceries' in s: return 'Budgeting'
-    if 'pension' in s or 'retirement' in s: return 'Pensions'
-    if 'tax' in s or 'self-assessment' in s: return 'Tax'
-    if 'side-hustle' in s or 'passive-income' in s or 'salary' in s: return 'Side Income'
-    if 'debt' in s or 'loan' in s: return 'Debt'
-    if 'insurance' in s: return 'Insurance'
-    if 'bank' in s or 'monzo' in s or 'starling' in s: return 'Banking'
-    return 'Personal Finance'
-
-
-def build_og_image(title, cat, article_slug):
-    """Generate a simple SVG OG image for social sharing."""
-    import textwrap
-    # Wrap title to fit
-    words = title.split()
-    lines = []
-    current = []
-    for w in words:
-        current.append(w)
-        if len(' '.join(current)) > 28:
-            if len(current) > 1:
-                lines.append(' '.join(current[:-1]))
-                current = [current[-1]]
-            else:
-                lines.append(' '.join(current))
-                current = []
-    if current:
-        lines.append(' '.join(current))
-    lines = lines[:3]  # max 3 lines
-
-    # Build text elements
-    y_start = 160 - (len(lines) - 1) * 32
-    text_els = ''
-    for i, line in enumerate(lines):
-        y = y_start + i * 52
-        text_els += f'<text x="60" y="{y}" font-family="Georgia,serif" font-size="38" font-weight="bold" fill="#f7f5f0">{line}</text>'
-
-    svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
-  <rect width="1200" height="630" fill="#0f0f0d"/>
-  <rect x="0" y="0" width="6" height="630" fill="#c8502a"/>
-  <rect x="0" y="580" width="1200" height="50" fill="#1a1a18"/>
-  <text x="60" y="100" font-family="Georgia,serif" font-size="22" fill="#c8502a" letter-spacing="3">{cat.upper()}</text>
-  {text_els}
-  <text x="60" y="560" font-family="Arial,sans-serif" font-size="20" fill="rgba(247,245,240,0.5)">luispaiva.co.uk</text>
-  <text x="1140" y="560" font-family="Georgia,serif" font-size="28" font-weight="bold" fill="#f7f5f0" text-anchor="end">LP.</text>
-</svg>'''
-    return svg
-
-# Keyword → slug mapping for internal linking
-INTERNAL_LINK_MAP = [
-    # ISAs
-    (r'\bLifetime ISA\b', 'can-i-withdraw-my-lisa-savings-at-60-uk', 'Lifetime ISA'),
-    (r'\bLISA\b', 'can-i-withdraw-my-lisa-savings-at-60-uk', 'LISA'),
-    (r'\bstocks and shares ISA\b', None, None),
-    (r'\bcash ISA\b', None, None),
-    # Savings
-    (r'\bsave [^a-z]?10,?000\b', 'how-to-save-10000-pounds-in-one-year-uk', 'save £10,000'),
-    (r'\bemergency fund\b', None, None),
-    (r'\bpremium bonds\b', None, None),
-]
-
-def add_internal_links(body_html, current_slug):
-    """Auto-link keywords to internal articles."""
-    import re as _re
-    from pathlib import Path as _Path
-
-    # Build slug->title map from docs folder
-    docs = _Path(__file__).parent / "docs"
-    slug_titles = {}
-    for md in docs.glob("*.md"):
-        content = md.read_text(encoding="utf-8")
-        m = _re.search(r'^#\s+(.+)$', content, _re.MULTILINE)
-        if m:
-            slug_titles[md.stem] = m.group(1).strip()
-
-    # Strip HTML tags for matching, then reinsert
-    # Only link first occurrence of each keyword
-    linked = set()
-
-    for pattern, slug, label in INTERNAL_LINK_MAP:
-        if slug is None or slug == current_slug or slug in linked:
-            continue
-        if slug not in slug_titles:
-            continue
-
-        def replace_first(m, slug=slug, label=label):
-            if slug in linked:
-                return m.group(0)
-            linked.add(slug)
-            return f'<a href="/{slug}/" class="internal-link">{m.group(0)}</a>'
-
-        # Only link inside <p> tags, not headings or existing links
-        new_html = _re.sub(
-            pattern,
-            replace_first,
-            body_html,
-            count=1,
-            flags=_re.IGNORECASE
-        )
-        body_html = new_html
-
-    return body_html
-
-def get_related_articles(article_slug, all_articles=None, n=3):
-    """Get n related articles from same category."""
-    from pathlib import Path as _Path
-    docs = _Path(__file__).parent / "docs"
-    cat = category_from_slug(article_slug)
-    related = []
-    for md in sorted(docs.glob("*.md"), key=lambda p: p.stat().st_mtime, reverse=True):
-        slug = md.stem
-        if slug == article_slug:
-            continue
-        if category_from_slug(slug) == cat:
-            import re as _re
-            content = md.read_text(encoding="utf-8")
-            m = _re.search(r'^#\s+(.+)$', content, _re.MULTILINE)
-            title = m.group(1).strip() if m else slug.replace('-', ' ').title()
-            related.append({"slug": slug, "title": title, "cat": cat})
-        if len(related) >= n:
-            break
-    return related
-
-def build_article_html(topic, article_slug, md_content, pub_date=None, image_meta=None):
-    """Build a complete standalone HTML page from article markdown."""
-
-    body_html = md_to_html(md_content)
-
-    # Add IDs to headings for TOC
-    body_html = add_heading_ids(body_html)
-
-    # Add UTM tracking to affiliate links
-    body_html = add_utm_to_links(body_html, article_slug)
-
-    # Add internal links
-    body_html = add_internal_links(body_html, article_slug)
-
-    # Extract title
-    m = re.search(r'<h1>(.*?)</h1>', body_html)
-    title = re.sub(r'<!--.*?-->', '', m.group(1)).strip() if m else topic.title()
-
-    # Extract META_DESCRIPTION line written by Writer
-    m2 = re.search(r'META_DESCRIPTION:\s*(.+)', md_content)
-    if m2:
-        description = m2.group(1).strip()[:155]
-    else:
-        # Fallback: try old meta tag format
-        m2b = re.search(r'content="([^"]{20,})"', md_content)
-        description = m2b.group(1)[:155] if m2b else title
-    # Remove META_DESCRIPTION line from body
-    body_html = re.sub(r'<p>META_DESCRIPTION:.*?</p>', '', body_html)
-    body_html = re.sub(r'META_DESCRIPTION:.*?\n', '', body_html)
-
-    # Separate disclaimer
-    m3 = re.search(r'<p><em>(Affiliate disclosure.*?)</em></p>', body_html, re.DOTALL)
-    disclaimer_html = ''
-    if m3:
-        disclaimer_html = '<div class="disclaimer"><em>{}</em></div>'.format(m3.group(1))
-        body_html = body_html.replace(m3.group(0), '')
-
-    cat = category_from_slug(article_slug)
-    _pub = pub_date if pub_date else date.today()
-
-    # Build hero image HTML
-    hero_html = ''
-    if image_meta and image_meta.get('path'):
-        img_path = image_meta['path']
-        # Use web path: images/<slug>.jpg served from repo root
-        img_web  = '/images/' + article_slug + '.jpg'
-        credit   = image_meta.get('credit_name', '')
-        cred_url = image_meta.get('credit_url', '')
-        source   = image_meta.get('source', '')
-        cred_html = ''
-        if credit:
-            cred_link = f'<a href="{cred_url}" target="_blank" rel="noopener">{credit}</a>' if cred_url else credit
-            cred_html = f'<p class="image-credit">Photo by {cred_link} on {source}</p>'
-        hero_html = f'<div class="article-hero-wrap"><img src="{img_web}" alt="{title}" loading="eager"/></div>{cred_html}'
-    year = _pub.year
-    read_time = reading_time(md_content)
-    toc_html = extract_toc(body_html)
-    schema_json = build_schema(title, description, article_slug, _pub.strftime("%Y-%m-%d"))
-    faq_schema_json = build_faq_schema(body_html)
-    faq_schema_tag = f'<script type="application/ld+json">\n{faq_schema_json}\n</script>' if faq_schema_json else ''
-    article_schema_tag = f'<script type="application/ld+json">\n{schema_json}\n</script>'
-
-    # Generate OG image SVG
-    og_svg = build_og_image(title, cat, article_slug)
-
-    # Related articles
-    related = get_related_articles(article_slug)
-    if related:
-        cards = ''
-        for r in related:
-            cards += f'<a class="related-card" href="/{r["slug"]}/">'                      f'<div class="related-cat">{r["cat"]}</div>'                      f'<div class="related-title">{r["title"]}</div>'                      f'</a>'
-        related_html = f'<div class="related-articles"><div class="related-label">Related Articles</div><div class="related-grid">{cards}</div></div>'
-    else:
-        related_html = '' 
-
-    css = """
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<meta name="theme-color" content="#0f0f0d"/>
+<link rel="apple-touch-icon" href="/favicon.svg"/>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet" media="print" onload="this.media='all'"/>
+<noscript><link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet"/></noscript>
+<style>
 :root{--ink:#0f0f0d;--ink-soft:#3a3a35;--ink-muted:#7a7a72;--paper:#f7f5f0;--cream:#eeebe3;--rule:#d8d4c8;--accent:#c8502a;--serif:'DM Serif Display',Georgia,serif;--sans:'DM Sans',system-ui,sans-serif;--max:740px}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:var(--sans);background:var(--paper);color:var(--ink);font-size:17px;line-height:1.7;-webkit-font-smoothing:antialiased}
@@ -533,30 +182,7 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
 .image-credit{font-size:.68rem;color:var(--ink-muted);margin-top:.35rem;text-align:right}
 .image-credit a{color:var(--ink-muted);text-decoration:none}
 .image-credit a:hover{color:var(--ink)}
-"""
-
-    return """<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>{title} - Luis Paiva</title>
-<meta name="description" content="{description}"/>
-<link rel="canonical" href="https://www.luispaiva.co.uk/{slug}/"/>
-<meta name="twitter:card" content="summary_large_image"/>
-<meta name="twitter:title" content="{{title}} - Luis Paiva"/>
-<meta name="twitter:description" content="{{description}}"/>
-{article_schema_tag}
-{faq_schema_tag}
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<meta name="theme-color" content="#0f0f0d"/>
-<link rel="apple-touch-icon" href="/favicon.svg"/>
-<link rel="icon" href="/favicon.svg" type="image/svg+xml"/>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap"/>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet" media="print" onload="this.media='all'"/>
-<noscript><link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet"/></noscript>
-<style>{css}</style>
+</style>
 </head>
 <body>
 <div class="progress-bar" id="js-progress"></div>
@@ -567,12 +193,84 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
 </div>
 </header>
 <main class="article-wrap">
-<div class="article-label">{cat}</div>
-<div class="article-meta">Published {date_str} &middot; {read_time}</div>
-{hero_html}
-{toc_html}
-{body}
-{disclaimer}
+<div class="article-label">Mortgages</div>
+<div class="article-meta">Published 01 April 2026 &middot; 14 min read</div>
+<div class="article-hero-wrap"><img src="/images/current-mortgage-rate-coming-to-an-end.jpg" alt="Fixed Rate Mortgage Ending? Here's Exactly What to Do in 2026" loading="eager"/></div><p class="image-credit">Photo by <a href="https://unsplash.com/photos/row-of-parked-cars-on-a-residential-street-Z911T1lwYg4?utm_source=luispaiva&utm_medium=referral" target="_blank" rel="noopener">Andri Aeschlimann</a> on Unsplash</p>
+
+<p>PUB_DATE: 2026-04-01</p>
+
+<h1>Fixed Rate Mortgage Ending? Here's Exactly What to Do in 2026</h1>
+<p>Your fixed rate mortgage is coming to an end — and if you do nothing, you will almost certainly end up paying hundreds of pounds more every month than you need to. This guide tells you exactly what your options are, what the current UK mortgage market looks like in 2026, and how to make the right decision for your situation.</p>
+<p>The good news: mortgage rates have come down significantly from their 2023 peak. The bad news: they are still materially higher than the ultra-low rates many people locked in two and five years ago. If your fix was taken out in 2021 or early 2022, the jump in payments when you remortgage will be real — but it can be managed with the right approach.</p>
+<p>Let's start with what actually happens when your fixed rate ends.</p>
+<h2 id="what-happens-when-your-fixed-rate-mortgage-expires">What Happens When Your Fixed Rate Mortgage Expires</h2>
+<p>When your fixed rate period ends — whether that is a two-year, three-year, or five-year deal — your mortgage does not simply stop. You do not lose your home. What happens is that you automatically roll onto your lender's Standard Variable Rate, known as the SVR.</p>
+<p>The SVR is almost always a bad deal. Lenders set it themselves, it does not track the Bank of England base rate directly, and it can be changed at any time. In early 2026, most major lenders' SVRs are sitting between 7% and 8.5% — significantly higher than the best fixed and tracker deals available.</p>
+<p>Here is what that means in real money. If you have a £200,000 mortgage and you roll onto an SVR of 7.5% rather than taking a new two-year fix at 4.5%, the difference in monthly payments is approximately £390 per month. Over two years, that is £9,360 in extra interest you did not need to pay.</p>
+<p>The single most important thing you can do when your mortgage is ending is not to do nothing.</p>
+<h2 id="where-uk-mortgage-rates-stand-in-2026">Where UK Mortgage Rates Stand in 2026</h2>
+<p>After the turbulence of 2022 and 2023 — when two-year fixed rates briefly hit 6.5% — the market has calmed significantly. The Bank of England base rate has been on a gradual downward path through 2025 and into 2026, currently sitting at 4.25%.</p>
+<p>As of April 2026, the best available deals on the market look approximately like this:</p>
+<div class="table-wrap"><table><thead><tr><th>Mortgage Type</th><th>Best Available Rate</th><th>LTV</th><th>Notes</th></tr></thead><tbody><tr><td>2-year fixed</td><td>4.1%</td><td>60% LTV</td><td>Lower rate for larger equity</td></tr><tr><td>2-year fixed</td><td>4.5%</td><td>75% LTV</td><td>Most common bracket</td></tr><tr><td>2-year fixed</td><td>4.9%</td><td>85% LTV</td><td>Higher LTV means higher rate</td></tr><tr><td>5-year fixed</td><td>4.3%</td><td>60% LTV</td><td>Certainty over longer period</td></tr><tr><td>5-year fixed</td><td>4.7%</td><td>75% LTV</td><td>Popular choice in 2026</td></tr><tr><td>2-year tracker</td><td>4.0%</td><td>75% LTV</td><td>Tracks base rate + 0.25%</td></tr><tr><td>SVR (average)</td><td>7.8%</td><td>Any</td><td>What you pay if you do nothing</td></tr></tbody></table></div>
+These are indicative rates — the exact deal you are offered will depend on your credit score, income, the remaining term of your mortgage, and which lender you approach. But they give you a clear picture of the market and why acting matters.
+<h2 id="your-four-options-when-your-fix-ends">Your Four Options When Your Fix Ends</h2>
+<p>When your fixed rate period ends, you have four choices. Understanding each one properly will help you make the right decision for your situation.</p>
+<p><strong>Option 1: Remortgage to a new deal with a different lender</strong></p>
+<p>This is what most people should do. You apply to a new lender, they do an affordability assessment, value your property, and offer you a new deal. If approved, your existing mortgage is paid off and you start fresh with the new lender.</p>
+<p>The main advantage is access to the whole of the market — not just what your current lender is offering. The process takes four to eight weeks on average, so you need to start six months before your current deal ends to avoid any gap where you sit on the SVR.</p>
+<p>A mortgage broker is invaluable here. A whole-of-market broker like <a href="https://www.landc.co.uk?utm_source=luispaiva&utm_medium=affiliate&utm_campaign=current-mortgage-rate-coming-to-an-end" rel="noopener sponsored">L&C Mortgages</a> can search thousands of deals and advise on which is right for your situation. Crucially, most mortgage brokers are free to use for residential remortgages — they are paid a commission by the lender when your mortgage completes.</p>
+<p><strong>Option 2: Take a product transfer with your existing lender</strong></p>
+<p>A product transfer means you stay with your current lender but switch to a new deal. This is much simpler than a full remortgage — there is no new affordability assessment, no property valuation, and much less paperwork. It can often be done entirely online in under 30 minutes.</p>
+<p>The downside is you are limited to what your current lender offers, which may not be the best deal on the market. However, in 2026 many lenders are offering competitive product transfer rates to retain customers, so it is always worth checking your lender's retention deals before starting a full remortgage process.</p>
+<p>If your circumstances have changed since you originally took out the mortgage — perhaps your income is lower, or you have taken on more debt — a product transfer is often much easier to complete than a full remortgage, which requires a fresh affordability check.</p>
+<p><strong>Option 3: Switch to a tracker mortgage</strong></p>
+<p>A tracker mortgage follows the Bank of England base rate plus a set margin — for example, base rate plus 0.25%. As the base rate moves, so does your interest rate.</p>
+<p>In 2026, trackers are an interesting option for one specific reason: if you believe the Bank of England will continue cutting rates over the next year or two, a tracker means your payments automatically fall as rates fall. You benefit from cuts without needing to remortgage again.</p>
+<p>The risk is the reverse — if rates rise, your payments rise with them. Trackers also usually come with no early repayment charges, which gives you the flexibility to switch to a fixed deal at any time if rates start moving against you.</p>
+<p><strong>Option 4: Do nothing and roll onto the SVR</strong></p>
+<p>This is almost never the right choice, but there are limited circumstances where it makes sense. If you are planning to sell your property within the next two or three months, the flexibility of the SVR — no early repayment charges — might outweigh the higher rate. Similarly, if you are in the middle of a major life event that makes applying for a new mortgage impractical right now, a short period on the SVR buys you time.</p>
+<p>But be honest with yourself about the timeline. A month on the SVR at 7.8% versus 4.7% on a five-year fix costs approximately £175 per month on a £200,000 mortgage. If a couple of months turns into six, that is over £1,000 you did not need to spend.</p>
+<h2 id="how-to-get-the-best-deal-step-by-step">How to Get the Best Deal — Step by Step</h2>
+<p><strong>Six months before your deal ends:</strong> Check your current deal expiry date and your early repayment charges. Most lenders allow you to lock in a new rate six months in advance without paying ERC — this is called a rate reservation. If rates rise between now and when you complete, you are protected. If they fall, most lenders will let you switch to the new lower rate.</p>
+<p><strong>Five months before:</strong> Use a comparison site like MoneySuperMarket or Moneyfacts to get a sense of the market. Do not apply yet — just research. Check both the initial rate and the overall cost for comparison (APRC), which takes fees into account.</p>
+<p><strong>Four months before:</strong> Speak to a whole-of-market mortgage broker. They will search the full market including lender-only deals that do not appear on comparison sites. A good broker will also check your credit file, identify any issues, and advise on which lenders are likely to accept your application.</p>
+<p><strong>Three months before:</strong> Submit your mortgage application. Allow six to eight weeks for the process — lenders can be slow, especially at busy periods like the start of the tax year.</p>
+<p><strong>Two weeks before your current deal ends:</strong> Confirm completion date and ensure the new mortgage is ready to start the day your old deal finishes.</p>
+<h2 id="understanding-the-costs-of-remortgaging">Understanding the Costs of Remortgaging</h2>
+<p>Remortgaging is not always free, and understanding the costs helps you compare deals properly.</p>
+<p><strong>Arrangement fees</strong> — Many of the best-rate mortgages come with an arrangement fee of £999 to £1,999. A deal with a slightly higher rate but no arrangement fee can sometimes work out cheaper over the fixed period. Always compare the total cost, not just the headline rate. A broker or online fee calculator can do this for you instantly.</p>
+<p><strong>Legal fees</strong> — When switching lenders, you need a solicitor to handle the transfer. Many lenders offer a free legal service as part of the remortgage deal. Take this where it is offered.</p>
+<p><strong>Valuation fees</strong> — Most lenders want to value your property. Many offer free valuations for remortgages. If yours does not, expect to pay £150–£400 depending on property value.</p>
+<p><strong>Early repayment charges</strong> — If you remortgage before your current fixed period ends, you will pay an ERC — typically 1–5% of your outstanding balance. On a £200,000 mortgage, that could be £2,000–£10,000. Always check your ERC before acting early.</p>
+<p><strong>Broker fees</strong> — Some brokers charge a fee of £300–£500 while others are free, paid by lender commission. Free brokers are not necessarily worse — they access the same products. A fee-charging broker may spend more time on complex cases.</p>
+<h2 id="what-if-your-circumstances-have-changed">What if Your Circumstances Have Changed?</h2>
+<p>This is where many people get into difficulty. If your income has fallen, your credit score has deteriorated, or you have taken on significant new debt since you originally took out the mortgage, you may find it harder to remortgage to a new lender.</p>
+<p>In these situations, a product transfer with your existing lender is often the best route — they already hold your mortgage and are not doing a full new affordability assessment. Your lender has a duty to offer you reasonable options if you are at risk of payment difficulty.</p>
+<p>If you are genuinely struggling or worried about affordability, contact your lender directly before your deal ends. Most have specialist teams for customers in financial difficulty. Do not wait until you miss a payment — call early, explain your situation, and ask what options are available.</p>
+<p>The Money Helper service at moneyhelper.org.uk offers free, impartial mortgage guidance and can help you understand your options if your circumstances are complicated.</p>
+<h2 id="fixed-vs-tracker-in-2026-which-should-you-choose">Fixed vs Tracker in 2026 — Which Should You Choose?</h2>
+<p>Nobody can predict with certainty what rates will do. But here is a simple framework.</p>
+<p><strong>Choose a five-year fix if:</strong> You value certainty above everything else. You want to know exactly what your payment will be for the next five years. You cannot afford for payments to rise if rates increase unexpectedly.</p>
+<p><strong>Choose a two-year fix if:</strong> You think rates will fall significantly over the next two years and you want to benefit from them at your next remortgage. You are comfortable repeating the remortgage process in 24 months.</p>
+<p><strong>Choose a tracker if:</strong> You strongly believe rates will fall and want automatic benefit from cuts without remortgaging each time. You are comfortable with some payment variability month to month.</p>
+<p>The Bank of England's Monetary Policy Committee meets eight times per year and its decisions on the base rate drive the entire mortgage market. Most economists in early 2026 are forecasting further gradual cuts — but the pace and extent remain uncertain. A five-year fix at 4.7% gives you certainty at a rate that, historically speaking, is still very reasonable.</p>
+<h2 id="frequently-asked-questions">Frequently Asked Questions</h2>
+<p><strong>Q: How early can I start looking for a new mortgage deal before my current one ends?</strong> A: Most lenders allow you to lock in a new rate up to six months before your current deal expires. This is called a rate reservation. You are not committed — if a better deal appears before you complete, you can switch. Starting six months early means you can complete the process without any gap on the SVR.</p>
+<p><strong>Q: Will remortgaging affect my credit score?</strong> A: Yes, slightly and temporarily. Each full mortgage application involves a hard credit check, which leaves a mark on your credit file for 12 months. A mortgage broker typically does a soft search first — which does not affect your score — to identify suitable lenders before making a formal application.</p>
+<p><strong>Q: Can I borrow more money when I remortgage?</strong> A: Yes — this is called a further advance or capital raising remortgage. You can borrow additional funds secured against your property for home improvements, debt consolidation, or other large expenses. The additional borrowing is subject to a fresh affordability assessment and will be at the current market rate.</p>
+<p><strong>Q: What is the difference between a fixed rate and a capped rate mortgage?</strong> A: A fixed rate is set for the entire term and cannot change. A capped rate is a type of variable rate mortgage with a maximum rate it cannot exceed — so it can fall if rates drop but will never rise above the cap. Capped rate products are relatively rare in the current UK market but can offer a useful middle ground between certainty and flexibility.</p>
+<p><strong>Q: I am on a Help to Buy equity loan — does remortgaging work differently?</strong> A: Yes. If you have a Help to Buy equity loan, the government holds a stake in your property. Your new lender must be on the Help to Buy panel of approved lenders. You also need to notify Homes England. If your property has increased in value, the government's percentage stake means they will take a proportionally larger amount when you sell or repay the loan. Speak to a broker with specific Help to Buy experience.</p>
+<hr>
+<p>If your fixed rate mortgage is ending in the next six months, the most valuable 30 minutes you can spend today is either calling a whole-of-market broker or checking your lender's product transfer options online. The difference between acting now and rolling onto the SVR could easily be £3,000–£5,000 over the next two years. Do not leave that money on the table.</p>
+
+<h2 id="how-remortgaging-affects-your-long-term-financial-plan">How Remortgaging Affects Your Long-Term Financial Plan</h2>
+<p>It is easy to think of remortgaging as a one-off admin task — find a rate, sign some forms, move on. But the decisions you make when your fix ends can have a meaningful impact on your broader financial position over years, not just months.</p>
+<p><strong>Overpayments and flexibility</strong> — When you remortgage, check whether your new deal allows overpayments. Most fixed rate mortgages allow overpayments of up to 10% of the outstanding balance per year without penalty. Making regular overpayments reduces your outstanding balance, which means you build equity faster and pay less interest over the life of the loan. On a £200,000 mortgage at 4.7%, overpaying £200 per month saves approximately £18,000 in interest and cuts around four years off a 25-year term.</p>
+<p><strong>Your loan-to-value ratio</strong> — Every time you remortgage, your LTV is recalculated based on your current outstanding balance and your property's current value. If your property has increased in value since you bought it, your LTV may have improved significantly — potentially dropping you into a lower LTV bracket and qualifying you for better rates. For example, moving from 75% LTV to 60% LTV could save 0.3–0.5% on your interest rate, worth hundreds of pounds per year.</p>
+<p><strong>Thinking about the full mortgage term</strong> — Most people focus on their monthly payment when comparing mortgages. But the total amount you pay over the full term matters more. A slightly lower rate with a longer remaining term can result in significantly more total interest paid. Use a mortgage calculator to compare total repayment costs, not just monthly figures.</p>
+<p><strong>When to consult a financial adviser</strong> — If your mortgage situation is straightforward, a good broker is all you need. But if you are approaching retirement, have complex income (multiple jobs, self-employment, rental income), are going through a relationship breakdown, or have significant equity you are considering releasing, a qualified financial adviser — not just a mortgage broker — can ensure your remortgage decision fits into your wider financial plan.</p>
+<p>The mortgage market in 2026 is more accessible and competitive than it was 18 months ago. Rates are not at the historic lows of 2021, but they are far from the painful highs of 2023. Acting promptly, comparing properly, and taking professional advice where needed will put you in a significantly better position than waiting and hoping for the best.</p>
+<div class="disclaimer"><em>Affiliate disclosure: This article contains affiliate links. We may earn a small commission at no extra cost to you. Always do your own research before making financial decisions.</em></div>
 
 <div class="reactions" id="reactions">
   <p class="reactions-label">Was this article helpful?</p>
@@ -589,88 +287,88 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
 </div>
 
 <script>
-(function() {{
+(function() {
   var SUPABASE_URL = "https://ypvjjmeuocdntwgagyqd.supabase.co";
   var SUPABASE_KEY = "sb_publishable_UcS1DYjeWuTiFKduCwlwag_6f4grHGI";
-  var SLUG = "{slug}";
+  var SLUG = "current-mortgage-rate-coming-to-an-end";
   var SESSION_KEY = "oc_session_id";
   var VOTED_KEY = "voted_" + SLUG;
 
   // Get or create a stable session ID for this browser
   var sessionId = localStorage.getItem(SESSION_KEY);
-  if (!sessionId) {{
+  if (!sessionId) {
     sessionId = "s_" + Math.random().toString(36).slice(2) + Date.now().toString(36);
     localStorage.setItem(SESSION_KEY, sessionId);
-  }}
+  }
 
   var voted = localStorage.getItem(VOTED_KEY);
 
-  function applyVoted(reaction) {{
+  function applyVoted(reaction) {
     var btnLike = document.getElementById("btn-like");
     var btnDislike = document.getElementById("btn-dislike");
     if (!btnLike || !btnDislike) return;
     btnLike.classList.remove("active", "dimmed");
     btnDislike.classList.remove("active", "dimmed");
-    if (reaction === "like") {{
+    if (reaction === "like") {
       btnLike.classList.add("active");
       btnDislike.classList.add("dimmed");
-    }} else if (reaction === "dislike") {{
+    } else if (reaction === "dislike") {
       btnDislike.classList.add("active");
       btnLike.classList.add("dimmed");
-    }}
-  }}
+    }
+  }
 
-  function loadCounts() {{
-    fetch(SUPABASE_URL + "/rest/v1/article_reactions?slug=eq." + SLUG + "&select=reaction", {{
-      headers: {{ "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY }}
-    }})
-    .then(function(r) {{ return r.json(); }})
-    .then(function(rows) {{
-      var likes = rows.filter(function(r) {{ return r.reaction === "like"; }}).length;
-      var dislikes = rows.filter(function(r) {{ return r.reaction === "dislike"; }}).length;
+  function loadCounts() {
+    fetch(SUPABASE_URL + "/rest/v1/article_reactions?slug=eq." + SLUG + "&select=reaction", {
+      headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY }
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(rows) {
+      var likes = rows.filter(function(r) { return r.reaction === "like"; }).length;
+      var dislikes = rows.filter(function(r) { return r.reaction === "dislike"; }).length;
       var el1 = document.getElementById("count-like");
       var el2 = document.getElementById("count-dislike");
       if (el1) el1.textContent = likes;
       if (el2) el2.textContent = dislikes;
-    }})
-    .catch(function() {{}});
-  }}
+    })
+    .catch(function() {});
+  }
 
-  window.react = function(reaction) {{
+  window.react = function(reaction) {
     // Clicking same button again does nothing
     if (voted === reaction) return;
 
     // Upsert on slug+session_id conflict — updates reaction if row exists
-    fetch(SUPABASE_URL + "/rest/v1/article_reactions?on_conflict=slug,session_id", {{
+    fetch(SUPABASE_URL + "/rest/v1/article_reactions?on_conflict=slug,session_id", {
       method: "POST",
-      headers: {{
+      headers: {
         "apikey": SUPABASE_KEY,
         "Authorization": "Bearer " + SUPABASE_KEY,
         "Content-Type": "application/json",
         "Prefer": "resolution=merge-duplicates,return=minimal"
-      }},
-      body: JSON.stringify({{
+      },
+      body: JSON.stringify({
         slug: SLUG,
         session_id: sessionId,
         reaction: reaction
-      }})
-    }})
-    .then(function(r) {{
-      if (r.ok || r.status === 201) {{
+      })
+    })
+    .then(function(r) {
+      if (r.ok || r.status === 201) {
         voted = reaction;
         localStorage.setItem(VOTED_KEY, reaction);
         applyVoted(reaction);
         loadCounts();
-      }}
-    }})
-    .catch(function() {{}});
-  }};
+      }
+    })
+    .catch(function() {});
+  };
 
   loadCounts();
   if (voted) applyVoted(voted);
-}})();
+})();
 </script>
-{related_html}
+
 <!-- COMMENTS -->
 <div class="comments-section" id="comments">
   <h2 class="comments-title">Comments <span class="comment-count-badge" id="comment-count" style="display:none"></span></h2>
@@ -712,7 +410,7 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
 <div class="footer-inner">
 <div class="footer-logo">Luis Paiva<span style="color:var(--accent)">.</span></div>
 <nav class="footer-links"><a href="/about">About</a><a href="/privacy">Privacy</a><a href="/newsletter">Newsletter</a></nav>
-<p class="footer-legal">This site contains affiliate links. We may earn a commission at no extra cost to you. Always do your own research. &copy; {year} Luis Paiva.</p>
+<p class="footer-legal">This site contains affiliate links. We may earn a commission at no extra cost to you. Always do your own research. &copy; 2026 Luis Paiva.</p>
 </div>
 </footer>
 
@@ -744,23 +442,23 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
 </div>
 
 <script>
-(function() {{
+(function() {
   // ── COOKIE BANNER ──
   var COOKIE_KEY = 'lp_cookie_consent';
   var consent = localStorage.getItem(COOKIE_KEY);
   var banner = document.getElementById('js-cookie-banner');
 
-  if (!consent && banner) {{
-    setTimeout(function() {{ banner.classList.add('active'); }}, 800);
-    document.getElementById('js-cookie-accept').addEventListener('click', function() {{
+  if (!consent && banner) {
+    setTimeout(function() { banner.classList.add('active'); }, 800);
+    document.getElementById('js-cookie-accept').addEventListener('click', function() {
       localStorage.setItem(COOKIE_KEY, 'accepted');
       banner.classList.remove('active');
-    }});
-    document.getElementById('js-cookie-decline').addEventListener('click', function() {{
+    });
+    document.getElementById('js-cookie-decline').addEventListener('click', function() {
       localStorage.setItem(COOKIE_KEY, 'declined');
       banner.classList.remove('active');
-    }});
-  }}
+    });
+  }
 
   // ── EMAIL POPUP ──
   var POPUP_KEY = 'lp_popup_shown';
@@ -768,107 +466,107 @@ footer{border-top:3px solid var(--ink);padding:2rem 1.5rem;margin-top:4rem}
   var popupClose = document.getElementById('js-popup-close');
   var popupShown = sessionStorage.getItem(POPUP_KEY);
 
-  function showPopup() {{
+  function showPopup() {
     if (!popup || popupShown) return;
     popup.classList.add('active');
     sessionStorage.setItem(POPUP_KEY, '1');
     document.body.style.overflow = 'hidden';
-  }}
+  }
 
-  function closePopup() {{
+  function closePopup() {
     if (!popup) return;
     popup.classList.remove('active');
     document.body.style.overflow = '';
-  }}
+  }
 
-  if (!popupShown) {{
+  if (!popupShown) {
     // Show after 30 seconds
     setTimeout(showPopup, 30000);
 
     // Also show when user scrolls 60% of article
-    window.addEventListener('scroll', function onScroll() {{
+    window.addEventListener('scroll', function onScroll() {
       var scrolled = window.scrollY / (document.body.scrollHeight - window.innerHeight);
-      if (scrolled > 0.6) {{
+      if (scrolled > 0.6) {
         showPopup();
         window.removeEventListener('scroll', onScroll);
-      }}
-    }}, {{ passive: true }});
-  }}
+      }
+    }, { passive: true });
+  }
 
   if (popupClose) popupClose.addEventListener('click', closePopup);
 
   // Close on overlay click
-  if (popup) {{
-    popup.addEventListener('click', function(e) {{
+  if (popup) {
+    popup.addEventListener('click', function(e) {
       if (e.target === popup) closePopup();
-    }});
-  }}
+    });
+  }
 
   // Close on Escape
-  document.addEventListener('keydown', function(e) {{
+  document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') closePopup();
-  }});
+  });
 
   // Subscribe via Beehiiv magic link - pre-fills email, one click confirm
-  function subscribeEmail(email, btn, msgEl) {{
+  function subscribeEmail(email, btn, msgEl) {
     var url = 'https://magic.beehiiv.com/v1/8bc3d4e7-0688-4182-8d13-041f31a4bab1?email=' + encodeURIComponent(email) + '&utm_source=luispaiva&utm_medium=website';
     btn.textContent = 'Opening...';
     var win = window.open(url, '_blank');
-    if (!win) {{ window.location.href = url; return; }}
-    setTimeout(function() {{
+    if (!win) { window.location.href = url; return; }
+    setTimeout(function() {
       btn.textContent = 'Subscribe free';
       btn.disabled = false;
-      if (msgEl) {{ msgEl.textContent = 'Check the new tab to confirm your subscription!'; }}
+      if (msgEl) { msgEl.textContent = 'Check the new tab to confirm your subscription!'; }
       setTimeout(closePopup, 2500);
-    }}, 800);
-  }}
+    }, 800);
+  }
 
   // Popup form
   var popupForm = document.getElementById('js-popup-form');
-  if (popupForm) {{
-    popupForm.addEventListener('submit', function(e) {{
+  if (popupForm) {
+    popupForm.addEventListener('submit', function(e) {
       e.preventDefault();
       var email = document.getElementById('js-popup-email').value;
       subscribeEmail(email, document.getElementById('js-popup-btn'), null);
-    }});
-  }}
+    });
+  }
 
   // CTA form
   var ctaForm = document.getElementById('js-cta-form');
-  if (ctaForm) {{
-    ctaForm.addEventListener('submit', function(e) {{
+  if (ctaForm) {
+    ctaForm.addEventListener('submit', function(e) {
       e.preventDefault();
       var email = document.getElementById('js-cta-email').value;
       var msg = document.getElementById('js-cta-msg');
       subscribeEmail(email, document.getElementById('js-cta-btn'), msg);
-    }});
-  }}
-}})();
+    });
+  }
+})();
 </script>
 <script>
 // ── READING PROGRESS BAR ──────────────────────────────────────────
-(function() {{
+(function() {
   var bar = document.getElementById('js-progress');
   if (!bar) return;
-  window.addEventListener('scroll', function() {{
+  window.addEventListener('scroll', function() {
     var doc = document.documentElement;
     var scrollTop = doc.scrollTop || document.body.scrollTop;
     var scrollHeight = doc.scrollHeight - doc.clientHeight;
     bar.style.width = scrollHeight > 0 ? (scrollTop / scrollHeight * 100) + '%' : '0%';
-  }}, {{passive: true}});
-}})();
+  }, {passive: true});
+})();
 
 // ── COPY LINK ────────────────────────────────────────────────────
-function copyLink() {{
+function copyLink() {
   var btn = document.getElementById('js-share-copy');
-  navigator.clipboard.writeText(window.location.href).then(function() {{
+  navigator.clipboard.writeText(window.location.href).then(function() {
     btn.textContent = '✓ Copied!';
     btn.classList.add('copied');
-    setTimeout(function() {{
+    setTimeout(function() {
       btn.innerHTML = '&#128279; Copy link';
       btn.classList.remove('copied');
-    }}, 2000);
-  }}).catch(function() {{
+    }, 2000);
+  }).catch(function() {
     // Fallback for older browsers
     var ta = document.createElement('textarea');
     ta.value = window.location.href;
@@ -877,9 +575,9 @@ function copyLink() {{
     document.execCommand('copy');
     document.body.removeChild(ta);
     btn.textContent = '✓ Copied!';
-    setTimeout(function() {{ btn.innerHTML = '&#128279; Copy link'; }}, 2000);
-  }});
-}}
+    setTimeout(function() { btn.innerHTML = '&#128279; Copy link'; }, 2000);
+  });
+}
 
 // ── POST-REACTION EMAIL NUDGE ────────────────────────────────────
 // Show nudge only when user clicks 👍 (not 👎)
@@ -887,43 +585,43 @@ function copyLink() {{
 
 
 // ── COMMENTS ─────────────────────────────────────────────────────
-(function() {{
+(function() {
   var SUPABASE_URL = "https://ypvjjmeuocdntwgagyqd.supabase.co";
   var SUPABASE_KEY = "sb_publishable_UcS1DYjeWuTiFKduCwlwag_6f4grHGI";
-  var SLUG = "{slug}";
+  var SLUG = "current-mortgage-rate-coming-to-an-end";
 
-  function timeAgo(dateStr) {{
+  function timeAgo(dateStr) {
     var d = new Date(dateStr), now = new Date();
     var diff = Math.floor((now - d) / 1000);
     if (diff < 60)   return 'just now';
     if (diff < 3600) return Math.floor(diff/60) + 'm ago';
     if (diff < 86400) return Math.floor(diff/3600) + 'h ago';
     if (diff < 604800) return Math.floor(diff/86400) + 'd ago';
-    return d.toLocaleDateString('en-GB', {{day:'numeric', month:'short', year:'numeric'}});
-  }}
+    return d.toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'});
+  }
 
-  function loadComments() {{
-    fetch(SUPABASE_URL + '/rest/v1/article_comments?slug=eq.' + SLUG + '&approved=eq.true&order=created_at.asc&select=name,body,created_at', {{
-      headers: {{
+  function loadComments() {
+    fetch(SUPABASE_URL + '/rest/v1/article_comments?slug=eq.' + SLUG + '&approved=eq.true&order=created_at.asc&select=name,body,created_at', {
+      headers: {
         'apikey': SUPABASE_KEY,
         'Authorization': 'Bearer ' + SUPABASE_KEY
-      }}
-    }})
-    .then(function(r) {{ return r.json(); }})
-    .then(function(rows) {{
+      }
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(rows) {
       var list = document.getElementById('comment-list');
       var noC  = document.getElementById('no-comments');
       var cnt  = document.getElementById('comment-count');
       if (!list) return;
-      if (rows.length) {{
+      if (rows.length) {
         cnt.textContent = rows.length;
         cnt.style.display = 'inline-block';
-      }} else {{
+      } else {
         cnt.style.display = 'none';
-      }}
-      if (!rows.length) {{ noC.style.display = 'block'; return; }}
+      }
+      if (!rows.length) { noC.style.display = 'block'; return; }
       noC.style.display = 'none';
-      list.innerHTML = rows.map(function(c) {{
+      list.innerHTML = rows.map(function(c) {
         return '<div class="comment">' +
           '<div class="comment-meta">' +
           '<span class="comment-dash">&mdash;</span>' +
@@ -932,109 +630,77 @@ function copyLink() {{
           '</div>' +
           '<p class="comment-body">' + escHtml(c.body) + '</p>' +
           '</div>';
-      }}).join('');
-    }})
-    .catch(function() {{}});
-  }}
+      }).join('');
+    })
+    .catch(function() {});
+  }
 
-  function escHtml(s) {{
+  function escHtml(s) {
     return String(s)
       .replace(/&/g,'&amp;')
       .replace(/</g,'&lt;')
       .replace(/>/g,'&gt;')
       .replace(/"/g,'&quot;')
       .replace(/'/g,'&#39;');
-  }}
+  }
 
-  window.submitComment = function() {{
+  window.submitComment = function() {
     var name   = (document.getElementById('c-name').value || '').trim();
     var body   = (document.getElementById('c-body').value || '').trim();
     var msg    = document.getElementById('c-msg');
     var btn    = document.getElementById('c-submit');
 
-    if (!name) {{ msg.textContent = 'Please enter your name.'; msg.className='cf-msg err'; return; }}
-    if (body.length < 5) {{ msg.textContent = 'Comment is too short.'; msg.className='cf-msg err'; return; }}
+    if (!name) { msg.textContent = 'Please enter your name.'; msg.className='cf-msg err'; return; }
+    if (body.length < 5) { msg.textContent = 'Comment is too short.'; msg.className='cf-msg err'; return; }
 
     btn.disabled = true;
     btn.textContent = 'Posting...';
     msg.textContent = '';
 
-    fetch(SUPABASE_URL + '/rest/v1/article_comments', {{
+    fetch(SUPABASE_URL + '/rest/v1/article_comments', {
       method: 'POST',
-      headers: {{
+      headers: {
         'apikey': SUPABASE_KEY,
         'Authorization': 'Bearer ' + SUPABASE_KEY,
         'Content-Type': 'application/json',
         'Prefer': 'return=minimal'
-      }},
-      body: JSON.stringify({{ slug: SLUG, name: name, body: body }})
-    }})
-    .then(function(r) {{
-      if (r.ok || r.status === 201) {{
+      },
+      body: JSON.stringify({ slug: SLUG, name: name, body: body })
+    })
+    .then(function(r) {
+      if (r.ok || r.status === 201) {
         msg.textContent = 'Comment posted — thank you!';
         msg.className = 'cf-msg ok';
         document.getElementById('c-name').value = '';
         document.getElementById('c-email').value = '';
         document.getElementById('c-body').value = '';
         loadComments();
-      }} else {{
+      } else {
         msg.textContent = 'Something went wrong. Please try again.';
         msg.className = 'cf-msg err';
-      }}
-    }})
-    .catch(function() {{
+      }
+    })
+    .catch(function() {
       msg.textContent = 'Could not post comment. Check your connection.';
       msg.className = 'cf-msg err';
-    }})
-    .finally(function() {{
+    })
+    .finally(function() {
       btn.disabled = false;
       btn.textContent = 'Post comment';
-    }});
-  }};
+    });
+  };
 
   loadComments();
 
   // Auto-grow textarea
   var ta = document.getElementById('c-body');
-  if (ta) {{
-    ta.addEventListener('input', function() {{
+  if (ta) {
+    ta.addEventListener('input', function() {
       this.style.height = 'auto';
       this.style.height = Math.max(80, this.scrollHeight) + 'px';
-    }});
-  }}
-}})();
+    });
+  }
+})();
 </script>
 </body>
-</html>""".format(
-        title=title,
-        description=description,
-        slug=article_slug,
-        css=css,
-        cat=cat,
-        body=body_html,
-        disclaimer=disclaimer_html,
-        year=year,
-        date_str=_pub.strftime("%d %B %Y"),
-        read_time=read_time,
-        toc_html=toc_html,
-        article_schema_tag=article_schema_tag,
-        faq_schema_tag=faq_schema_tag,
-        related_html=related_html,
-        hero_html=hero_html
-    )
-
-
-if __name__ == "__main__":
-    # Test: convert all existing articles
-    from pathlib import Path
-    docs = Path(__file__).parent / "docs"
-    for md_file in docs.glob("*.md"):
-        if md_file.name in {".gitkeep", "index.md"}:
-            continue
-        slug = md_file.stem
-        content = md_file.read_text(encoding="utf-8")
-        html = build_article_html(slug.replace("-", " "), slug, content)
-        out_dir = Path(__file__).parent / slug
-        out_dir.mkdir(exist_ok=True)
-        (out_dir / "index.html").write_text(html, encoding="utf-8")
-        print("Built:", out_dir / "index.html")
+</html>
