@@ -185,8 +185,8 @@ def build_faq_schema(body_html):
         pairs = _re.findall(r'\*\*Q:\s*(.*?)\*\*\s*A:\s*(.*?)(?=\*\*Q:|$)', body_html, _re.DOTALL)
     if not pairs:
         return ''
-    entities = [{{"@type": "Question", "name": q.strip(), "acceptedAnswer": {{"@type": "Answer", "text": a.strip()}}}} for q, a in pairs[:5]]
-    schema = {{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": entities}}
+    entities = [{"@type": "Question", "name": q.strip(), "acceptedAnswer": {"@type": "Answer", "text": a.strip()}} for q, a in pairs[:5]]
+    schema = {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": entities}
     return _json.dumps(schema, indent=2)
 
 def category_from_slug(s):
