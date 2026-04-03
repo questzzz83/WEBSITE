@@ -17,40 +17,26 @@ try:
     notify = _nm.notify
 except Exception:
     def notify(msg): pass
-
 from datetime import datetime, date
 from pathlib import Path
 import sys
 if sys.stdout.encoding and sys.stdout.encoding.lower() not in ("utf-8", "utf8"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-# -------------------------------------------------------------------------
-# 0️⃣  ENSURE OLLAMA HOME POINTS TO D:\ollama_data (second drive)
-# -------------------------------------------------------------------------
-if not os.getenv("OLLAMA_HOME"):
-    os.environ["OLLAMA_HOME"] = r"D:\ollama_data"
-    os.makedirs(os.getenv("OLLAMA_HOME"), exist_ok=True)
-
 # -- CONFIG --------------------------------------------------------------------
+
 SITE_DOMAIN     = "www.luispaiva.co.uk"
 GITHUB_USERNAME = "questzzz83"
 GITHUB_REPO     = "WEBSITE"
 GITHUB_BRANCH   = "main"
 OLLAMA_URL      = "http://127.0.0.1:11434/api/chat"
 
-# -------------------------------------------------------------------------
-# 1️⃣  MODEL MAP – which model each agent uses
-# -------------------------------------------------------------------------
-# Writer can be switched to the ultra‑light phi3.5‑mini if you ever run out of VRAM.
-# The default (llama3.1) gives the best creativity while still fitting on an 8 GB GPU
-# when we limit GPU layers (see GPU_LAYER_MAP below).
 MODELS = {
-    "scout"      : "phi3:mini",   # short research brief / newsletter intro
-    "strategist" : "llama3.1",      # article skeleton (good structure)
-    "writer"     : "llama3.1",      # full 2 500‑word article (Option A)
-    # "writer"   : "phi3.5-mini",  # <-- uncomment this line & comment above if you need the ultra‑light writer
-    "gatekeeper" : "phi3:mini",    # QA / pass‑fail checker (tiny)
-    "courier"    : "phi3:mini",   # Friday Money Brief newsletter
+    "scout"      : "llama3.1:8b",
+    "strategist" : "qwen2.5-coder:7b",
+    "writer"     : "llama3.1:8b",
+    "gatekeeper" : "llama3.1:8b",
+    "courier"    : "llama3.1:8b",
 }
 
 BEEHIIV_ENABLED        = True
@@ -71,30 +57,9 @@ NL_DIR    = BASE_DIR / "newsletters"
 for _d in [DOCS_DIR, STATE_DIR, LOGS_DIR, NL_DIR]:
     _d.mkdir(parents=True, exist_ok=True)
 
-# -------------------------------------------------------------------------
-# 2️⃣  GPU‑LAYER MAP – how many layers may stay on the GPU
-# -------------------------------------------------------------------------
-# 4‑bit GGUF models still need a few GB of VRAM.
-# We keep the heavy llama3.1 at 6 layers (~6‑7 GB VRAM); the tiny models stay
-# fully on‑GPU.
-GPU_LAYER_MAP = {
-    "phi3.5-mini": 4,   # ~1.4 GB VRAM
-    "llama3.1":    6,   # ~6‑7 GB VRAM, rest runs on CPU
-    "phi3:mini":   3,   # < 1 GB VRAM
-}
-
-def _gpu_options(model_name: str):
-    """Return the Ollama `options` dict for a given model."""
-    base = model_name.split(":")[0]        # strip any tag (e.g. :q5_0)
-    num_gpu = GPU_LAYER_MAP.get(base, 4)   # default 4 layers if unknown
-    return {
-        "num_gpu"   : num_gpu,
-        "num_thread": 8,                   # use all 8 cores of the Ryzen 5 5600X
-    }
-
 # -- TOPICS -------------------------------------------------------------------
+
 TOPICS = [
-    "how best to handle a period out of work",  # trending 2026-04-03
     "how to protect credit score after death of a parent uk",  # trending 2026-04-02
     "current mortgage rate coming to an end",  # trending 2026-04-01
     "pension at 39 should i stop working",  # trending 2026-03-30
@@ -289,8 +254,10 @@ TOPICS = [
 ]
 
 # -- SYSTEM PROMPTS ------------------------------------------------------------
+
 PROMPTS = {
-    "scout": """You are Scout, a research agent for a UK personal finance blog at luispaiva.co.uk.
+
+"scout": """You are Scout, a research agent for a UK personal finance blog at luispaiva.co.uk.
 You receive a topic. You return a research brief. Nothing else.
 
 Output ONLY this exact markdown -- no preamble, no sign-off:
@@ -326,7 +293,8 @@ Output ONLY this exact markdown -- no preamble, no sign-off:
 - [UK-specific stat with source name]
 ## TONE NOTES
 [2 sentences on voice and style for this specific topic]""",
-    "strategist": """You are Strategist, a content architect for a UK personal finance blog at luispaiva.co.uk.
+
+"strategist": """You are Strategist, a content architect for a UK personal finance blog at luispaiva.co.uk.
 You receive a research brief. You return an article skeleton. Nothing else.
 
 Rules:
@@ -338,18 +306,19 @@ Rules:
 - Place [CTA] at the very end
 
 Output ONLY the skeleton in markdown. No preamble. No sign-off.""",
-    "writer": """You are Writer, a content writer for luispaiva.co.uk -- a UK personal finance blog.
+
+"writer": """You are Writer, a content writer for luispaiva.co.uk -- a UK personal finance blog.
 Voice: like a financially-savvy friend giving honest advice over coffee.
 You receive a brief and skeleton. You return the complete article. Nothing else.
 
-CRITICAL LENGTH REQUIREMENT: The article MUST be 2,500 words minimum. This is non‑negotiable.
+CRITICAL LENGTH REQUIREMENT: The article MUST be 2,500 words minimum. This is non-negotiable.
 Count your words as you write. If you finish under 2,500 words, you have failed.
 
 HOW TO REACH 2,500 WORDS:
 - Introduction: 200-250 words
 - Each H2 section: 350-450 words minimum
 - With 6 sections that is already 2,300+ words
-- Add real UK examples, specific numbers, step‑by‑step instructions in every section
+- Add real UK examples, specific numbers, step-by-step instructions in every section
 - Never write a section in under 300 words
 - Expand every point with a concrete UK example or specific data
 
@@ -358,28 +327,29 @@ RULES:
 2. Fill every DIRECTIVE block then delete the comment
 3. Replace [AFFILIATE:N] with real markdown links: [Product Name](https://url)
 4. Replace [TABLE] with a markdown table (min 4 columns, 5 data rows, real UK data)
-5. Replace [CTA] with a 2‑3 sentence friendly call‑to‑action
+5. Replace [CTA] with a 2-3 sentence friendly call-to-action
 6. Primary keyword in: H1, first sentence, at least 2 H2s
-7. Paragraphs: 2‑3 sentences max
-8. UK‑specific: GBP signs, real UK providers, UK rates and rules
+7. Paragraphs: 2-3 sentences max
+8. UK-specific: GBP signs, real UK providers, UK rates and rules
 9. Every section must have at least one specific UK example with real numbers
 10. Add a META DESCRIPTION on line 2 of the article (after the version comment):
-    META_DESCRIPTION: [exactly 150‑155 characters, contains primary keyword, describes what reader will learn]
+    META_DESCRIPTION: [exactly 150-155 characters, contains primary keyword, describes what reader will learn]
 11. Add a FAQ section near the end with exactly 5 questions and answers:
     ## Frequently Asked Questions
     **Q: [common question about the topic]**
-    A: [2‑3 sentence answer with specific UK details]
+    A: [2-3 sentence answer with specific UK details]
     (repeat for 5 questions)
 12. Final line must be exactly:
     *Affiliate disclosure: This article contains affiliate links. We may earn a small commission at no extra cost to you. Always do your own research before making financial decisions.*
 
 When fixing after QA FAIL:
-- If word count is low: expand EVERY section by adding more detail, examples, and UK‑specific data
+- If word count is low: expand EVERY section by adding more detail, examples, and UK-specific data
 - Do not rewrite passing sections -- only expand them
 - Increment <!-- version: N --> at top
 
 Output ONLY the article. Nothing before it. Nothing after it.""",
-    "gatekeeper": """You are Gatekeeper, a QA agent for luispaiva.co.uk. You are strict and impartial.
+
+"gatekeeper": """You are Gatekeeper, a QA agent for luispaiva.co.uk. You are strict and impartial.
 You receive a brief and article. You return ONLY this exact format:
 
 STATUS: PASS | FAIL
@@ -408,7 +378,8 @@ VERDICT: [one sentence]
 
 FAIL if ANY check is FAIL. PASS only if ALL are OK.
 CRITICAL: Word count under 2500 is ALWAYS a FAIL. No exceptions. Count every single word.""",
-    "courier": """You are Courier, the newsletter writer for luispaiva.co.uk.
+
+"courier": """You are Courier, the newsletter writer for luispaiva.co.uk.
 Every Friday you write "The Friday Money Brief" -- a practical, punchy UK money email.
 Tone: a financially-savvy friend sharing the week's best money insight. Warm, direct, no fluff.
 
@@ -461,6 +432,7 @@ luispaiva.co.uk
 }
 
 # -- HELPERS -------------------------------------------------------------------
+
 _log_path = LOGS_DIR / f"pipeline_{date.today().isoformat()}.log"
 
 def log(msg, level="INFO"):
@@ -502,6 +474,7 @@ def today_iso():
     return date.today().isoformat()
 
 # -- OLLAMA --------------------------------------------------------------------
+
 _last_model_used = None
 
 def unload_model(model):
@@ -516,6 +489,7 @@ def unload_model(model):
     except Exception:
         pass
 
+    # Poll /api/ps until model is gone from loaded list (max 60s)
     for i in range(20):
         time.sleep(3)
         try:
@@ -526,32 +500,36 @@ def unload_model(model):
             loaded = [m.get("name", "") for m in r.json().get("models", [])]
             if not any(model.split(":")[0] in m for m in loaded):
                 log(f"  VRAM clear confirmed after {(i+1)*3}s")
-                time.sleep(5)
+                time.sleep(5)  # extra buffer after confirmation
                 return
         except Exception:
             pass
-    log("  VRAM poll timeout – waiting extra 20s", "WARN")
+    log("  VRAM poll timeout -- waiting 20s extra", "WARN")
     time.sleep(20)
 
 def call_agent(agent, user_msg, retries=2):
     global _last_model_used
     model = MODELS[agent]
 
+    # If switching models, unload previous and wait for VRAM to clear
     if _last_model_used and _last_model_used != model:
         log(f"  Switching model: {_last_model_used} -> {model}")
         unload_model(_last_model_used)
-        time.sleep(20)
+        time.sleep(20)  # wait for VRAM to fully clear on 8GB GPU
 
     log(f"  -> {agent} ({model}) thinking...")
     payload = {
-        "model"      : model,
-        "stream"     : False,
-        "messages"   : [
+        "model"   : model,
+        "stream"  : False,
+        "messages": [
             {"role": "system", "content": PROMPTS[agent]},
             {"role": "user",   "content": user_msg},
         ],
-        "keep_alive" : "5m",
-        "options"    : _gpu_options(model),   # <-- per‑model GPU options
+        "keep_alive": "5m",
+        "options": {
+            "num_gpu"   : 12,   # conservative split for 8GB VRAM
+            "num_thread": 8,    # CPU threads for remaining layers
+        },
     }
     for attempt in range(1, retries + 2):
         try:
@@ -571,11 +549,13 @@ def call_agent(agent, user_msg, retries=2):
     return None
 
 # -- TOPIC ---------------------------------------------------------------------
+
 def pick_topic():
     done_path = STATE_DIR / "done_topics.txt"
     next_path = STATE_DIR / "next_topic.txt"
     done      = set(done_path.read_text(encoding="utf-8").splitlines()) if done_path.exists() else set()
 
+    # Check if trend_scout.py queued a trending topic for today
     if next_path.exists():
         trending = next_path.read_text(encoding="utf-8").strip()
         if trending and trending not in done:
@@ -586,9 +566,11 @@ def pick_topic():
             return trending
         next_path.unlink()
 
+    # Check strategy room recommendations
     strategy_path = STATE_DIR / "strategy_latest.md"
     if strategy_path.exists():
         strategy = strategy_path.read_text(encoding="utf-8")
+        # Extract recommended article titles
         rec_titles = re.findall(r"### \d+\. (.+)", strategy)
         for title in rec_titles:
             title = title.strip()
@@ -598,9 +580,10 @@ def pick_topic():
                     f.write(title + "\n")
                 return title
 
+    # Fall back to static list
     remaining = [t for t in TOPICS if t not in done]
     if not remaining:
-        log("All topics exhausted – add more to TOPICS list", "WARN")
+        log("All topics exhausted -- add more to TOPICS list", "WARN")
         return None
     topic = remaining[0]
     with open(done_path, "a", encoding="utf-8") as f:
@@ -609,6 +592,7 @@ def pick_topic():
     return topic
 
 # -- GIT -----------------------------------------------------------------------
+
 def git_push(commit_msg):
     log(f"  Pushing: {commit_msg}")
     for cmd in [
@@ -623,169 +607,170 @@ def git_push(commit_msg):
                 return True
             log(f"  git error: {r.stderr.strip()}", "ERROR")
             return False
-    log("  Pushed OK – Vercel deploying...")
+    log("  Pushed OK -- Vercel deploying...")
     return True
 
 # -- PIPELINE ------------------------------------------------------------------
+
 def run_article_pipeline():
     log("== ARTICLE PIPELINE ======================================")
 
-    # Skip if already published today
+    # Check already done today
     if state_read_json(f"delivery_{today_iso()}").get("published"):
-        log("  Already published today – skipping")
+        log("  Already published today -- skipping")
         return True
 
-    # -----------------------------------------------------------------
-    # 1️⃣ Scout – research brief
-    # -----------------------------------------------------------------
+    # 1. Scout
     log("-- Phase 1 - Scout")
     topic = pick_topic()
-    if not topic:
-        return False
+    if not topic: return False
     brief = call_agent("scout", f"Research this topic for a UK personal finance blog: {topic}")
-    if not brief:
-        return False
+    if not brief: return False
     state_write("current_brief", brief)
     state_write("current_topic", topic)
+    log("  Brief saved OK")
 
-    # -----------------------------------------------------------------
-    # 2️⃣ Strategist – article skeleton
-    # -----------------------------------------------------------------
+    # 2. Strategist
     log("-- Phase 2 - Strategist")
     skeleton = call_agent("strategist", f"Create an article skeleton from this brief:\n\n{brief}")
-    if not skeleton:
-        return False
+    if not skeleton: return False
     state_write("current_skeleton", skeleton)
+    log("  Skeleton saved OK")
 
-    # -----------------------------------------------------------------
-    # 3️⃣ Writer – full article (>=2500 words)
-    # -----------------------------------------------------------------
+    # 3. Writer
     log("-- Phase 3 - Writer")
     draft = call_agent("writer", f"Write the full article.\n\nBRIEF:\n{brief}\n\nSKELETON:\n{skeleton}")
-    if not draft:
-        return False
+    if not draft: return False
 
-    # Auto‑expand if under word‑count (max 2 attempts)
-    for attempt in range(1, 3):
+    # Auto-expand if under 2500 words (max 2 expansion attempts)
+    for expand_attempt in range(1, 3):
         wc = word_count(draft)
         if wc >= 2500:
             break
-        log(f"  Draft too short ({wc} words) – expanding (attempt {attempt})", "WARN")
-        expand_prompt = f"""The article is only {wc} words. You MUST expand it to at least 2,500 words.
+        log(f"  Draft too short: {wc} words -- expanding (attempt {expand_attempt}/2)", "WARN")
+        expand_prompt = f"""This article is only {wc} words. You MUST expand it to at least 2,500 words.
 
 EXPANSION INSTRUCTIONS:
-- Add at least 150 words to **every** H2 section.
-- Insert more concrete UK examples (e.g., specific rates, provider names, GBP amounts).
-- Keep the same headings, affiliate placeholders and table positions.
-- Do NOT change the overall structure.
+- Go through every H2 section and add at least 150 more words to each
+- Add more specific UK examples with real numbers (interest rates, account names, GBP amounts)
+- Add more practical tips and step-by-step detail
+- Do NOT change the structure, headings, or affiliate links
+- Do NOT add new sections -- expand existing ones
 
 CURRENT ARTICLE:
 {draft}
 
-Return the FULL expanded article (still >= 2500 words)."""
+Return the FULL expanded article. Minimum 2,500 words."""
         expanded = call_agent("writer", expand_prompt)
         if expanded and word_count(expanded) > wc:
             draft = expanded
         else:
-            log("  Expansion did not improve word count", "WARN")
+            log(f"  Expansion attempt {expand_attempt} did not improve word count", "WARN")
             break
 
     state_write("current_draft", draft)
-    log(f"  Draft length: {word_count(draft)} words")
+    log(f"  Draft: {word_count(draft)} words OK")
 
-    # -----------------------------------------------------------------
-    # 4️⃣ Gatekeeper – QA loop
-    # -----------------------------------------------------------------
+    # 4. Gatekeeper QA loop
     current = draft
     qa_status = "FAIL"
+    cycle = 1
     for cycle in range(1, MAX_QA_RETRIES + 1):
         log(f"-- Phase 4 - Gatekeeper (cycle {cycle}/{MAX_QA_RETRIES})")
         qa = call_agent("gatekeeper", f"Review cycle {cycle}.\n\nBRIEF:\n{brief}\n\nARTICLE:\n{current}")
-        if not qa:
-            break
+        if not qa: break
         state_write("last_qa_report", qa)
         if "STATUS: PASS" in qa:
             qa_status = "PASS"
-            log("  Gatekeeper: PASS")
+            log("  Gatekeeper: PASS OK")
             break
-        log("  Gatekeeper: FAIL – sending back to Writer")
+        log(f"  Gatekeeper: FAIL -- sending back to Writer")
         if cycle < MAX_QA_RETRIES:
-            fixed = call_agent("writer", f"Fix this article based on QA feedback.\n\nBRIEF:\n{brief}\n\nARTICLE:\n{current}\n\nQA:\n{qa}")
+            fixed = call_agent("writer", f"Fix this article based on QA feedback.\n\nBRIEF:\n{brief}\n\nARTICLE:\n{current}\n\nQA REPORT:\n{qa}")
             if fixed:
                 current = fixed
                 state_write("current_draft", fixed)
         else:
-            log("  Max QA cycles reached – publishing with warnings", "WARN")
+            log("  Max QA cycles reached -- publishing with warnings", "WARN")
             qa_status = "FORCED"
 
-    # -----------------------------------------------------------------
-    # 5️⃣ Publish – write markdown, build HTML, push to Git
-    # -----------------------------------------------------------------
+    # 5. Publish
     log("-- Phase 5 - Publish")
     article_slug = slug(topic)
     filename = article_slug + ".md"
-    dest_md = DOCS_DIR / filename
-
-    # Prepend a publish‑date line so the build script never relies on file mtime
+    dest = DOCS_DIR / filename
+    # Embed publish date so build scripts never rely on file mtime
     pub_line = f"PUB_DATE: {today_iso()}\n"
     if not current.startswith("PUB_DATE:"):
         current = pub_line + current
+    dest.write_text(current, encoding="utf-8")
+    log(f"  Saved: docs/{filename}")
 
-    dest_md.write_text(current, encoding="utf-8")
-    log(f"  Saved markdown: docs/{filename}")
-
-    # -----------------------------------------------------------------
-    # (Optional) hero image, HTML build, sitemap, homepage rebuild
-    # -----------------------------------------------------------------
+    # Fetch hero image from Unsplash / Pexels
+    image_meta = None
     try:
         from fetch_article_image import get_article_image
         image_meta = get_article_image(topic, article_slug)
         if image_meta:
-            log(f"  Image fetched: {image_meta.get('source','?')} – query: {image_meta.get('query','')}")
+            log(f"  Image: {image_meta['source']} — {image_meta.get('query','')}")
         else:
-            log("  No hero image found", "WARN")
+            log("  Image: none found — publishing without hero image", "WARN")
     except Exception as e:
-        log(f"  Image step skipped: {e}", "WARN")
-        image_meta = None
+        log(f"  Image fetch skipped: {e}", "WARN")
 
+    # Build standalone HTML page in a slug/index.html folder
     try:
         from build_article import build_article_html
         slug_dir = BASE_DIR / article_slug
         slug_dir.mkdir(parents=True, exist_ok=True)
-        html = build_article_html(topic, article_slug, current,
-                                  pub_date=date.today(),
-                                  image_meta=image_meta)
+        html = build_article_html(topic, article_slug, current, pub_date=date.today(), image_meta=image_meta)
         (slug_dir / "index.html").write_text(html, encoding="utf-8")
-        log(f"  Saved HTML: {article_slug}/index.html")
+        log(f"  Saved: {article_slug}/index.html")
     except Exception as e:
-        log(f"  HTML build skipped: {e}", "WARN")
+        log(f"  Article HTML build skipped: {e}", "WARN")
 
-    # Rebuild homepage (if the script exists)
-    home_script = BASE_DIR / "build_homepage.py"
-    if home_script.exists():
-        r = subprocess.run(["python", str(home_script)], cwd=BASE_DIR, capture_output=True, text=True)
-        if r.returncode == 0:
-            log("  Homepage rebuilt OK")
-        else:
-            log(f"  Homepage rebuild error: {r.stderr.strip()}", "WARN")
+    # Rebuild homepage
+    build_script = BASE_DIR / "build_homepage.py"
+    if build_script.exists():
+        r = subprocess.run(["python", str(build_script)], cwd=BASE_DIR, capture_output=True, text=True)
+        if r.returncode == 0: log("  Homepage rebuilt OK")
+        else: log(f"  Homepage rebuild warning: {r.stderr.strip()}", "WARN")
 
-    # Rebuild sitemap (if the script exists)
+    # Rebuild sitemap
     sitemap_script = BASE_DIR / "build_sitemap.py"
     if sitemap_script.exists():
         r = subprocess.run(["python", str(sitemap_script)], cwd=BASE_DIR, capture_output=True, text=True)
-        if r.returncode == 0:
-            log("  Sitemap rebuilt OK")
-        else:
-            log(f"  Sitemap rebuild error: {r.stderr.strip()}", "WARN")
+        if r.returncode == 0: log("  Sitemap rebuilt OK")
+        else: log(f"  Sitemap rebuild warning: {r.stderr.strip()}", "WARN")
 
-    # -----------------------------------------------------------------
-    # 6️⃣ Record delivery metadata
-    # -----------------------------------------------------------------
+    # Rebuild all article HTML pages to update internal links and related articles
+    for md_file in DOCS_DIR.glob("*.md"):
+        if md_file.name in {".gitkeep", "index.md"}:
+            continue
+        try:
+            from build_article import build_article_html
+            import re as _re, json as _json
+            sl = md_file.stem
+            content = md_file.read_text(encoding="utf-8")
+            _dm = _re.search(r'^PUB_DATE:\s*(\d{4}-\d{2}-\d{2})', content, _re.MULTILINE)
+            _pd = date.fromisoformat(_dm.group(1)) if _dm else date.today()
+            # Load cached image metadata if available
+            _img_meta_path = BASE_DIR / "images" / (sl + ".json")
+            _img_meta = _json.loads(_img_meta_path.read_text(encoding="utf-8")) if _img_meta_path.exists() else None
+            html = build_article_html(sl.replace("-", " "), sl, content, pub_date=_pd, image_meta=_img_meta)
+            slug_dir = BASE_DIR / sl
+            slug_dir.mkdir(parents=True, exist_ok=True)
+            (slug_dir / "index.html").write_text(html, encoding="utf-8")
+        except Exception as e:
+            log(f"  Rebuild {md_file.name}: {e}", "WARN")
+    log("  All article pages rebuilt OK")
+
+    # Record delivery
     delivery = {
         "topic"    : topic,
         "filename" : filename,
-        "slug"     : article_slug,
-        "url"      : f"https://{SITE_DOMAIN}/{article_slug}/",
+        "slug"     : slug(topic),
+        "url"      : f"https://{SITE_DOMAIN}/{slug(topic)}/",
         "words"    : word_count(current),
         "qa_status": qa_status,
         "qa_cycles": cycle,
@@ -793,7 +778,7 @@ Return the FULL expanded article (still >= 2500 words)."""
     }
     state_write_json(f"delivery_{today_iso()}", delivery)
 
-    # Update article history (used by the newsletter)
+    # Update article history for newsletter
     history = state_read_json("article_history") or {"articles": []}
     history["articles"].insert(0, delivery)
     history["articles"] = history["articles"][:30]
@@ -801,65 +786,148 @@ Return the FULL expanded article (still >= 2500 words)."""
 
     git_push(f"auto: publish -- {topic[:50]}")
     log(f"  URL: {delivery['url']}")
-    log("== PIPELINE COMPLETE ===============================")
+    log(f"== PIPELINE COMPLETE [{qa_status}] ==========================")
     return True
 
-# -- NEWSLETTER ---------------------------------------------------------------
+# -- NEWSLETTER ----------------------------------------------------------------
+
 def run_newsletter_pipeline():
-    log("== NEWSLETTER PIPELINE =============================")
+    log("== NEWSLETTER PIPELINE ====================================")
     week_key = f"newsletter_week_{date.today().isocalendar()[1]}"
     if state_read(week_key) == "sent":
-        log("  Already sent this week – skipping")
+        log("  Already sent this week -- skipping")
         return True
 
     history = state_read_json("article_history")
     articles = history.get("articles", [])[:7]
     if len(articles) < 2:
-        log("  Not enough recent articles for a newsletter", "WARN")
+        log("  Not enough articles yet (need >=2)", "WARN")
         return False
 
-    # Build a simple list of article info for the prompt
     article_list = ""
     for i, a in enumerate(articles, 1):
-        article_list += f"\nArticle {i}:\nTitle: {a['topic']}\nURL: {a['url']}\n"
+        path = DOCS_DIR / a["filename"]
+        summary = " ".join(path.read_text(encoding="utf-8").split()[:200]) if path.exists() else ""
+        real_url = a["url"]
+        article_list += f"\nArticle {i}:\nTitle: {a['topic'].title()}\nFULL URL (use exactly): {real_url}\nSummary: {summary}\n"
 
     prompt = f"""Write this week's Friday Money Brief newsletter.
 
-USE THE EXACT URLs below – never invent placeholders.
+IMPORTANT: Use the EXACT URLs provided below. Never write [URL] as a placeholder.
+Replace every link with the actual full URL from the article list.
 
 {article_list}
 
-Remember: subject line ≤ 50 chars, 300‑400 words total, include 1 UK‑specific number in the lead section."""
-    result = call_agent("courier", prompt)
-    if not result:
-        return False
+Remember: copy the FULL URL exactly as given above into every link."""
 
-    # Clean up the output (the agent already follows the exact format, but we
-    # strip any stray leading/trailing whitespace)
-    match = re.search(r"---BRIEF START---(.*?)---BRIEF END---", result, re.DOTALL)
+    result = call_agent("courier", prompt)
+    if not result: return False
+
+    match   = re.search(r"---BRIEF START---(.*?)---BRIEF END---", result, re.DOTALL)
     content = match.group(1).strip() if match else result.strip()
 
-    # Save the newsletter markdown
+    # --- Newsletter post-processing ---
+    existing_slugs = {p.stem for p in DOCS_DIR.glob("*.md")}
+
+    # Step 1: Fix [text]([url](url)) -> [text](url)
+    import re as _re
+    def fix_triple(m):
+        return "[" + m.group(1) + "](" + m.group(3) + ")"
+    content = _re.sub(r"\[([^\]]+)\]\(\[([^\]]+)\]\(([^)]+)\)\)", fix_triple, content)
+
+    # Step 2: Fix ([url](url)) -> (url)
+    def fix_double(m):
+        return "(" + m.group(2) + ")"
+    content = _re.sub(r"\(\[([^\]]+)\]\(([^)]+)\)\)", fix_double, content)
+
+    # Step 3: Fix empty links [text]() -> match to real article or remove
+    def fix_empty(m):
+        words = set(_re.sub(r"[^a-z0-9]", " ", m.group(1).lower()).split())
+        best, best_score = None, 0
+        for a in articles:
+            slug_words = set(a["url"].rstrip("/").split("/")[-1].split("-"))
+            score = len(words & slug_words)
+            if score > best_score:
+                best, best_score = a["url"], score
+        if best and best_score >= 3:
+            return "[" + m.group(1) + "](" + best + ")"
+        return m.group(1)
+    content = _re.sub(r"\[([^\]]+)\]\(\s*\)", fix_empty, content)
+
+    # Step 4: Remove dead links (articles not in docs/)
+    def remove_dead(m):
+        slug = m.group(2).rstrip("/").split("/")[-1]
+        return m.group(0) if slug in existing_slugs else m.group(1)
+    content = _re.sub(r"\[([^\]]+)\]\((https://www\.luispaiva\.co\.uk/[^)]+)\)", remove_dead, content)
+
+    # Step 5: Remove bullet lines with no real links
+    cleaned = []
+    for line in content.splitlines():
+        if line.strip().startswith("- "):
+            found = _re.findall(r"https://www\.luispaiva\.co\.uk/([^/]+)/", line)
+            if not found or not any(s in existing_slugs for s in found):
+                continue
+        cleaned.append(line)
+    content = "\n".join(cleaned)
+
+    # Step 6: Fix bare "Title (url)" -> "[Title](url)"
+    def fix_bare_url(m):
+        return "[" + m.group(1).strip() + "](" + m.group(2) + ")"
+    content = _re.sub(
+        r'\*?\*?([A-Z][^(\n]{5,60}?)\s+\((https://www\.luispaiva\.co\.uk/[^)]+)\)\*?\*?',
+        fix_bare_url, content)
+
+    # Step 7: Fix "-> Read the full guide" with no link
+    if articles:
+        lead_url = articles[0]["url"]
+        content = _re.sub(
+            r'-> (Read the full guide[^(\[<\n]*)',
+            lambda m: "-> [" + m.group(1).strip() + "](" + lead_url + ")",
+            content)
+
+    # Step 8: Remove empty/whitespace-only bullet lines
+    cleaned2 = []
+    for line in content.splitlines():
+        stripped = line.strip()
+        if stripped in ('-', '- ') or (stripped.startswith('- ') and len(stripped) <= 3):
+            continue
+        cleaned2.append(line)
+    content = "\n".join(cleaned2)
+    # Remove consecutive blank lines
+    content = _re.sub(r'\n{3,}', '\n\n', content).strip()
+
+    # Step 9: Make lead article link bold if not already
+    content = _re.sub(
+        r'^(?!\*\*)(\[.+?\]\(https://www\.luispaiva\.co\.uk/.+?\))$',
+        lambda m: "**" + m.group(1) + "**",
+        content, flags=_re.MULTILINE)
+
+    subject = "The Friday Money Brief"
+    preview = "Your weekly personal finance roundup from luispaiva.co.uk"
+    for line in content.splitlines():
+        if line.startswith("SUBJECT:"): subject = line.replace("SUBJECT:", "").strip()
+        elif line.startswith("PREVIEW:"): preview = line.replace("PREVIEW:", "").strip()
+
+    body = "\n".join(l for l in content.splitlines()
+                     if not l.startswith("SUBJECT:") and not l.startswith("PREVIEW:")).strip()
+
     nl_path = NL_DIR / f"newsletter-{today_iso()}.md"
     nl_path.write_text(content, encoding="utf-8")
     (NL_DIR / "latest.md").write_text(content, encoding="utf-8")
-    log(f"  Saved newsletter: newsletters/newsletter-{today_iso()}.md")
+    log(f"  Saved: newsletters/newsletter-{today_iso()}.md")
 
-    # (Optional) send to Beehiiv – keep the original function unchanged
     if BEEHIIV_ENABLED and "YOUR_API" not in BEEHIIV_API_KEY:
-        _send_beehiiv("The Friday Money Brief",
-                      "Your weekly UK money roundup",
-                      content)
+        _send_beehiiv(subject, preview, body)
         state_write(week_key, "sent")
     else:
-        log("  Beehiiv not configured – newsletter saved locally only")
+        log("  Beehiiv not configured -- saved locally only")
 
     git_push("auto: add weekly newsletter")
-    notify("Newsletter ready – copy from newsletters/ folder to Beehiiv")
+    log("== NEWSLETTER COMPLETE ====================================")
+    notify("Newsletter ready - copy from newsletters/ folder to Beehiiv")
     return True
 
 def _send_beehiiv(subject, preview, body_md):
-    # (original implementation – unchanged)
     html = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', body_md)
     html = re.sub(r'\[([^\]]+)\]\(([^\)]+)\)', r'<a href="\2">\1</a>', html)
     html = re.sub(r'^-> (.+)$', r'<p>-> \1</p>', html, flags=re.MULTILINE)
@@ -891,6 +959,7 @@ def _send_beehiiv(subject, preview, body_md):
     return False
 
 # -- MAIN ----------------------------------------------------------------------
+
 def run(force_newsletter=False):
     log("=" * 60)
     log(f"  BLOG PIPELINE  |  {SITE_DOMAIN}")
@@ -901,7 +970,7 @@ def run(force_newsletter=False):
         run_newsletter_pipeline()
 
     if not force_newsletter:
-        notify(f"Pipeline starting – {date.today().strftime('%A %d %B')}")
+        notify(f"Pipeline starting - {date.today().strftime('%A %d %B')}")
         run_article_pipeline()
 
 if __name__ == "__main__":
