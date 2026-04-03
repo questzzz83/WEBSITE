@@ -94,6 +94,7 @@ def _gpu_options(model_name: str):
 
 # -- TOPICS -------------------------------------------------------------------
 TOPICS = [
+    "guidance on clawback refunds - are you being fobbed off?",  # trending 2026-04-04
     "how best to handle a period out of work",  # trending 2026-04-03
     "how to protect credit score after death of a parent uk",  # trending 2026-04-02
     "current mortgage rate coming to an end",  # trending 2026-04-01
@@ -495,6 +496,69 @@ def slug(text):
 def word_count(text):
     return len(text.split())
 
+
+# -- BRIEF QUALITY CHECK -------------------------------------------------------
+FAKE_ORG_PATTERNS = [
+    r"pension rights protection service",
+    r"\bprps\b",
+    r"\bmapes\b",
+    r"money and pensions enquiry service",
+    r"clawbackadviceuk\.com",
+    r"clawbake",
+    r"pensionsadviceukservices",
+    r"clawbackrecovery",
+]
+GARBLED_TITLE_PATTERNS = [
+    r"navelled",
+    r"fair right answers",
+]
+
+def validate_brief(brief, topic):
+    b = brief.lower()
+    for pat in FAKE_ORG_PATTERNS:
+        if re.search(pat, b, re.IGNORECASE):
+            return False, "Hallucinated source detected: " + pat
+    for pat in GARBLED_TITLE_PATTERNS:
+        if re.search(pat, b, re.IGNORECASE):
+            return False, "Garbled brief language: " + pat
+    if word_count(brief) < 80:
+        return False, "Brief too short (%d words)" % word_count(brief)
+    topic_words = [w for w in topic.lower().split() if len(w) > 4]
+    matches = sum(1 for w in topic_words if w in b)
+    if topic_words and matches == 0:
+        return False, "Brief has no overlap with topic"
+    return True, "OK"
+
+def rescount_topic(bad_topic):
+    """Re-run trend_scout to get a fresh topic after a bad brief."""
+    log("  Re-running Trend Scout for a fresh topic...", "WARN")
+    scouted_lock = STATE_DIR / ("trend_scouted_" + today_iso() + ".txt")
+    if scouted_lock.exists():
+        scouted_lock.unlink()
+    next_path = STATE_DIR / "next_topic.txt"
+    if next_path.exists():
+        next_path.unlink()
+    done_path = STATE_DIR / "done_topics.txt"
+    with open(done_path, "a", encoding="utf-8") as f:
+        f.write(bad_topic + "\n")
+    scout_script = BASE_DIR / "trend_scout.py"
+    if not scout_script.exists():
+        log("  trend_scout.py not found - falling back to static list", "WARN")
+        return None
+    r = subprocess.run(
+        ["python", str(scout_script)],
+        cwd=BASE_DIR, capture_output=True, text=True, timeout=180
+    )
+    if r.returncode != 0:
+        log("  Trend Scout failed: " + r.stderr.strip()[:200], "ERROR")
+        return None
+    if next_path.exists():
+        new_topic = next_path.read_text(encoding="utf-8").strip()
+        log("  New topic from Scout: " + new_topic)
+        return new_topic
+    log("  Trend Scout ran but produced no topic", "WARN")
+    return None
+
 def is_friday():
     return date.today().weekday() == 4
 
@@ -645,6 +709,31 @@ def run_article_pipeline():
     brief = call_agent("scout", f"Research this topic for a UK personal finance blog: {topic}")
     if not brief:
         return False
+
+    # Validate brief quality – catch hallucinated sources / garbled output
+    MAX_TOPIC_RETRIES = 2
+    for _retry in range(MAX_TOPIC_RETRIES):
+        ok, reason = validate_brief(brief, topic)
+        if ok:
+            break
+        log(f"  Brief quality check FAILED: {reason}", "WARN")
+        new_topic = rescount_topic(topic)
+        if not new_topic or new_topic == topic:
+            log("  Could not get a fresh topic – skipping today", "ERROR")
+            notify("Pipeline skipped – Scout produced bad brief and no fallback topic found")
+            return False
+        topic = new_topic
+        log(f"  Retrying with new topic: {topic}")
+        brief = call_agent("scout", f"Research this topic for a UK personal finance blog: {topic}")
+        if not brief:
+            return False
+    else:
+        ok, reason = validate_brief(brief, topic)
+        if not ok:
+            log(f"  Brief still invalid after {MAX_TOPIC_RETRIES} retries: {reason}", "ERROR")
+            notify("Pipeline skipped – could not get a valid brief after retries")
+            return False
+
     state_write("current_brief", brief)
     state_write("current_topic", topic)
 
