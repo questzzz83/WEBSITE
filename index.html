@@ -52,6 +52,13 @@
     .cat-dropdown a:last-child{border-bottom:none}
     .cat-dropdown a:hover{background:var(--cream);color:var(--accent)}
     .cat-empty{padding:.65rem 1rem;font-size:.8rem;color:var(--ink-muted);letter-spacing:0;text-transform:none}
+    /* RIBBON ARROWS */
+    .ribbon{position:relative}
+    .ribbon-arrow{display:none;position:absolute;top:0;bottom:0;width:2.2rem;align-items:center;justify-content:center;background:var(--ink);border:none;color:rgba(247,245,240,.8);cursor:pointer;z-index:10;font-size:1rem;transition:color .15s,background .15s;flex-shrink:0}
+    .ribbon-arrow:hover{color:var(--paper);background:rgba(255,255,255,.1)}
+    .ribbon-arrow.left{left:0}
+    .ribbon-arrow.right{right:0}
+    .ribbon-arrow.visible{display:flex}
     /* HERO */
     .hero{border-bottom:1px solid var(--rule);padding:3.5rem 1.5rem 0}
     .hero-inner{max-width:var(--max);margin:0 auto;display:grid;grid-template-columns:1.55fr 1fr;gap:var(--gap);align-items:start}
@@ -201,7 +208,8 @@
 </div>
 
 <nav class="ribbon">
-  <div class="ribbon-inner">
+  <button class="ribbon-arrow left" id="js-ribbon-left" aria-label="Scroll left">&#8249;</button>
+  <div class="ribbon-inner" id="js-ribbon">
     <div class="cat-item" data-cat="Savings">Savings<div class="cat-dropdown"></div></div>
     <div class="cat-item" data-cat="Investing">Investing<div class="cat-dropdown"></div></div>
     <div class="cat-item" data-cat="ISAs">ISAs<div class="cat-dropdown"></div></div>
@@ -214,7 +222,9 @@
     <div class="cat-item" data-cat="Debt">Debt<div class="cat-dropdown"></div></div>
     <div class="cat-item" data-cat="Banking">Banking<div class="cat-dropdown"></div></div>
     <div class="cat-item" data-cat="Insurance">Insurance<div class="cat-dropdown"></div></div>
+    <div class="cat-item" data-cat="Finance">Finance<div class="cat-dropdown"></div></div>
   </div>
+  <button class="ribbon-arrow right" id="js-ribbon-right" aria-label="Scroll right">&#8250;</button>
 </nav>
 
 <section class="hero">
@@ -266,6 +276,13 @@
 
   // Articles — injected by build_homepage.py
   window.SITE_ARTICLES = [
+  {
+    "title": "Every Money Change in April 2026: What Goes Up, What Comes Down",
+    "slug": "every-money-change-april-2026-uk",
+    "excerpt": "April is always the month the UK's finances get reshuffled. New tax year, new rules, new bills — some welcome, most not. This April is one of the busiest in years. Energy is falling, but council tax, water, broadband, TV...",
+    "date": "04 Apr 2026",
+    "img": "/images/every-money-change-april-2026-uk.jpg"
+  },
   {
     "title": "How to Build an Emergency Fund UK 2026 — A Complete Guide",
     "slug": "how-to-build-an-emergency-fund-uk-2026",
@@ -420,6 +437,26 @@
       });
     });
   }
+
+  // RIBBON ARROWS
+  (function(){
+    var ribbon = document.getElementById('js-ribbon');
+    var btnL = document.getElementById('js-ribbon-left');
+    var btnR = document.getElementById('js-ribbon-right');
+    if (!ribbon || !btnL || !btnR) return;
+    var STEP = 220;
+
+    function update() {
+      btnL.classList.toggle('visible', ribbon.scrollLeft > 4);
+      btnR.classList.toggle('visible', ribbon.scrollLeft < ribbon.scrollWidth - ribbon.clientWidth - 4);
+    }
+
+    btnL.addEventListener('click', function(){ ribbon.scrollBy({left: -STEP, behavior: 'smooth'}); });
+    btnR.addEventListener('click', function(){ ribbon.scrollBy({left: STEP, behavior: 'smooth'}); });
+    ribbon.addEventListener('scroll', update);
+    window.addEventListener('resize', update);
+    update();
+  })();
 
   if (ARTICLES.length) { renderHero(ARTICLES); renderGrid(ARTICLES); renderDropdowns(ARTICLES); }
   initDropdowns();
