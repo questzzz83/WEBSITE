@@ -94,6 +94,7 @@ def _gpu_options(model_name: str):
 
 # -- TOPICS -------------------------------------------------------------------
 TOPICS = [
+    "best balance transfer credit cards for savings",  # trending 2026-04-05
     "guidance on clawback refunds - are you being fobbed off?",  # trending 2026-04-04
     "how best to handle a period out of work",  # trending 2026-04-03
     "how to protect credit score after death of a parent uk",  # trending 2026-04-02
