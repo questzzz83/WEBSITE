@@ -322,6 +322,12 @@ def get_related_articles(article_slug, all_articles=None, n=3):
 def build_article_html(topic, article_slug, md_content, pub_date=None, image_meta=None):
     """Build a complete standalone HTML page from article markdown."""
 
+    # Strip pipeline header lines before rendering
+    md_content = re.sub(r'^PUB_DATE:.*\n?', '', md_content, flags=re.MULTILINE)
+    md_content = re.sub(r'^\*{0,2}META[_:].*\n?', '', md_content, flags=re.MULTILINE)
+    md_content = re.sub(r'^META_DESCRIPTION:.*\n?', '', md_content, flags=re.MULTILINE)
+    md_content = md_content.lstrip()
+
     body_html = md_to_html(md_content)
 
     # Add IDs to headings for TOC
