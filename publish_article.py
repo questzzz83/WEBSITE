@@ -89,6 +89,17 @@ def find_newest_md():
 
 def git_push(commit_msg):
     log(f"  Pushing: {commit_msg}")
+
+    # Pull remote changes first (theirs wins on conflict) to avoid rejection
+    r = subprocess.run(
+        ["git", "pull", "--no-rebase", "-X", "theirs", "origin", GITHUB_BRANCH],
+        cwd=BASE_DIR, capture_output=True, text=True
+    )
+    if r.returncode != 0:
+        log(f"  git pull warning: {r.stderr.strip()}", "WARN")
+    else:
+        log("  Pulled remote OK")
+
     for cmd in [
         ["git", "add", "-A"],
         ["git", "commit", "-m", commit_msg],

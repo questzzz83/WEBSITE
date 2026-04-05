@@ -2,37 +2,43 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://www.luispaiva.co.uk/</loc>
-    <lastmod>2026-04-04</lastmod>
+    <lastmod>2026-04-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://www.luispaiva.co.uk/about/</loc>
-    <lastmod>2026-04-04</lastmod>
+    <lastmod>2026-04-05</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://www.luispaiva.co.uk/newsletter/</loc>
-    <lastmod>2026-04-04</lastmod>
+    <lastmod>2026-04-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://www.luispaiva.co.uk/privacy/</loc>
-    <lastmod>2026-04-04</lastmod>
+    <lastmod>2026-04-05</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://www.luispaiva.co.uk/every-money-change-april-2026-uk/</loc>
-    <lastmod>2026-04-04</lastmod>
+    <loc>https://www.luispaiva.co.uk/how-to-build-an-emergency-fund-uk-2026/</loc>
+    <lastmod>2026-04-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.luispaiva.co.uk/how-to-build-an-emergency-fund-uk-2026/</loc>
-    <lastmod>2026-04-03</lastmod>
+    <loc>https://www.luispaiva.co.uk/best-balance-transfer-credit-cards/</loc>
+    <lastmod>2026-04-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.luispaiva.co.uk/every-money-change-april-2026-uk/</loc>
+    <lastmod>2026-04-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
