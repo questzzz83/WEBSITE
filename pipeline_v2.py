@@ -2,7 +2,9 @@
 #!/usr/bin/env python3
 """
 Autonomous Blog Pipeline v2 -- luispaiva.co.uk
-Agents: Scout -> Strategist -> Writer -> Gatekeeper -> Courier (Fridays)
+Agents: Scout -> Strategist -> [Writer DISABLED] -> Courier (Fridays)
+Pipeline stops after Strategist and notifies via Telegram.
+Article writing is done manually with Claude's help.
 Run: python pipeline_v2.py
 """
 
@@ -94,6 +96,7 @@ def _gpu_options(model_name: str):
 
 # -- TOPICS -------------------------------------------------------------------
 TOPICS = [
+    "how to inherite money and use it wisely - a guide for british residents",  # trending 2026-04-06
     "best balance transfer credit cards for savings",  # trending 2026-04-05
     "guidance on clawback refunds - are you being fobbed off?",  # trending 2026-04-04
     "how best to handle a period out of work",  # trending 2026-04-03
@@ -654,7 +657,8 @@ def pick_topic():
     strategy_path = STATE_DIR / "strategy_latest.md"
     if strategy_path.exists():
         strategy = strategy_path.read_text(encoding="utf-8")
-        rec_titles = re.findall(r"### \d+\. (.+)", strategy)
+        # Match old format "### 1. Title" and new emoji format "### 🔴 Priority 1 — Title"
+        rec_titles = re.findall(r"###\s+[^\w\n]*(?:Priority\s+\d+\s+[\u2014-]\s+|\d+\.\s+)(.+)", strategy)
         for title in rec_titles:
             title = title.strip()
             if title not in done:
@@ -676,6 +680,15 @@ def pick_topic():
 # -- GIT -----------------------------------------------------------------------
 def git_push(commit_msg):
     log(f"  Pushing: {commit_msg}")
+    # Pull remote first to avoid rejection; theirs wins on conflict
+    r = subprocess.run(
+        ["git", "pull", "--no-rebase", "-X", "theirs", "origin", GITHUB_BRANCH],
+        cwd=BASE_DIR, capture_output=True, text=True
+    )
+    if r.returncode != 0:
+        log(f"  git pull warning: {r.stderr.strip()}", "WARN")
+    else:
+        log("  Pulled remote OK")
     for cmd in [
         ["git", "add", "-A"],
         ["git", "commit", "-m", commit_msg],
@@ -748,150 +761,21 @@ def run_article_pipeline():
     state_write("current_skeleton", skeleton)
 
     # -----------------------------------------------------------------
-    # 3️⃣ Writer – full article (>=2500 words)
+    # 3️⃣ Writer – DISABLED (manual authoring with Claude)
     # -----------------------------------------------------------------
-    log("-- Phase 3 - Writer")
-    draft = call_agent("writer", f"Write the full article.\n\nBRIEF:\n{brief}\n\nSKELETON:\n{skeleton}")
-    if not draft:
-        return False
-
-    # Auto‑expand if under word‑count (max 2 attempts)
-    for attempt in range(1, 3):
-        wc = word_count(draft)
-        if wc >= 2500:
-            break
-        log(f"  Draft too short ({wc} words) – expanding (attempt {attempt})", "WARN")
-        expand_prompt = f"""The article is only {wc} words. You MUST expand it to at least 2,500 words.
-
-EXPANSION INSTRUCTIONS:
-- Add at least 150 words to **every** H2 section.
-- Insert more concrete UK examples (e.g., specific rates, provider names, GBP amounts).
-- Keep the same headings, affiliate placeholders and table positions.
-- Do NOT change the overall structure.
-
-CURRENT ARTICLE:
-{draft}
-
-Return the FULL expanded article (still >= 2500 words)."""
-        expanded = call_agent("writer", expand_prompt)
-        if expanded and word_count(expanded) > wc:
-            draft = expanded
-        else:
-            log("  Expansion did not improve word count", "WARN")
-            break
-
-    state_write("current_draft", draft)
-    log(f"  Draft length: {word_count(draft)} words")
-
-    # -----------------------------------------------------------------
-    # 4️⃣ Gatekeeper – QA loop
-    # -----------------------------------------------------------------
-    current = draft
-    qa_status = "FAIL"
-    for cycle in range(1, MAX_QA_RETRIES + 1):
-        log(f"-- Phase 4 - Gatekeeper (cycle {cycle}/{MAX_QA_RETRIES})")
-        qa = call_agent("gatekeeper", f"Review cycle {cycle}.\n\nBRIEF:\n{brief}\n\nARTICLE:\n{current}")
-        if not qa:
-            break
-        state_write("last_qa_report", qa)
-        if "STATUS: PASS" in qa:
-            qa_status = "PASS"
-            log("  Gatekeeper: PASS")
-            break
-        log("  Gatekeeper: FAIL – sending back to Writer")
-        if cycle < MAX_QA_RETRIES:
-            fixed = call_agent("writer", f"Fix this article based on QA feedback.\n\nBRIEF:\n{brief}\n\nARTICLE:\n{current}\n\nQA:\n{qa}")
-            if fixed:
-                current = fixed
-                state_write("current_draft", fixed)
-        else:
-            log("  Max QA cycles reached – publishing with warnings", "WARN")
-            qa_status = "FORCED"
-
-    # -----------------------------------------------------------------
-    # 5️⃣ Publish – write markdown, build HTML, push to Git
-    # -----------------------------------------------------------------
-    log("-- Phase 5 - Publish")
-    article_slug = slug(topic)
-    filename = article_slug + ".md"
-    dest_md = DOCS_DIR / filename
-
-    # Prepend a publish‑date line so the build script never relies on file mtime
-    pub_line = f"PUB_DATE: {today_iso()}\n"
-    if not current.startswith("PUB_DATE:"):
-        current = pub_line + current
-
-    dest_md.write_text(current, encoding="utf-8")
-    log(f"  Saved markdown: docs/{filename}")
-
-    # -----------------------------------------------------------------
-    # (Optional) hero image, HTML build, sitemap, homepage rebuild
-    # -----------------------------------------------------------------
-    try:
-        from fetch_article_image import get_article_image
-        image_meta = get_article_image(topic, article_slug)
-        if image_meta:
-            log(f"  Image fetched: {image_meta.get('source','?')} – query: {image_meta.get('query','')}")
-        else:
-            log("  No hero image found", "WARN")
-    except Exception as e:
-        log(f"  Image step skipped: {e}", "WARN")
-        image_meta = None
-
-    try:
-        from build_article import build_article_html
-        slug_dir = BASE_DIR / article_slug
-        slug_dir.mkdir(parents=True, exist_ok=True)
-        html = build_article_html(topic, article_slug, current,
-                                  pub_date=date.today(),
-                                  image_meta=image_meta)
-        (slug_dir / "index.html").write_text(html, encoding="utf-8")
-        log(f"  Saved HTML: {article_slug}/index.html")
-    except Exception as e:
-        log(f"  HTML build skipped: {e}", "WARN")
-
-    # Rebuild homepage (if the script exists)
-    home_script = BASE_DIR / "build_homepage.py"
-    if home_script.exists():
-        r = subprocess.run(["python", str(home_script)], cwd=BASE_DIR, capture_output=True, text=True)
-        if r.returncode == 0:
-            log("  Homepage rebuilt OK")
-        else:
-            log(f"  Homepage rebuild error: {r.stderr.strip()}", "WARN")
-
-    # Rebuild sitemap (if the script exists)
-    sitemap_script = BASE_DIR / "build_sitemap.py"
-    if sitemap_script.exists():
-        r = subprocess.run(["python", str(sitemap_script)], cwd=BASE_DIR, capture_output=True, text=True)
-        if r.returncode == 0:
-            log("  Sitemap rebuilt OK")
-        else:
-            log(f"  Sitemap rebuild error: {r.stderr.strip()}", "WARN")
-
-    # -----------------------------------------------------------------
-    # 6️⃣ Record delivery metadata
-    # -----------------------------------------------------------------
-    delivery = {
-        "topic"    : topic,
-        "filename" : filename,
-        "slug"     : article_slug,
-        "url"      : f"https://{SITE_DOMAIN}/{article_slug}/",
-        "words"    : word_count(current),
-        "qa_status": qa_status,
-        "qa_cycles": cycle,
-        "published": datetime.now().isoformat(),
-    }
-    state_write_json(f"delivery_{today_iso()}", delivery)
-
-    # Update article history (used by the newsletter)
-    history = state_read_json("article_history") or {"articles": []}
-    history["articles"].insert(0, delivery)
-    history["articles"] = history["articles"][:30]
-    state_write_json("article_history", history)
-
-    git_push(f"auto: publish -- {topic[:50]}")
-    log(f"  URL: {delivery['url']}")
-    log("== PIPELINE COMPLETE ===============================")
+    log("-- Phase 3 - Writer DISABLED")
+    log("  Brief and skeleton saved. Write the article manually using Claude.")
+    log(f"  Brief : .pipeline/current_brief.txt")
+    log(f"  Skeleton: .pipeline/current_skeleton.txt")
+    log(f"  Topic : {topic}")
+    notify(
+        f"\U0001F4DD Pipeline ready for manual writing\n\n"
+        f"Topic: {topic}\n"
+        f"Brief: .pipeline/current_brief.txt\n"
+        f"Skeleton: .pipeline/current_skeleton.txt\n\n"
+        f"Write article → save to docs/{slug(topic)}.md → run publish_article.py"
+    )
+    log("== PIPELINE PAUSED – awaiting manual article ================")
     return True
 
 # -- NEWSLETTER ---------------------------------------------------------------
