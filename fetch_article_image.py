@@ -110,7 +110,7 @@ def fetch_unsplash(query, slug):
                 urllib.request.urlopen(dl_req, timeout=10)
             except Exception:
                 pass
-            return local_path, credit, photo_url
+            return local_path, credit, credit_url
 
     except Exception as e:
         print(f"  [image] Unsplash error: {e}", file=sys.stderr)
