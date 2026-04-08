@@ -96,6 +96,7 @@ def _gpu_options(model_name: str):
 
 # -- TOPICS -------------------------------------------------------------------
 TOPICS = [
+    "coping with credit card debt in times of unemployment",  # trending 2026-04-08
     "best balance transfer credit cards in the uk",  # trending 2026-04-07
     "how to inherite money and use it wisely - a guide for british residents",  # trending 2026-04-06
     "best balance transfer credit cards for savings",  # trending 2026-04-05
