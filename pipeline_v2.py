@@ -96,6 +96,7 @@ def _gpu_options(model_name: str):
 
 # -- TOPICS -------------------------------------------------------------------
 TOPICS = [
+    "managing finances with a newborn",  # trending 2026-04-10
     "pension vs isa which is better uk 2026", # trending 2026-04-09
     "coping with credit card debt in times of unemployment",  # trending 2026-04-08
     "best balance transfer credit cards in the uk",  # trending 2026-04-07
