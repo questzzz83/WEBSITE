@@ -96,6 +96,7 @@ def _gpu_options(model_name: str):
 
 # -- TOPICS -------------------------------------------------------------------
 TOPICS = [
+    "navigating joint account debt with a partner starting dmp",  # trending 2026-04-12
     "how to safely pay off credit card debt",  # trending 2026-04-11
     "managing finances with a newborn",  # trending 2026-04-10
     "pension vs isa which is better uk 2026", # trending 2026-04-09
