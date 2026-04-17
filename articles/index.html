@@ -192,10 +192,8 @@
   document.getElementById('js-date').textContent = now.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   document.getElementById('js-year').textContent = now.getFullYear();
 
-  // ── Articles — replace window.SITE_ARTICLES with your injected array ──
-  // This is the same array injected by build_homepage.py
-  // In production, replace this with your pipeline injection:
-  //   window.SITE_ARTICLES = [
+  // ── Articles injected by build_articles_page.py ────────────────
+  window.SITE_ARTICLES = [
   {
     "title": "Making Tax Digital 2026: What Every Sole Trader and Landlord Needs to Do Right Now",
     "slug": "making-tax-digital-sole-traders-landlords-uk-2026",
@@ -344,7 +342,6 @@
     "img": "/images/pension-at-39-should-i-stop-working.jpg"
   }
 ];
-  window.SITE_ARTICLES = window.SITE_ARTICLES || [];
 
   // ── Category detection (mirrors build_homepage.py logic) ─────
   function cat(slug) {
@@ -374,7 +371,7 @@
   }
 
   // ── Build filter buttons ─────────────────────────────────────
-  var ARTICLES = window.SITE_ARTICLES || [];
+  var ARTICLES = window.SITE_ARTICLES;
   document.getElementById('js-total').textContent = ARTICLES.length;
 
   var cats = ['All'];
