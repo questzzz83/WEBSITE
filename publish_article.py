@@ -196,6 +196,15 @@ def publish(slug=None):
     else:
         log(f"  Sitemap error: {r.stderr.strip()}", "WARN")
 
+    # ── Rebuild articles archive ──────────────────────────────────────
+    log("-- Rebuilding articles archive...")
+    r = subprocess.run(["python", str(BASE_DIR / "build_articles_page.py")],
+                       cwd=BASE_DIR, capture_output=True, text=True)
+    if r.returncode == 0:
+        log("  Articles archive OK")
+    else:
+        log(f"  Articles archive error: {r.stderr.strip()}", "WARN")
+
     # ── Update article history (used by newsletter) ───────────────────
     history_path = STATE_DIR / "article_history.json"
     history = {"articles": []}

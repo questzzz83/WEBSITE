@@ -51,6 +51,7 @@ def build_sitemap():
     	{"url": "/privacy",                  "priority": "0.3", "changefreq": "yearly"},
     	{"url": "/calculators",              "priority": "0.9", "changefreq": "monthly"},
     	{"url": "/take-home-pay-calculator", "priority": "0.8", "changefreq": "monthly"},
+    	{"url": "/articles",                 "priority": "0.7", "changefreq": "weekly"},
     ]
 
     # Articles
