@@ -87,10 +87,23 @@ def find_newest_md():
         return None
     return max(candidates, key=lambda f: f.stat().st_mtime)
 
+GITHUB_REPO = "https://github.com/questzzz83/WEBSITE.git"
+
 def git_push(commit_msg):
     log(f"  Pushing: {commit_msg}")
 
-    # Pull remote changes first (theirs wins on conflict) to avoid rejection
+    # ── Verify / fix remote URL ───────────────────────────────────────
+    r = subprocess.run(["git", "remote", "get-url", "origin"],
+                       cwd=BASE_DIR, capture_output=True, text=True)
+    current_remote = r.stdout.strip()
+    if current_remote != GITHUB_REPO:
+        log(f"  Remote was '{current_remote}' — updating to {GITHUB_REPO}", "WARN")
+        subprocess.run(["git", "remote", "set-url", "origin", GITHUB_REPO],
+                       cwd=BASE_DIR)
+    else:
+        log(f"  Remote OK: {current_remote}")
+
+    # ── Pull first to avoid rejection ────────────────────────────────
     r = subprocess.run(
         ["git", "pull", "--no-rebase", "-X", "theirs", "origin", GITHUB_BRANCH],
         cwd=BASE_DIR, capture_output=True, text=True
@@ -100,18 +113,25 @@ def git_push(commit_msg):
     else:
         log("  Pulled remote OK")
 
+    # ── Stage, commit, push ───────────────────────────────────────────
     for cmd in [
         ["git", "add", "-A"],
         ["git", "commit", "-m", commit_msg],
         ["git", "push", "origin", GITHUB_BRANCH],
     ]:
         r = subprocess.run(cmd, cwd=BASE_DIR, capture_output=True, text=True)
+        output = (r.stdout + r.stderr).strip()
         if r.returncode != 0:
-            if "nothing to commit" in r.stdout + r.stderr:
+            if "nothing to commit" in output:
                 log("  Nothing to commit")
                 return True
-            log(f"  git error: {r.stderr.strip()}", "ERROR")
+            log(f"  git error running: {' '.join(cmd)}", "ERROR")
+            log(f"    stdout: {r.stdout.strip()}", "ERROR")
+            log(f"    stderr: {r.stderr.strip()}", "ERROR")
             return False
+        else:
+            log(f"  OK: {' '.join(cmd[:2])} -> {output[:120]}")
+
     log("  Pushed OK – Vercel deploying...")
     return True
 
@@ -195,6 +215,7 @@ def publish(slug=None):
         log("  Sitemap OK")
     else:
         log(f"  Sitemap error: {r.stderr.strip()}", "WARN")
+
 
     # ── Rebuild articles archive ──────────────────────────────────────
     log("-- Rebuilding articles archive...")
