@@ -333,6 +333,35 @@
         document.querySelector('meta[name="description"]').content =
           md.split('\n').filter(l => l && !l.startsWith('#'))[0]?.substring(0, 155) || title;
         document.getElementById('canonical').href = `https://www.luispaiva.co.uk/${slug}/`;
+        // -- Author + Article schema (E-E-A-T) ---------------------------------
+        const schema = {
+          "@context": "https://schema.org",
+          "@type": "Article",
+          "headline": title,
+          "url": "https://www.luispaiva.co.uk/" + slug + "/",
+          "author": {
+            "@type": "Person",
+            "name": "Luis Paiva",
+            "url": "https://www.luispaiva.co.uk/about"
+          },
+          "publisher": {
+            "@type": "Person",
+            "name": "Luis Paiva",
+            "url": "https://www.luispaiva.co.uk"
+          },
+          "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https://www.luispaiva.co.uk/" + slug + "/"
+          }
+        };
+        let schemaTag = document.getElementById('js-schema');
+        if (!schemaTag) {
+          schemaTag = document.createElement('script');
+          schemaTag.type = 'application/ld+json';
+          schemaTag.id = 'js-schema';
+          document.head.appendChild(schemaTag);
+        }
+        schemaTag.textContent = JSON.stringify(schema);
 
         // Render
         document.getElementById('article-content').innerHTML = `
