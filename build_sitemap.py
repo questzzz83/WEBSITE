@@ -45,10 +45,12 @@ def build_sitemap():
 
     # Static pages — use today as lastmod (they change with each deploy)
     static = [
-        {"url": "",             "priority": "1.0", "changefreq": "daily"},
-        {"url": "/about",       "priority": "0.5", "changefreq": "monthly"},
-        {"url": "/newsletter",  "priority": "0.6", "changefreq": "weekly"},
-        {"url": "/privacy",     "priority": "0.3", "changefreq": "yearly"},
+    	{"url": "",                          "priority": "1.0", "changefreq": "daily"},
+     	{"url": "/about",                    "priority": "0.5", "changefreq": "monthly"},
+    	{"url": "/newsletter",               "priority": "0.6", "changefreq": "weekly"},
+    	{"url": "/privacy",                  "priority": "0.3", "changefreq": "yearly"},
+    	{"url": "/calculators",              "priority": "0.9", "changefreq": "monthly"},
+    	{"url": "/take-home-pay-calculator", "priority": "0.8", "changefreq": "monthly"},
     ]
 
     # Articles
