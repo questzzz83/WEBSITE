@@ -487,11 +487,11 @@
     var side = arts.slice(1,4);
     var sideHtml = side.map(function(a){
       var sideImg = a.img ? '<img class="side-img" src="'+a.img+'" alt="'+a.title+'" loading="lazy"/>' : '';
-      return '<div class="side-stack-item">'+sideImg+'<div class="side-label">'+cat(a.slug)+'</div><div class="side-date">'+(a.date||'')+'</div><h3><a href="/'+a.slug+'">'+a.title+'</a></h3><p>'+trunc(a.excerpt,18)+'</p></div>';
+      return '<div class="side-stack-item">'+sideImg+'<div class="side-label">'+cat(a.slug)+'</div><div class="side-date">'+(a.date||'')+'</div><h3><a href="/'+a.slug+'/">'+a.title+'</a></h3><p>'+trunc(a.excerpt,18)+'</p></div>';
     }).join('');
     var leadImg = lead.img ? '<img class="lead-img" src="'+lead.img+'" alt="'+lead.title+'" loading="eager"/>' : '';
     document.getElementById('js-hero').innerHTML =
-      '<article class="lead">'+leadImg+'<div class="lead-label">'+cat(lead.slug)+'</div><div class="lead-date">'+(lead.date||'')+'</div><h2><a href="/'+lead.slug+'">'+lead.title+'</a></h2><p class="lead-deck">'+trunc(lead.excerpt,35)+'</p><a class="read-more" href="/'+lead.slug+'">Read the guide &rarr;</a></article>'+
+      '<article class="lead">'+leadImg+'<div class="lead-label">'+cat(lead.slug)+'</div><div class="lead-date">'+(lead.date||'')+'</div><h2><a href="/'+lead.slug+'/">'+lead.title+'</a></h2><p class="lead-deck">'+trunc(lead.excerpt,35)+'</p><a class="read-more" href="/'+lead.slug+'/">Read the guide &rarr;</a></article>'+
       '<aside class="side-stack">'+sideHtml+'</aside>';
   }
 
@@ -501,7 +501,7 @@
     if (!items.length) { grid.innerHTML='<p style="color:var(--ink-muted);font-size:.9rem;padding:2rem 0">More articles coming soon.</p>'; return; }
     grid.innerHTML = items.map(function(a){
       var cardImg = a.img ? '<img class="card-img" src="'+a.img+'" alt="'+a.title+'" loading="lazy"/>' : '';
-      return '<article class="card">'+cardImg+'<div class="card-tag">'+cat(a.slug)+'</div><div class="card-date">'+(a.date||'')+'</div><h3><a href="/'+a.slug+'">'+a.title+'</a></h3><p>'+trunc(a.excerpt,22)+'</p></article>';
+      return '<article class="card">'+cardImg+'<div class="card-tag">'+cat(a.slug)+'</div><div class="card-date">'+(a.date||'')+'</div><h3><a href="/'+a.slug+'/">'+a.title+'</a></h3><p>'+trunc(a.excerpt,22)+'</p></article>';
     }).join('');
   }
 
@@ -514,7 +514,7 @@
       if (!drop) return;
       var list = groups[c] || [];
       drop.innerHTML = list.length
-        ? list.map(function(a){ return '<a href="/'+a.slug+'">'+a.title+'</a>'; }).join('')
+        ? list.map(function(a){ return '<a href="/'+a.slug+'/">'+a.title+'</a>'; }).join('')
         : '<div class="cat-empty">No articles yet</div>';
     });
   }
@@ -600,7 +600,7 @@
         results.innerHTML = '<div class="search-no-results">No articles found for "' + q + '"</div>';
       } else {
         results.innerHTML = matches.map(function(a) {
-          return '<a class="search-result-item" href="/' + a.slug + '">' +
+          return '<a class="search-result-item" href="/' + a.slug + '/">' +
             '<div class="search-result-cat">' + cat(a.slug) + '</div>' +
             '<div class="search-result-title">' + a.title + '</div>' +
             '</a>';
