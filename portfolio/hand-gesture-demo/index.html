@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Gesture-Controlled Interface — Live Demo — Luis Paiva</title>
+<meta name="description" content="A live, in-browser hand-tracking demo. Move a cursor and click by pinching, using only your webcam — all processing happens on-device."/>
+<link rel="canonical" href="https://www.luispaiva.co.uk/portfolio/hand-gesture-demo/"/>
+<meta name="robots" content="noindex,follow"/>
+<meta name="theme-color" content="#0f0f0d"/>
+<link rel="apple-touch-icon" href="/favicon.svg"/>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --ink:#0f0f0d;--ink-soft:#3a3a35;--ink-muted:#7a7a72;
+  --paper:#f7f5f0;--cream:#eeebe3;--rule:#d8d4c8;
+  --accent:#c8502a;--accent-2:#2a5c4e;
+  --serif:'DM Serif Display',Georgia,serif;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --max:1140px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--paper);color:var(--ink);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+
+.masthead{border-bottom:3px solid var(--ink);padding:0 1.5rem}
+.masthead-inner{max-width:var(--max);margin:0 auto;display:flex;justify-content:space-between;align-items:center;padding:1.25rem 0}
+.masthead-logo a{font-family:var(--serif);font-size:1.5rem;color:var(--ink);text-decoration:none;letter-spacing:-.02em}
+.dot{color:var(--accent)}
+.masthead-nav a{font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);text-decoration:none;margin-left:1.5rem}
+.masthead-nav a:hover{color:var(--accent)}
+
+.page-header{max-width:var(--max);margin:0 auto;padding:2.5rem 1.5rem 1.5rem}
+.page-eyebrow{font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);font-weight:500;margin-bottom:.6rem}
+.page-header h1{font-family:var(--serif);font-size:clamp(1.8rem,4vw,2.6rem);letter-spacing:-.02em;margin-bottom:.75rem}
+.page-header p{color:var(--ink-soft);font-size:.98rem;max-width:64ch}
+
+.panel-wrap{max-width:var(--max);margin:0 auto;padding:0 1.5rem 1.5rem}
+.panel{border:1.5px solid var(--rule);background:#fff;padding:1.25rem 1.5rem;display:flex;flex-wrap:wrap;gap:1.5rem;align-items:center;justify-content:space-between}
+.instructions{font-size:.85rem;color:var(--ink-soft);max-width:56ch}
+.instructions b{color:var(--ink)}
+.controls{display:flex;gap:.75rem;flex-wrap:wrap}
+.btn{font-family:var(--sans);font-size:.78rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase;border:none;padding:.75rem 1.4rem;cursor:pointer;transition:background .15s}
+.btn-primary{background:var(--ink);color:var(--paper)}
+.btn-primary:hover{background:var(--accent)}
+.btn-primary:disabled{background:var(--rule);color:var(--ink-muted);cursor:not-allowed}
+.btn-secondary{background:var(--cream);color:var(--ink-soft);border:1px solid var(--rule)}
+.btn-secondary:hover{color:var(--ink)}
+
+.status-wrap{max-width:var(--max);margin:0 auto;padding:0 1.5rem 1rem}
+.status-bar{display:flex;flex-wrap:wrap;gap:1.5rem;font-size:.75rem;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-muted)}
+.status-bar span b{color:var(--ink);font-weight:500;text-transform:none;letter-spacing:0}
+.status-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--rule);margin-right:.4rem;vertical-align:middle}
+.status-dot.on{background:#2a9e6e}
+.status-dot.off{background:#c8502a}
+
+.stage-wrap{max-width:var(--max);margin:0 auto;padding:0 1.5rem 3rem}
+.stage{position:relative;background:var(--ink);min-height:460px;display:flex;flex-wrap:wrap;overflow:hidden}
+.camera-box{position:relative;width:320px;max-width:100%;aspect-ratio:4/3;background:#000;flex-shrink:0;border-right:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.08)}
+.camera-box video,.camera-box canvas{position:absolute;top:0;left:0;width:100%;height:100%;transform:scaleX(-1)}
+.camera-box video{object-fit:cover}
+.camera-label{position:absolute;bottom:.5rem;left:.5rem;font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.5);background:rgba(0,0,0,.4);padding:.2rem .5rem;pointer-events:none}
+.camera-placeholder{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.35);font-size:.8rem;text-align:center;padding:1rem}
+
+.playground{flex:1;min-width:280px;padding:1.5rem;display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;align-content:start}
+.tile{aspect-ratio:1;border:1.5px solid rgba(255,255,255,.15);background:rgba(255,255,255,.03);color:rgba(247,245,240,.55);font-family:var(--sans);font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.4rem;transition:background .12s,border-color .12s,transform .1s;cursor:default}
+.tile .count{font-family:var(--serif);font-size:1.6rem;color:rgba(247,245,240,.8)}
+.tile.hover{border-color:var(--accent);background:rgba(200,80,42,.12)}
+.tile.clicked{background:var(--accent);border-color:var(--accent);transform:scale(.96)}
+.tile.clicked .count,.tile.clicked{color:#fff}
+
+.gesture-cursor{position:absolute;width:26px;height:26px;border:2px solid var(--accent);border-radius:50%;pointer-events:none;transform:translate(-50%,-50%);transition:width .1s,height .1s,background .1s;z-index:20;display:none}
+.gesture-cursor.pinched{background:rgba(200,80,42,.55);width:18px;height:18px}
+
+.notice{max-width:var(--max);margin:0 auto;padding:0 1.5rem 3rem}
+.notice p{font-size:.78rem;color:var(--ink-muted);line-height:1.6;padding:1rem 1.25rem;background:var(--cream);border-left:3px solid var(--rule)}
+
+footer{border-top:3px solid var(--ink);padding:2rem 1.5rem}
+.footer-inner{max-width:var(--max);margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem}
+.footer-logo{font-family:var(--serif);font-size:1rem}
+.footer-links a{font-size:.75rem;color:var(--ink-muted);text-decoration:none;margin-left:1.25rem}
+.footer-links a:hover{color:var(--accent)}
+
+@media(max-width:700px){
+  .masthead-inner{gap:.5rem}
+  .masthead-nav a{margin-left:1rem}
+  .playground{grid-template-columns:repeat(2,1fr)}
+  .stage{min-height:auto}
+}
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <div class="masthead-logo"><a href="/">Luis Paiva<span class="dot">.</span></a></div>
+    <nav class="masthead-nav">
+      <a href="/portfolio">&larr; Portfolio</a>
+      <a href="/about">About</a>
+    </nav>
+  </div>
+</header>
+
+<div class="page-header">
+  <div class="page-eyebrow">Live demo</div>
+  <h1>Gesture-Controlled Interface</h1>
+  <p>Hand tracking running entirely in your browser via MediaPipe. Your camera feed is processed on-device — nothing is uploaded or stored anywhere.</p>
+</div>
+
+<div class="panel-wrap">
+  <div class="panel">
+    <p class="instructions">Click <b>Start camera</b> and allow access. Hold one hand up so it's visible in the small camera box. Move your <b>index fingertip</b> to steer the dot, and pinch your <b>thumb and index finger together</b> while over a tile to click it.</p>
+    <div class="controls">
+      <button class="btn btn-primary" id="start-btn">Start camera</button>
+      <button class="btn btn-secondary" id="stop-btn" disabled>Stop</button>
+      <button class="btn btn-secondary" id="reset-btn">Reset tiles</button>
+    </div>
+  </div>
+</div>
+
+<div class="status-wrap">
+  <div class="status-bar">
+    <span><span class="status-dot" id="dot-camera"></span>Camera: <b id="status-camera">Off</b></span>
+    <span><span class="status-dot" id="dot-model"></span>Model: <b id="status-model">Not loaded</b></span>
+    <span><span class="status-dot" id="dot-hand"></span>Hand: <b id="status-hand">&mdash;</b></span>
+    <span>Total clicks: <b id="status-clicks">0</b></span>
+  </div>
+</div>
+
+<div class="stage-wrap">
+  <div class="stage" id="stage">
+    <div class="camera-box">
+      <video id="video" autoplay playsinline muted></video>
+      <canvas id="overlay"></canvas>
+      <div class="camera-placeholder" id="camera-placeholder">Camera preview<br>will appear here</div>
+      <div class="camera-label">Camera feed &middot; mirrored</div>
+    </div>
+    <div class="playground" id="playground">
+      <button class="tile" data-tile="0"><span class="count">0</span><span>Tile 1</span></button>
+      <button class="tile" data-tile="1"><span class="count">0</span><span>Tile 2</span></button>
+      <button class="tile" data-tile="2"><span class="count">0</span><span>Tile 3</span></button>
+      <button class="tile" data-tile="3"><span class="count">0</span><span>Tile 4</span></button>
+      <button class="tile" data-tile="4"><span class="count">0</span><span>Tile 5</span></button>
+      <button class="tile" data-tile="5"><span class="count">0</span><span>Tile 6</span></button>
+    </div>
+    <div class="gesture-cursor" id="cursor"></div>
+  </div>
+</div>
+
+<div class="notice">
+  <p id="notice-text">This demo needs a webcam and a browser that supports on-device ML (recent Chrome, Edge or Safari work best). It requires HTTPS, which this site already runs on. If hand tracking feels inaccurate, try improving lighting and keeping your whole hand inside the small camera box in the top-left.</p>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">Luis Paiva<span style="color:var(--accent)">.</span></div>
+    <nav class="footer-links">
+      <a href="/portfolio">Portfolio</a>
+      <a href="/about">About</a>
+    </nav>
+  </div>
+</footer>
+
+<script type="module">
+import { HandLandmarker, FilesetResolver, DrawingUtils } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14";
+
+const video = document.getElementById('video');
+const canvas = document.getElementById('overlay');
+const ctx = canvas.getContext('2d');
+const cursor = document.getElementById('cursor');
+const stage = document.getElementById('stage');
+const placeholder = document.getElementById('camera-placeholder');
+
+const startBtn = document.getElementById('start-btn');
+const stopBtn = document.getElementById('stop-btn');
+const resetBtn = document.getElementById('reset-btn');
+
+const statusCamera = document.getElementById('status-camera');
+const statusModel = document.getElementById('status-model');
+const statusHand = document.getElementById('status-hand');
+const statusClicks = document.getElementById('status-clicks');
+const dotCamera = document.getElementById('dot-camera');
+const dotModel = document.getElementById('dot-model');
+const dotHand = document.getElementById('dot-hand');
+const noticeText = document.getElementById('notice-text');
+
+let handLandmarker = null;
+let stream = null;
+let rafId = null;
+let running = false;
+let wasPinched = false;
+let totalClicks = 0;
+
+const PINCH_THRESHOLD = 0.07;
+
+function setDot(el, state) {
+  el.classList.remove('on', 'off');
+  if (state === true) el.classList.add('on');
+  if (state === false) el.classList.add('off');
+}
+
+async function loadModel() {
+  statusModel.textContent = 'Loading...';
+  const vision = await FilesetResolver.forVisionTasks(
+    "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm"
+  );
+  const baseModel = {
+    modelAssetPath: "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task",
+  };
+  try {
+    handLandmarker = await HandLandmarker.createFromOptions(vision, {
+      baseOptions: { ...baseModel, delegate: "GPU" },
+      runningMode: "VIDEO",
+      numHands: 1,
+    });
+  } catch (e) {
+    handLandmarker = await HandLandmarker.createFromOptions(vision, {
+      baseOptions: { ...baseModel, delegate: "CPU" },
+      runningMode: "VIDEO",
+      numHands: 1,
+    });
+  }
+  statusModel.textContent = 'Ready';
+  setDot(dotModel, true);
+}
+
+async function startCamera() {
+  startBtn.disabled = true;
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+  } catch (e) {
+    noticeText.textContent = 'Camera access was blocked or unavailable (' + e.message + '). Allow camera permission in your browser settings and reload the page.';
+    startBtn.disabled = false;
+    return;
+  }
+  video.srcObject = stream;
+  await new Promise(resolve => { video.onloadedmetadata = resolve; });
+  video.play();
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  placeholder.style.display = 'none';
+  statusCamera.textContent = 'On';
+  setDot(dotCamera, true);
+
+  if (!handLandmarker) {
+    try {
+      await loadModel();
+    } catch (e) {
+      noticeText.textContent = 'Could not load the hand-tracking model (' + e.message + '). Check your connection and reload.';
+      stopCamera();
+      startBtn.disabled = false;
+      return;
+    }
+  }
+
+  running = true;
+  stopBtn.disabled = false;
+  cursor.style.display = 'block';
+  renderLoop();
+}
+
+function stopCamera() {
+  running = false;
+  if (rafId) cancelAnimationFrame(rafId);
+  if (stream) {
+    stream.getTracks().forEach(t => t.stop());
+    stream = null;
+  }
+  video.srcObject = null;
+  placeholder.style.display = 'flex';
+  cursor.style.display = 'none';
+  statusCamera.textContent = 'Off';
+  statusHand.textContent = '—';
+  setDot(dotCamera, false);
+  setDot(dotHand, null);
+  startBtn.disabled = false;
+  stopBtn.disabled = true;
+  clearHovers();
+}
+
+function clearHovers() {
+  document.querySelectorAll('.tile.hover').forEach(t => t.classList.remove('hover'));
+}
+
+const drawingUtils = new DrawingUtils(ctx);
+
+function renderLoop() {
+  if (!running) return;
+  const now = performance.now();
+  const result = handLandmarker.detectForVideo(video, now);
+  ctx.save();
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  if (result.landmarks && result.landmarks.length > 0) {
+    const landmarks = result.landmarks[0];
+    statusHand.textContent = 'Detected';
+    setDot(dotHand, true);
+
+    drawingUtils.drawConnectors(landmarks, HandLandmarker.HAND_CONNECTIONS, { color: '#c8502a', lineWidth: 3 });
+    drawingUtils.drawLandmarks(landmarks, { color: '#f7f5f0', radius: 2.5 });
+
+    const indexTip = landmarks[8];
+    const thumbTip = landmarks[4];
+
+    const stageRect = stage.getBoundingClientRect();
+    const cx = (1 - indexTip.x) * stageRect.width;
+    const cy = indexTip.y * stageRect.height;
+    cursor.style.left = cx + 'px';
+    cursor.style.top = cy + 'px';
+    cursor.style.display = 'block';
+
+    const dx = thumbTip.x - indexTip.x;
+    const dy = thumbTip.y - indexTip.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    const isPinched = dist < PINCH_THRESHOLD;
+    cursor.classList.toggle('pinched', isPinched);
+
+    clearHovers();
+    const pageX = stageRect.left + cx;
+    const pageY = stageRect.top + cy;
+    const el = document.elementFromPoint(pageX, pageY);
+    const tile = el && el.closest ? el.closest('.tile') : null;
+    if (tile) {
+      tile.classList.add('hover');
+      if (isPinched && !wasPinched) {
+        registerClick(tile);
+      }
+    }
+    wasPinched = isPinched;
+  } else {
+    statusHand.textContent = 'Not detected';
+    setDot(dotHand, false);
+    cursor.style.display = 'none';
+    clearHovers();
+    wasPinched = false;
+  }
+  ctx.restore();
+  rafId = requestAnimationFrame(renderLoop);
+}
+
+function registerClick(tile) {
+  const countEl = tile.querySelector('.count');
+  const n = parseInt(countEl.textContent, 10) + 1;
+  countEl.textContent = n;
+  tile.classList.add('clicked');
+  setTimeout(() => tile.classList.remove('clicked'), 180);
+  totalClicks++;
+  statusClicks.textContent = totalClicks;
+}
+
+function resetTiles() {
+  document.querySelectorAll('.tile').forEach(t => t.querySelector('.count').textContent = '0');
+  totalClicks = 0;
+  statusClicks.textContent = '0';
+}
+
+startBtn.addEventListener('click', startCamera);
+stopBtn.addEventListener('click', stopCamera);
+resetBtn.addEventListener('click', resetTiles);
+
+if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+  startBtn.disabled = true;
+  noticeText.textContent = 'Your browser does not support camera access (getUserMedia). Try a recent version of Chrome, Edge or Safari.';
+}
+</script>
+</body>
+</html>
